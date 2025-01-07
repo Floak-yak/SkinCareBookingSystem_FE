@@ -12,7 +12,7 @@ const MainLayout = ({ children }) => {
       <AppHeader />
 
       {/* Content */}
-      <Content style={{ padding: '20px', margin: '20px auto', maxWidth: '1200px', background: '#fff' }}>
+      <Content>
         {children}
       </Content>
 
@@ -23,3 +23,4 @@ const MainLayout = ({ children }) => {
 };
 
 export default MainLayout;
+    

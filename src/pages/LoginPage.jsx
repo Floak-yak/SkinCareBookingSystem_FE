@@ -15,8 +15,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f0f2f5' }}>
-      <div style={{ width: '400px', padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#f0f2f5' }}>
+      <div style={{ width: '400px',marginTop:'100px', padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.2)'}}>
         <Title level={3} style={{ textAlign: 'center', marginBottom: '20px' }}>
           Login
         </Title>
