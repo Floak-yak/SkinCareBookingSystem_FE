@@ -1,19 +1,13 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import BookingPage from './pages/BookingPage';
-import LoginPage from './pages/LoginPage';
+import { BrowserRouter as Router } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
+import AppRoutes from './routes/index';
 
 const App = () => {
   return (
     <Router>
       <MainLayout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/booking" element={<BookingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-        </Routes>
+        <AppRoutes />
       </MainLayout>
     </Router>
   );
