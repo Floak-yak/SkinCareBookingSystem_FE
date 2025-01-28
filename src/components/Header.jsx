@@ -1,31 +1,55 @@
-import React from 'react';
-import { Layout, Menu } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
+import { Input, Button, Dropdown, Menu } from "antd";
+import { SearchOutlined, UserOutlined } from "@ant-design/icons";
+import Logo from "../assets/logo.png";
 
-const { Header } = Layout;
+const menu = (
+  <Menu>
+    <Menu.Item key="profile">
+      <Link to="/profile">Profile</Link>
+    </Menu.Item>
+    <Menu.Item key="logout">
+      <Link to="/logout">Logout</Link>
+    </Menu.Item>
+  </Menu>
+);
 
-const AppHeader = () => {
+const Header = ({ isLoggedIn }) => {
   return (
-    <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#001529' }}>
+    <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 50px", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
       {/* Logo */}
-      <div style={{ color: 'white', fontSize: '20px', fontWeight: 'bold' }}>
-        Skincare Center
-      </div>
+      <Link to="/">
+        <img src={Logo} alt="SkinCare" style={{ height: 40 }} />
+      </Link>
 
-      {/* Navigation Menu */}
-      <Menu theme="dark" mode="horizontal" style={{ flex: 1, marginLeft: '20px' }}>
-        <Menu.Item key="1">
-          <Link to="/">Home</Link>
-        </Menu.Item>
-        <Menu.Item key="2">
-          <Link to="/booking">Booking</Link>
-        </Menu.Item>
-        <Menu.Item key="3">
-          <Link to="/login">Login</Link>
-        </Menu.Item>
-      </Menu>
-    </Header>
+      {/* Navigation */}
+      <nav style={{ flex: 1, marginLeft: "50px" }}>
+        <Link to="/" style={{ marginRight: "20px", fontWeight: "500" }}>Home</Link>
+        <Link to="/services" style={{ marginRight: "20px" }}>Services</Link>
+        <Link to="/skin-test" style={{ marginRight: "20px" }}>Skin Testing</Link>
+        <Link to="/blog">Blog</Link>
+      </nav>
+
+      {/* Search */}
+      <Input placeholder="Search" prefix={<SearchOutlined />} style={{ width: "200px", borderRadius: "20px" }} />
+
+      {/* Auth Buttons */}
+      {isLoggedIn ? (
+        <Dropdown overlay={menu} placement="bottomRight">
+          <Button shape="circle" icon={<UserOutlined />} />
+        </Dropdown>
+      ) : (
+        <div style={{ marginLeft: "20px" }}>
+          <Link to="/login">
+            <Button style={{ marginRight: "10px", borderRadius: "8px" }}>Log in</Button>
+          </Link>
+          <Link to="/register">
+            <Button type="primary" style={{ borderRadius: "8px" }}>Sign up</Button>
+          </Link>
+        </div>
+      )}
+    </header>
   );
 };
 
-export default AppHeader;
+export default Header;
