@@ -1,53 +1,109 @@
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { Input, Button, Dropdown, Menu } from "antd";
-import { SearchOutlined, UserOutlined } from "@ant-design/icons";
-import Logo from "../assets/logo.png";
+import {Dropdown, Button, message } from "antd";
+import {
+  UserOutlined,
+  LogoutOutlined,
+  IdcardOutlined,
+  MailOutlined,
+  MenuOutlined,
+  CheckCircleOutlined
+} from "@ant-design/icons";
+import AuthContext from "../context/AuthContext";
+import "../styles/header.css";
 
-const menu = (
-  <Menu>
-    <Menu.Item key="profile">
-      <Link to="/profile">Profile</Link>
-    </Menu.Item>
-    <Menu.Item key="logout">
-      <Link to="/logout">Logout</Link>
-    </Menu.Item>
-  </Menu>
-);
+const Header = () => {
+  const { user, logout } = useContext(AuthContext);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-const Header = ({ isLoggedIn }) => {
+  const handleLogout = () => {
+    logout();
+    localStorage.removeItem("currentUser");
+    message.success("Đã đăng xuất!");
+    window.location.href = "/";
+  };
+
+  const userMenuItems = [
+    {
+      key: "profile",
+      label: (
+        <span>
+          <UserOutlined /> {user?.FullName || "Người dùng"}
+        </span>
+      ),
+    },
+    {
+      key: "role",
+      label: (
+        <span>
+          <IdcardOutlined /> Vai trò: {user?.Role || "Chưa xác định"}
+        </span>
+      ),
+    },
+    {
+      key: "email",
+      label: (
+        <span>
+          <MailOutlined /> {user?.Email || "Chưa có email"}
+        </span>
+      ),
+    },
+    {
+      type: "divider",
+    },
+    user?.Role === "Staff"
+      ? {
+          key: "approve",
+          label: (
+            <Link to="/staff/approve-blogs" className="staff-approve-btn">
+              <CheckCircleOutlined /> Duyệt bài viết
+            </Link>
+          ),
+        }
+      : null,
+    {
+      key: "logout",
+      label: (
+        <span onClick={handleLogout}>
+          <LogoutOutlined /> Đăng xuất
+        </span>
+      ),
+    },
+  ].filter(Boolean); 
+
   return (
-    <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 50px", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-      {/* Logo */}
-      <Link to="/">
-        <img src={Logo} alt="SkinCare" style={{ height: 40 }} />
-      </Link>
+    <header className="header">
+      <Link to="/" className="logo">SkinCare Booking</Link>
 
-      {/* Navigation */}
-      <nav style={{ flex: 1, marginLeft: "50px" }}>
-        <Link to="/" style={{ marginRight: "20px", fontWeight: "500" }}>Home</Link>
-        <Link to="/services" style={{ marginRight: "20px" }}>Services</Link>
-        <Link to="/skin-test" style={{ marginRight: "20px" }}>Skin Testing</Link>
-        <Link to="/blog">Blog</Link>
+      <nav className={`nav ${menuOpen ? "open" : ""}`}>
+        <Link to="/">Trang chủ</Link>
+        <Link to="/services">Dịch vụ</Link>
+        <Link to="/blogs">Blog</Link>
+        <Link to="/contact">Liên hệ</Link>
       </nav>
 
-      {/* Search */}
-      <Input placeholder="Search" prefix={<SearchOutlined />} style={{ width: "200px", borderRadius: "20px" }} />
+      <div className="auth">
+        {user ? (
+          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+            <Button type="text" icon={<UserOutlined />}>
+              {user?.FullName || "Người dùng"}
+            </Button>
+          </Dropdown>
+        ) : (
+          <>
+            <Link to="/login">
+              <Button type="text">Đăng nhập</Button>
+            </Link>
+            <Link to="/register">
+              <Button type="primary">Đăng ký</Button>
+            </Link>
+          </>
+        )}
+      </div>
 
-      {/* Auth Buttons */}
-      {isLoggedIn ? (
-        <Dropdown overlay={menu} placement="bottomRight">
-          <Button shape="circle" icon={<UserOutlined />} />
-        </Dropdown>
-      ) : (
-        <div style={{ marginLeft: "20px" }}>
-          <Link to="/login">
-            <Button style={{ marginRight: "10px", borderRadius: "8px" }}>Log in</Button>
-          </Link>
-          <Link to="/register">
-            <Button type="primary" style={{ borderRadius: "8px" }}>Sign up</Button>
-          </Link>
-        </div>
-      )}
+      <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+        <MenuOutlined />
+      </button>
     </header>
   );
 };

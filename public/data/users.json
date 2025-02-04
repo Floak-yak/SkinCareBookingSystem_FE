@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "Role": "Customer",
+    "FullName": "Nguyễn Văn A",
+    "YearOfBirth": 1995,
+    "Email": "nguyenvana@example.com",
+    "Password": "123456",
+    "PhoneNumber": "0123456789"
+  },
+  {
+    "id": 2,
+    "Role": "Staff",
+    "FullName": "Trần Thị B",
+    "YearOfBirth": 1992,
+    "Email": "tranthib@example.com",
+    "Password": "abcdef",
+    "PhoneNumber": "0987654321"
+  }
+]

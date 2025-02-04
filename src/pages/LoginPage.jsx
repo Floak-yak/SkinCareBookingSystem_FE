@@ -1,57 +1,69 @@
-import { Link } from "react-router-dom";
-import { Input, Button, Typography } from "antd";
-import { GoogleOutlined } from "@ant-design/icons";
+import { useState, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Form, Input, Button, message } from "antd";
+import AuthContext from "../context/AuthContext";
+import "../styles/loginPage.css";
 
-const { Title, Text } = Typography;
+const LoginPage = () => {
+  const { login } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-const Login = () => {
+  const handleLogin = async (values) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/data/users.json");
+      const usersFromJson = await response.json();
+
+      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+      const users = [...usersFromJson, ...storedUsers];
+
+      const foundUser = users.find(
+        (user) => user.Email === values.email && user.Password === values.password
+      );
+
+      if (foundUser) {
+        localStorage.setItem("currentUser", JSON.stringify(foundUser));
+        login(foundUser);
+
+        message.success(`Chào mừng, ${foundUser.FullName}!`);
+        
+        setTimeout(() => {
+          navigate("/");
+          window.location.reload();
+        }, 500);
+      } else {
+        message.error("Sai email hoặc mật khẩu!");
+      }
+    } catch (error) {
+      message.error("Lỗi kết nối dữ liệu!");
+    }
+    setLoading(false);
+  };
+
   return (
-    <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", background: "#f4f4f4" }}>
-      {/* Hình ảnh bên trái */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#e5e5e5", height: "100%" }}>
-        <div style={{ width: "60%", height: "70%", background: "#d9d9d9", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "12px" }}>
-          <Text style={{ color: "#aaa", fontSize: "18px" }}>Image Placeholder</Text>
-        </div>
-      </div>
-
-      {/* Form đăng nhập bên phải */}
-      <div style={{ flex: 1, padding: "50px 80px", background: "#fff", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-        <Title level={2} style={{ textAlign: "center", marginBottom: "5px" }}>Welcome Back!</Title>
-        <Text type="secondary" style={{ display: "block", textAlign: "center", marginBottom: "25px" }}>
-          Please log in to your account
-        </Text>
-
-        {/* Email */}
-        <label style={{ fontWeight: "500", marginBottom: "5px", display: "block" }}>Email Address</label>
-        <Input placeholder="Enter your email" size="large" style={{ marginBottom: "15px", borderRadius: "8px" }} />
-
-        {/* Password */}
-        <label style={{ fontWeight: "500", marginBottom: "5px", display: "block" }}>Password</label>
-        <Input.Password placeholder="Enter your password" size="large" style={{ marginBottom: "15px", borderRadius: "8px" }} />
-
-        {/* Nút Login */}
-        <Button type="primary" size="large" style={{ width: "100%", borderRadius: "8px", fontSize: "16px", fontWeight: "500", marginTop: "10px" }}>
-          Log in
-        </Button>
-
-        {/* Quên mật khẩu */}
-        <Text type="secondary" style={{ display: "block", textAlign: "right", marginTop: "10px" }}>
-          <Link to="/forgot-password">Forgot password?</Link>
-        </Text>
-
-        {/* Chuyển hướng Sign Up */}
-        <Text style={{ display: "block", textAlign: "center", marginTop: "15px" }}>
-          Don't have an account? <Link to="/register">Sign up</Link>
-        </Text>
-
-        {/* Hoặc đăng nhập bằng Google */}
-        <div style={{ textAlign: "center", margin: "20px 0", color: "#aaa", fontWeight: "500" }}>OR</div>
-        <Button icon={<GoogleOutlined />} size="large" style={{ width: "100%", borderRadius: "8px", fontSize: "16px", border: "1px solid #ddd", fontWeight: "500" }}>
-          Sign in with Google
-        </Button>
+    <div className="login-container">
+      <div className="login-box">
+        <h2>Đăng Nhập</h2>
+        <Form className="login-form" onFinish={handleLogin}>
+          <Form.Item name="email" rules={[{ required: true, message: "Vui lòng nhập email!" }]}>
+            <Input placeholder="Email" />
+          </Form.Item>
+          <Form.Item name="password" rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}>
+            <Input.Password placeholder="Mật khẩu" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading} className="login-button">
+              Đăng Nhập
+            </Button>
+          </Form.Item>
+        </Form>
+        <p className="register-link">
+          Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
+        </p>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default LoginPage;

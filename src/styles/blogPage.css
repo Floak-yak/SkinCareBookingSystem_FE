@@ -1,0 +1,122 @@
+/* 🌟 Blog Container */
+.blog-container {
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+.blog-container h1 {
+  text-align: center;
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+}
+
+/* 🔹 Nút đăng bài viết */
+.create-blog-btn {
+  font-size: 16px;
+  padding: 8px 16px;
+  background-color: #ff7eb3;
+  border: none;
+  color: white;
+  transition: background 0.3s ease;
+}
+
+.create-blog-btn:hover {
+  background: linear-gradient(135deg, #8fb1ec, #f9a8d4);
+  transform: scale(1.05);
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* 📌 Danh mục Sidebar */
+.category-sidebar {
+  background: #fafafa;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.category-sidebar h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.category-sidebar .ant-list-item {
+  cursor: pointer;
+  padding: 8px;
+  transition: background 0.3s ease;
+}
+
+.category-sidebar .ant-list-item:hover {
+  background: #ffebf1;
+}
+
+/* Blog Card */
+.blog-card {
+  max-width: 100%;
+  height: 100%;
+  padding: 15px;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.blog-card:hover {
+  transform: translateY(-5px);
+}
+
+.blog-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.blog-card h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #444;
+  margin: 10px 0;
+}
+
+.blog-card p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.btn-view {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #ff7eb3;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.btn-view:hover {
+  background: #ff4d94;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .blog-container {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .create-blog-btn {
+    width: 100%;
+  }
+
+  .category-sidebar {
+    margin-bottom: 20px;
+  }
+}

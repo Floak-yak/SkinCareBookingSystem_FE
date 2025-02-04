@@ -1,0 +1,22 @@
+.create-blog-container {  
+  padding: 30px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 500px;
+  margin: 0 auto;
+}
+
+.create-blog-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.preview-image {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  margin-top: 10px;
+  border-radius: 8px;
+}

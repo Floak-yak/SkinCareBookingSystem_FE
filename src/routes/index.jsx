@@ -1,21 +1,31 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom'; 
+import React, { useEffect, useState } from "react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import HomePage from '../pages/HomePage';
-import BookingPage from '../pages/BookingPage';
 import LoginPage from '../pages/LoginPage';
-import PaymentPage from '../pages/PaymentPage';
 import RegisterPage from '../pages/RegisterPage';
-import TestingPage from '../pages/TestingPage';
+import BlogDetail from '../pages/BlogDetail';
+import BlogPage from "../pages/BlogPage";
+import CreateBlog from "../pages/CreateBlog";
+import ApproveBlog from "../pages/ApproveBlog";
 
 const AppRoutes = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/booking" element={<BookingPage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/payment" element={<PaymentPage />} />
-      <Route path="/skin-test" element={<TestingPage />} />
+      <Route path="/blogs" element={< BlogPage />} />
+      <Route path="/blogs/:id" element={<BlogDetail />} />
+      <Route path="/blogs/create" element={<CreateBlog />}/>
+      <Route path="/staff/approve-blogs" element={<ApproveBlog />} />
     </Routes>
   );
 };

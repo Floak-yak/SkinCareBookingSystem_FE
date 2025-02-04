@@ -1,56 +1,99 @@
-import { Link } from "react-router-dom";
-import { Input, Button, Typography } from "antd";
-import { GoogleOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Form, Input, Button, DatePicker, message } from "antd";
+import "../styles/registerPage.css";
 
-const { Title, Text } = Typography;
+const RegisterPage = () => {
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-const Register = () => {
+  const handleRegister = (values) => {
+    setLoading(true);
+    try {
+      const newUser = {
+        id: Date.now(),
+        FullName: values.fullName,
+        Email: values.email,
+        Password: values.password,
+        PhoneNumber: values.phone,
+        Role: "Customer", 
+        DoB: values.dob.format("YYYY-MM-DD"), //Chuyển thành chuỗi
+      };
+
+      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+      storedUsers.push(newUser);
+      localStorage.setItem("users", JSON.stringify(storedUsers));
+
+      message.success("Đăng ký thành công! Hãy đăng nhập.");
+      navigate("/login");
+    } catch (error) {
+      message.error("Lỗi khi đăng ký!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", background: "#f4f4f4" }}>
-      {/* Hình ảnh bên trái */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#e5e5e5", height: "100%" }}>
-        <div style={{ width: "60%", height: "70%", background: "#d9d9d9", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "12px" }}>
-          <Text style={{ color: "#aaa", fontSize: "18px" }}>Image Placeholder</Text>
-        </div>
-      </div>
+    <div className="register-container">
+      <div className="register-box">
+        <h2>Đăng Ký</h2>
+        <Form form={form} layout="vertical" onFinish={handleRegister}>
+          <Form.Item
+            label="Họ và Tên"
+            name="fullName"
+            rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
+          >
+            <Input placeholder="Họ và tên" />
+          </Form.Item>
 
-      {/* Form đăng ký bên phải */}
-      <div style={{ flex: 1, padding: "50px 80px", background: "#fff", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-        <Title level={2} style={{ textAlign: "center", marginBottom: "5px" }}>Sign Up</Title>
-        <Text type="secondary" style={{ display: "block", textAlign: "center", marginBottom: "25px" }}>
-          Sign up for free to access our services
-        </Text>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: "Vui lòng nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
+            ]}
+          >
+            <Input placeholder="Email" />
+          </Form.Item>
 
-        {/* Email */}
-        <label style={{ fontWeight: "500", marginBottom: "5px", display: "block" }}>Email Address</label>
-        <Input placeholder="Enter your email" size="large" style={{ marginBottom: "15px", borderRadius: "8px" }} />
+          <Form.Item
+            label="Số điện thoại"
+            name="phone"
+            rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }]}
+          >
+            <Input placeholder="Số điện thoại" />
+          </Form.Item>
 
-        {/* Password */}
-        <label style={{ fontWeight: "500", marginBottom: "5px", display: "block" }}>Password</label>
-        <Input.Password placeholder="Enter your password" size="large" style={{ marginBottom: "15px", borderRadius: "8px" }} />
+          <Form.Item
+            label="Ngày sinh"
+            name="dob"
+            rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
+          >
+            <DatePicker format="DD/MM/YYYY" placeholder="Chọn ngày sinh" style={{ width: "100%" }}/>
+          </Form.Item>
 
-        {/* Confirm Password */}
-        <label style={{ fontWeight: "500", marginBottom: "5px", display: "block" }}>Confirm Password</label>
-        <Input.Password placeholder="Confirm your password" size="large" style={{ marginBottom: "15px", borderRadius: "8px" }} />
+          <Form.Item
+            label="Mật khẩu"
+            name="password"
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+          >
+            <Input.Password placeholder="Mật khẩu" />
+          </Form.Item>
 
-        {/* Nút Đăng Ký */}
-        <Button type="primary" size="large" style={{ width: "100%", borderRadius: "8px", fontSize: "16px", fontWeight: "500", marginTop: "10px" }}>
-          Sign Up
-        </Button>
-
-        {/* Chuyển hướng Login */}
-        <Text style={{ display: "block", textAlign: "center", marginTop: "15px" }}>
-          Already have an account? <Link to="/login">Log in</Link>
-        </Text>
-
-        {/* Hoặc đăng ký bằng Google */}
-        <div style={{ textAlign: "center", margin: "20px 0", color: "#aaa", fontWeight: "500" }}>OR</div>
-        <Button icon={<GoogleOutlined />} size="large" style={{ width: "100%", borderRadius: "8px", fontSize: "16px", border: "1px solid #ddd", fontWeight: "500" }}>
-          Sign up with Google
-        </Button>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading} className="register-button">
+              Đăng Ký
+            </Button>
+          </Form.Item>
+        </Form>
+        <p className="login-link">
+          Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+        </p>
       </div>
     </div>
   );
 };
 
-export default Register;
+export default RegisterPage;
