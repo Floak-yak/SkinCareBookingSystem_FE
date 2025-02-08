@@ -1,28 +1,31 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Input, Button, Upload, Select, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import AuthContext from "../context/AuthContext";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import useAuth from "../hooks/useAuth";
+import useFetch from "../hooks/useFetch";
 import "../styles/createBlog.css";
 
-const { TextArea } = Input;
 const { Option } = Select;
 
 const CreateBlog = () => {
-  const { user: currentUser } = useContext(AuthContext);
+  const { user } = useAuth();
+  const { updateData } = useFetch("/data/blogs.json", "blogs");
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [content, setContent] = useState("");
   const [imageBase64, setImageBase64] = useState(null);
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!user) {
       message.error("Bạn cần đăng nhập để viết bài!");
       navigate("/login");
     }
-  }, [currentUser, navigate]);
+  }, [user, navigate]);
 
-  // Xử lý tải ảnh lên
   const handleImageUpload = (file) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -30,9 +33,14 @@ const CreateBlog = () => {
     return false;
   };
 
-  const handleSubmit = async (values) => {
-    if (!currentUser) {
+  const handleSubmit = (values) => {
+    if (!user) {
       message.error("Bạn cần đăng nhập để đăng bài!");
+      return;
+    }
+
+    if (!content.trim()) {
+      message.error("Nội dung bài viết không được để trống!");
       return;
     }
 
@@ -40,21 +48,21 @@ const CreateBlog = () => {
     try {
       const newBlog = {
         id: Date.now(),
-        userId: currentUser.id,
-        author: currentUser.FullName,
+        userId: user.id,
+        author: user.FullName,
         datePost: new Date().toISOString(),
         image: imageBase64 || "/default.jpg",
-        isApproved: currentUser.Role === "Staff",
-        ...values,
+        category: values.category,
+        title: values.title,
+        content,
+        isApproved: user.Role === "Staff",
       };
 
-      // Lưu vào localStorage
-      const storedBlogs = JSON.parse(localStorage.getItem("blogs")) || [];
-      storedBlogs.push(newBlog);
-      localStorage.setItem("blogs", JSON.stringify(storedBlogs));
+      // Lưu vào localStorage và cập nhật state mà không ghi đè mock data
+      updateData(newBlog);
 
       message.success(
-        currentUser.Role === "Staff"
+        user.Role === "Staff"
           ? "Bài viết đã được đăng thành công!"
           : "Bài viết đã lưu, chờ duyệt!"
       );
@@ -67,11 +75,9 @@ const CreateBlog = () => {
     }
   };
 
-  if (!currentUser) return null;
-
   return (
     <div className="create-blog-container">
-      <h2>Đăng bài viết mới</h2>
+      <h2>Viết bài mới</h2>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
           label="Tiêu đề"
@@ -81,12 +87,12 @@ const CreateBlog = () => {
           <Input placeholder="Nhập tiêu đề bài viết..." />
         </Form.Item>
 
-        <Form.Item
-          label="Nội dung"
-          name="content"
-          rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
-        >
-          <TextArea rows={4} placeholder="Viết nội dung bài viết..." />
+        <Form.Item label="Nội dung">
+          <ReactQuill
+            value={content}
+            onChange={setContent}
+            className="rich-text-editor"
+          />
         </Form.Item>
 
         <Form.Item
@@ -101,7 +107,7 @@ const CreateBlog = () => {
           </Select>
         </Form.Item>
 
-        <Form.Item label="Ảnh đại diện" name="image">
+        <Form.Item label="Ảnh đại diện">
           <Upload
             showUploadList={false}
             beforeUpload={handleImageUpload}
