@@ -1,26 +1,20 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Dropdown, Button, message } from "antd";
 import {
-  UserOutlined,
-  LogoutOutlined,
-  IdcardOutlined,
-  MailOutlined,
-  MenuOutlined,
-  CheckCircleOutlined
+  UserOutlined, LogoutOutlined, IdcardOutlined, MailOutlined,
+  MenuOutlined, CheckCircleOutlined,
 } from "@ant-design/icons";
-import AuthContext from "../context/AuthContext";
 import "../styles/header.css";
+import useAuth from "../hooks/useAuth";
 
 const Header = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-    localStorage.removeItem("currentUser");
     message.success("Đã đăng xuất!");
-    window.location.href = "/";
   };
 
   const userMenuItems = [
@@ -53,13 +47,13 @@ const Header = () => {
     },
     user?.Role === "Staff"
       ? {
-        key: "approve",
-        label: (
-          <Link to="/staff/approve-blogs" className="staff-approve-btn">
-            <CheckCircleOutlined /> Duyệt bài viết
-          </Link>
-        ),
-      }
+          key: "approve",
+          label: (
+            <Link to="/staff/approve-blogs" className="staff-approve-btn">
+              <CheckCircleOutlined /> Duyệt bài viết
+            </Link>
+          ),
+        }
       : null,
     {
       key: "logout",
@@ -69,25 +63,23 @@ const Header = () => {
         </span>
       ),
     },
-  ].filter(Boolean);
+  ].filter(Boolean); 
 
   return (
     <header className="header">
-      <Link to="/" className="logo">ROSE</Link>
+      <Link to="/" className="logo">SkinCare Booking</Link>
 
       <nav className={`nav ${menuOpen ? "open" : ""}`}>
         <Link to="/">Trang chủ</Link>
         <Link to="/services">Dịch vụ</Link>
-        <Link to="/blogs">Blog</Link>
+        <Link to="/blogs">Blogs</Link>
         <Link to="/contact">Liên hệ</Link>
       </nav>
 
       <div className="auth">
         {user ? (
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Button type="text" icon={<UserOutlined />}>
-              {user?.FullName || "Người dùng"}
-            </Button>
+            <Button type="text" icon={<UserOutlined />}>{user?.FullName || "Người dùng"}</Button>
           </Dropdown>
         ) : (
           <>
@@ -95,7 +87,7 @@ const Header = () => {
               <Button type="text">Đăng nhập</Button>
             </Link>
             <Link to="/register">
-              <Button type="text">Đăng ký</Button>
+              <Button type="primary">Đăng ký</Button>
             </Link>
           </>
         )}
