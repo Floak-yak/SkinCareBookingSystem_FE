@@ -1,43 +1,31 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Form, Input, Button, message } from "antd";
-import AuthContext from "../context/AuthContext";
 import "../styles/loginPage.css";
+import useAuth from "../hooks/useAuth";
+import useFetch from "../hooks/useFetch";
 
 const LoginPage = () => {
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth();
+  const { data: users } = useFetch("/data/users.json", "users");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (values) => {
+  const handleLogin = (values) => {
     setLoading(true);
-    try {
-      const response = await fetch("/data/users.json");
-      const usersFromJson = await response.json();
 
-      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-      const users = [...usersFromJson, ...storedUsers];
+    const foundUser = users.find(
+      (user) => user.Email === values.email && user.Password === values.password
+    );
 
-      const foundUser = users.find(
-        (user) => user.Email === values.email && user.Password === values.password
-      );
-
-      if (foundUser) {
-        localStorage.setItem("currentUser", JSON.stringify(foundUser));
-        login(foundUser);
-
-        message.success(`Chào mừng, ${foundUser.FullName}!`);
-        
-        setTimeout(() => {
-          navigate("/");
-          window.location.reload();
-        }, 500);
-      } else {
-        message.error("Sai email hoặc mật khẩu!");
-      }
-    } catch (error) {
-      message.error("Lỗi kết nối dữ liệu!");
+    if (foundUser) {
+      login(foundUser);
+      message.success(`Chào mừng, ${foundUser.FullName}!`);
+      setTimeout(() => navigate("/"), 500);
+    } else {
+      message.error("Sai email hoặc mật khẩu!");
     }
+
     setLoading(false);
   };
 

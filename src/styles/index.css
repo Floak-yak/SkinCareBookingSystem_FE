@@ -12,7 +12,6 @@ html, body {
 }
 
 .main-content {
-  padding: 70px; 
   flex: 1;
   justify-content: center;
   align-items: center;

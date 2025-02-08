@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Form, Input, Button, DatePicker, message } from "antd";
 import "../styles/registerPage.css";
+import useFetch from "../hooks/useFetch";
 
 const RegisterPage = () => {
+  const { data: users, setData: setUsers } = useFetch("/data/users.json", "users");
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -11,6 +13,15 @@ const RegisterPage = () => {
   const handleRegister = (values) => {
     setLoading(true);
     try {
+      // Kiểm tra xem email đã tồn tại hay chưa
+      const emailExists = users.some(user => user.Email === values.email);
+      if (emailExists) {
+        message.error("Email đã được sử dụng. Vui lòng chọn email khác!");
+        setLoading(false);
+        return;
+      }
+
+      // Tạo user mới
       const newUser = {
         id: Date.now(),
         FullName: values.fullName,
@@ -18,12 +29,13 @@ const RegisterPage = () => {
         Password: values.password,
         PhoneNumber: values.phone,
         Role: "Customer", 
-        DoB: values.dob.format("YYYY-MM-DD"), //Chuyển thành chuỗi
+        DoB: values.dob.format("YYYY-MM-DD"),
       };
 
-      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-      storedUsers.push(newUser);
-      localStorage.setItem("users", JSON.stringify(storedUsers));
+      // Cập nhật danh sách người dùng mà không ghi đè dữ liệu cũ
+      const updatedUsers = [...users, newUser];
+      setUsers(updatedUsers);
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
 
       message.success("Đăng ký thành công! Hãy đăng nhập.");
       navigate("/login");
