@@ -1,0 +1,23 @@
+@keyframes scroll {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.scroll-container {
+    width: 100%;
+    overflow: hidden;
+    whiteSpace: nowrap;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.scroll-content {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 20s linear infinite;
+}

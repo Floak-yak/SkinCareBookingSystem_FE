@@ -3,12 +3,19 @@
   left: 0;
   right: 0;
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
+  justify-content: space-around;
   align-items: center;
   padding: 10px 20px;
-  background: linear-gradient(to right, #a6c1ee, #fbc2eb);
+  /* background: linear-gradient(to right, #a6c1ee, #fbc2eb); */
+  background-color: #f9b37a;
+  /* background-color: #fff; */
+  /* background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+    url('https://edbeauty.net/wp-content/uploads/2018/03/duong-trang-face-2.jpg'); */
+  position: fixed;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  /* color: black; */
 }
 
 .header .logo {
@@ -16,26 +23,28 @@
   font-weight: bold;
   text-decoration: none;
   color: white;
+  margin-right: 140px;
 }
 
 .header .logo:hover {
-  color: #e879f9;
+  color: grey;
 }
 
 .nav {
   display: flex;
-  gap: 20px;
+  gap: 40px;
+  margin: 0px 60px;
 }
 
 .nav a {
   color: white;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 22px;
   transition: color 0.3s;
 }
 
 .nav a:hover {
-  color: #e879f9;
+  color: grey;
 }
 
 .auth {
@@ -47,13 +56,13 @@
   color: white;
   border: none;
   background: none;
-  font-size: 16px;
+  font-size: 22px;
   cursor: pointer;
   transition: color 0.3s;
 }
 
 .auth button:hover {
-  color: #e879f9;
+  color: grey;
 }
 
 .menu-toggle {
