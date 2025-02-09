@@ -24,7 +24,7 @@ const AppRoutes = () => {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/blogs" element={< BlogPage />} />
       <Route path="/blogs/:id" element={<BlogDetail />} />
-      <Route path="/blogs/create" element={<CreateBlog />}/>
+      <Route path="/blogs/create" element={<CreateBlog />} />
       <Route path="/staff/approve-blogs" element={<ApproveBlog />} />
     </Routes>
   );

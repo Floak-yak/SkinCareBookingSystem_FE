@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import {Dropdown, Button, message } from "antd";
+import { Dropdown, Button, message } from "antd";
 import {
   UserOutlined,
   LogoutOutlined,
@@ -53,13 +53,13 @@ const Header = () => {
     },
     user?.Role === "Staff"
       ? {
-          key: "approve",
-          label: (
-            <Link to="/staff/approve-blogs" className="staff-approve-btn">
-              <CheckCircleOutlined /> Duyệt bài viết
-            </Link>
-          ),
-        }
+        key: "approve",
+        label: (
+          <Link to="/staff/approve-blogs" className="staff-approve-btn">
+            <CheckCircleOutlined /> Duyệt bài viết
+          </Link>
+        ),
+      }
       : null,
     {
       key: "logout",
@@ -69,11 +69,11 @@ const Header = () => {
         </span>
       ),
     },
-  ].filter(Boolean); 
+  ].filter(Boolean);
 
   return (
     <header className="header">
-      <Link to="/" className="logo">SkinCare Booking</Link>
+      <Link to="/" className="logo">ROSE</Link>
 
       <nav className={`nav ${menuOpen ? "open" : ""}`}>
         <Link to="/">Trang chủ</Link>
@@ -95,7 +95,7 @@ const Header = () => {
               <Button type="text">Đăng nhập</Button>
             </Link>
             <Link to="/register">
-              <Button type="primary">Đăng ký</Button>
+              <Button type="text">Đăng ký</Button>
             </Link>
           </>
         )}

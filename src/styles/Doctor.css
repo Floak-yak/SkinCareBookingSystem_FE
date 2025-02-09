@@ -1,0 +1,16 @@
+/* Feedback */
+.feedback {
+    display: flex;
+    justify-content: center;
+    margin: auto 100px;
+}
+
+.feedback-img {
+    width: calc((100%/12)*3);
+    width: 70%;
+    text-align: center;
+}
+
+.feedback-img img {
+    border-radius: 50%;
+}
