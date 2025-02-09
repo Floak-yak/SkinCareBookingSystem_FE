@@ -26,7 +26,7 @@ const Header = () => {
   const userMenuItems = [
     {
       key: "profile",
-      label: (
+      label: (                    
         <span>
           <UserOutlined /> {user?.FullName || "Người dùng"}
         </span>
@@ -57,8 +57,8 @@ const Header = () => {
           label: (
             <Link to="/staff/approve-blogs" className="staff-approve-btn">
               <CheckCircleOutlined /> Duyệt bài viết
-            </Link>
-          ),
+        </Link>
+      ),
         }
       : null,
     {
@@ -76,10 +76,10 @@ const Header = () => {
       <Link to="/" className="logo">SkinCare Booking</Link>
 
       <nav className={`nav ${menuOpen ? "open" : ""}`}>
-        <Link to="/">Trang chủ</Link>
-        <Link to="/services">Dịch vụ</Link>
+            <Link to="/">Trang chủ</Link>
+            <Link to="/services">Dịch vụ</Link>
         <Link to="/blogs">Blog</Link>
-        <Link to="/contact">Liên hệ</Link>
+            <Link to="/contact">Liên hệ</Link>
       </nav>
 
       <div className="auth">

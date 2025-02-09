@@ -81,7 +81,7 @@ function Booking() {
 
             <div className="contact-info">
               <p><i className="info-icon">ℹ️</i> Chúng tôi sẽ liên hệ với bạn qua số điện thoại {formData.phone} để xác nhận lịch hẹn</p>
-              <p><i className="info-icon">⚠️</i> Vui lòng đến trước giờ hẹn 15 phút để làm thủ tục</p>
+              
             </div>
           </div>
           <div className="success-footer">

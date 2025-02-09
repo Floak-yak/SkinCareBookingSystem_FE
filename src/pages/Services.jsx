@@ -130,7 +130,7 @@ function Services() {
       <div className="services-container">
         {services.map(service => (
           <div key={service.id} className={`service-item ${service.popular ? 'popular' : ''}`}>
-            {service.popular && <span className="popular-tag">Phổ Biến Nhất</span>}
+            {service.popular && <span className="popular-tag">Phổ Biến Nhất</span>}  
             <div className="service-icon">{service.icon}</div>
             <h2>{service.name}</h2>
             <img src={service.image} alt={service.name} className="service-image" />
