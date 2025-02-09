@@ -18,54 +18,6 @@ const Header = () => {
   };
 
   const userMenuItems = [
-<<<<<<< HEAD
-    {
-      key: "profile",
-      label: (                    
-        <span>
-          <UserOutlined /> {user?.FullName || "Người dùng"}
-        </span>
-      ),
-    },
-    {
-      key: "role",
-      label: (
-        <span>
-          <IdcardOutlined /> Vai trò: {user?.Role || "Chưa xác định"}
-        </span>
-      ),
-    },
-    {
-      key: "email",
-      label: (
-        <span>
-          <MailOutlined /> {user?.Email || "Chưa có email"}
-        </span>
-      ),
-    },
-    {
-      type: "divider",
-    },
-    user?.Role === "Staff"
-      ? {
-          key: "approve",
-          label: (
-            <Link to="/staff/approve-blogs" className="staff-approve-btn">
-              <CheckCircleOutlined /> Duyệt bài viết
-        </Link>
-      ),
-        }
-      : null,
-    {
-      key: "logout",
-      label: (
-        <span onClick={handleLogout}>
-          <LogoutOutlined /> Đăng xuất
-        </span>
-      ),
-    },
-  ].filter(Boolean); 
-=======
     { key: "profile", label: <span><UserOutlined /> {user?.FullName || "Người dùng"}</span> },
     { key: "role", label: <span><IdcardOutlined /> Vai trò: {user?.Role || "Chưa xác định"}</span> },
     { key: "email", label: <span><MailOutlined /> {user?.Email || "Chưa có email"}</span> },
@@ -80,23 +32,15 @@ const Header = () => {
     },
     { key: "logout", label: <span onClick={handleLogout}><LogoutOutlined /> Đăng xuất</span> },
   ].filter(Boolean);
->>>>>>> 5a88685 (Remove unused assets and hooks; update styles and configuration; enhance authentication context and registration logic)
 
   return (
     <header className="header">
       <Link to="/" className="logo">SkinCare Booking</Link>
       <nav className={`nav ${menuOpen ? "open" : ""}`}>
-<<<<<<< HEAD
-            <Link to="/">Trang chủ</Link>
-            <Link to="/services">Dịch vụ</Link>
-        <Link to="/blogs">Blog</Link>
-            <Link to="/contact">Liên hệ</Link>
-=======
         <Link to="/">Trang chủ</Link>
         <Link to="/services">Dịch vụ</Link>
         <Link to="/blogs">Blogs</Link>
         <Link to="/contact">Liên hệ</Link>
->>>>>>> 5a88685 (Remove unused assets and hooks; update styles and configuration; enhance authentication context and registration logic)
       </nav>
 
       <div className="auth">
