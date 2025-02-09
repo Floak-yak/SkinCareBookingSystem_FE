@@ -7,6 +7,12 @@ import BlogDetail from '../pages/BlogDetail';
 import BlogPage from "../pages/BlogPage";
 import CreateBlog from "../pages/CreateBlog";
 import ApproveBlog from "../pages/ApproveBlog";
+import Services from "../pages/Services";
+import Booking from "../pages/Booking";
+import Contact from "../pages/Contact";
+import ServiceDetail from "../pages/ServiceDetail";
+
+
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -26,8 +32,16 @@ const AppRoutes = () => {
       <Route path="/blogs/:id" element={<BlogDetail />} />
       <Route path="/blogs/create" element={<CreateBlog />}/>
       <Route path="/staff/approve-blogs" element={<ApproveBlog />} />
+      <Route path="/services" element={<Services />} />
+      <Route path="/booking" element={<Booking />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/service/:id" element={<ServiceDetail />} />
     </Routes>
   );
 };
+
+
+
+
 
 export default AppRoutes;

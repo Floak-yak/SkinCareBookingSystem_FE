@@ -1,0 +1,73 @@
+.about-page {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.about-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.about-header h1 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.about-header p {
+  color: #666;
+  font-size: 1.2rem;
+}
+
+.about-content {
+  display: grid;
+  gap: 40px;
+}
+
+.about-section,
+.mission-section,
+.values-section {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.about-section h2,
+.mission-section h2,
+.values-section h2 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.about-section p,
+.mission-section p {
+  color: #666;
+  line-height: 1.6;
+}
+
+.values-section ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.values-section li {
+  padding: 10px 0;
+  padding-left: 30px;
+  position: relative;
+  color: #666;
+}
+
+.values-section li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #27ae60;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .about-page {
+    padding: 20px;
+  }
+} 
