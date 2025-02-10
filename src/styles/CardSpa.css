@@ -9,9 +9,8 @@
 }
 
 .scroll-container {
-    width: 100%;
     overflow: hidden;
-    whiteSpace: nowrap;
+    white-space: nowrap;
     box-sizing: border-box;
     position: relative;
 }
