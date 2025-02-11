@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import "../styles/SpaGallery.css";
 
 const SpaGallery = () => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -27,54 +28,8 @@ const SpaGallery = () => {
         },
     ];
 
-    const galleryStyles = {
-        display: "flex",
-        gap: "10px",
-        width: "90%",
-        height: "500px",
-        overflow: "hidden",
-        margin: "0 auto 20px"
-    };
-
-    const itemStyles = (isHovered, isShrink) => ({
-        flex: isHovered ? 7 : isShrink ? 1 : 4,
-        transition: "flex 0.3s ease, transform 0.3s ease",
-        borderRadius: "10px",
-        overflow: "hidden",
-        position: "relative",
-        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-        opacity: isShrink ? 0.6 : 1,
-    });
-
-    const imgStyles = {
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        transition: "transform 0.3s ease",
-    };
-    const overlayStyles = (isHovered) => ({
-        position: "absolute",
-        bottom: "0",
-        left: "0",
-        width: "100%",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        color: "white",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        textAlign: "center",
-        padding: "10px",
-        transition: "opacity 0.3s ease",
-        opacity: isHovered ? 1 : 0,
-    });
-
-    const hoveredImgStyles = {
-        transform: "scale(1.2)",
-    };
-
     return (
-        <div style={galleryStyles}>
+        <div className="gallery">
             {images.map((item, index) => {
                 const isHovered = hoveredIndex === index;
                 const isShrink = hoveredIndex !== null && hoveredIndex !== index;
@@ -82,16 +37,12 @@ const SpaGallery = () => {
                 return (
                     <div
                         key={index}
-                        style={itemStyles(isHovered, isShrink)}
+                        className={`gallery-item ${isHovered ? "expand" : isShrink ? "shrink" : "normal"}`}
                         onMouseEnter={() => setHoveredIndex(index)}
                         onMouseLeave={() => setHoveredIndex(null)}
                     >
-                        <img
-                            src={item.src}
-                            alt={item.title}
-                            style={{ ...imgStyles, ...(isHovered ? hoveredImgStyles : {}) }}
-                        />
-                        <div style={overlayStyles(isHovered)}>
+                        <img src={item.src} alt={item.title} />
+                        <div className="overlay">
                             <h3>{item.title}</h3>
                             <p>{item.description}</p>
                         </div>

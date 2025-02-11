@@ -79,119 +79,25 @@ const HomePage = () => {
 
       <AboutUs></AboutUs>
 
-      <h1
-        style={{
-          textAlign: "center",
-          margin: "10px auto",
-          marginTop: "20px",
-          backgroundColor: "#f4a261",
-          width: "320px",
-          borderRadius: "20px",
-          padding: "10px",
-          color: "#fff",
-          fontSize: "1.5rem",
-          position: "relative",
-          bottom: "-30px",
-          zIndex: 3,
-        }}
-      >
-        Dịch Vụ Nổi Bật
-      </h1>
+      <h1 className="highlighted-title">Dịch Vụ Nổi Bật</h1>
 
-      <div
-        className="container_Card"
-        style={{
-          background: "#f4eade",
-          position: "relative",
-          overflow: "auto",
-          width: "100%",
-        }}
-      >
-        <button
-          className="scroll-button left"
-          onClick={() => scroll("left")}
-          style={{
-            position: "absolute",
-            left: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: 2,
-          }}
-        >
+
+      <div className="container_Card">
+        <button className="scroll-button left" onClick={() => scroll("left")}>
           <FaChevronLeft />
         </button>
 
-        <div
-          className="row"
-          ref={scrollRef}
-          style={{
-            display: "flex",
-            flexWrap: "nowrap",
-            gap: "20px",
-            overflowX: "auto",
-            padding: "40px 20px 30px",
-            scrollBehavior: "smooth",
-            msOverflowStyle: "none",
-            scrollbarWidth: "none",
-          }}
-        >
+        <div className="row" ref={scrollRef}>
           {SpaDATA.map((item) => (
-            <CardSpa
-              key={item.id}
-              id={item.id}
-              name={item.name}
-              image={item.image}
-            />
+            <CardSpa key={item.id} id={item.id} name={item.name} image={item.image} />
           ))}
         </div>
 
-        <button
-          className="scroll-button right"
-          onClick={() => scroll("right")}
-          style={{
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: 2,
-          }}
-        >
+        <button className="scroll-button right" onClick={() => scroll("right")}>
           <FaChevronRight />
         </button>
 
-        <a href="/Services" style={{ textDecoration: "none" }}>
-          <button
-            className="btn btn-primary"
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              textAlign: "center",
-              margin: "0px auto 10px",
-              // marginTop: "20px",
-              backgroundColor: "#f4a261",
-              width: "200px",
-              borderRadius: "20px",
-              padding: "10px",
-              color: "#fff",
-              fontSize: "1.5rem",
-              position: "relative",
-              // top: "-30px",
-              transition: "background-color 0.3s ease",
-              border: "1px solid #f4a261",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "#f4a200")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "#f4a261")
-            }
-            // onClick={() => alert('Xem Thêm clicked!')
-
-            // } // hoặc hành động khác bạn muốn thực hiện
-          >
-            Xem Thêm
-          </button>
-        </a>
+        <a href="/Services" className="btn-primary">Xem Thêm</a>
       </div>
 
       <DoctorProfiles></DoctorProfiles>
@@ -203,14 +109,10 @@ const HomePage = () => {
           <div className="testimonial-card">
             <FaQuoteLeft className="quote-icon" />
             <p>
-              "Dịch vụ tuyệt vời, nhân viên chuyên nghiệp. Tôi rất hài lòng với
-              kết quả sau liệu trình."
+              "Dịch vụ tuyệt vời, nhân viên chuyên nghiệp. Tôi rất hài lòng với kết quả sau liệu trình."
             </p>
             <div className="testimonial-author">
-              <img
-                src="https://randomuser.me/api/portraits/women/1.jpg"
-                alt="Customer"
-              />
+              <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Customer" />
               <div>
                 <h4>Nguyễn Thị A</h4>
                 {/* <div className="stars">
@@ -224,14 +126,10 @@ const HomePage = () => {
           <div className="testimonial-card">
             <FaQuoteLeft className="quote-icon" />
             <p>
-              "Không gian thư giãn, sang trọng. Các liệu trình đều mang lại hiệu
-              quả rõ rệt."
+              "Không gian thư giãn, sang trọng. Các liệu trình đều mang lại hiệu quả rõ rệt."
             </p>
             <div className="testimonial-author">
-              <img
-                src="https://randomuser.me/api/portraits/women/2.jpg"
-                alt="Customer"
-              />
+              <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="Customer" />
               <div>
                 <h4>Trần Thị B</h4>
                 {/* <div className="stars">
@@ -245,14 +143,10 @@ const HomePage = () => {
           <div className="testimonial-card">
             <FaQuoteLeft className="quote-icon" />
             <p>
-              "Đội ngũ nhân viên nhiệt tình, chu đáo. Sẽ tiếp tục ủng hộ spa
-              trong thời gian tới."
+              "Đội ngũ nhân viên nhiệt tình, chu đáo. Sẽ tiếp tục ủng hộ spa trong thời gian tới."
             </p>
             <div className="testimonial-author">
-              <img
-                src="https://randomuser.me/api/portraits/women/3.jpg"
-                alt="Customer"
-              />
+              <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Customer" />
               <div>
                 <h4>Lê Thị C</h4>
                 {/* <div className="stars">
@@ -267,7 +161,7 @@ const HomePage = () => {
       </section>
 
       {/* Gallery Section */}
-      <section className="gallery">
+      <section className="gallery-text">
         <h2>Không Gian Spa</h2>
       </section>
 

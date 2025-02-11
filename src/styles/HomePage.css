@@ -1,3 +1,86 @@
+.highlighted-title {
+  text-align: center;
+  margin: 10px auto;
+  margin-top: 20px;
+  background-color: #f4a261;
+  width: 320px;
+  border-radius: 20px;
+  padding: 10px;
+  color: #fff;
+  font-size: 1.5rem;
+  position: relative;
+  bottom: -30px;
+  z-index: 3;
+}
+
+
+.container_Card {
+  background: #f4eade;
+  position: relative;
+  overflow: auto;
+  width: 100%;
+}
+
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.scroll-button.left {
+  left: 10px;
+}
+
+.scroll-button.right {
+  right: 10px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 40px 20px 30px;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Ẩn thanh cuộn trên Chrome */
+.row::-webkit-scrollbar {
+  display: none;
+}
+
+.btn-primary {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  margin: 0px auto 10px;
+  background-color: #f4a261;
+  width: 200px;
+  border-radius: 20px;
+  padding: 10px;
+  color: #fff;
+  font-size: 1.5rem;
+  position: relative;
+  border: 1px solid #f4a261;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background-color: #f4a200;
+}
+
+
+
 /* Testimonials Section */
 .testimonials {
   padding: 3rem 2rem;
@@ -53,19 +136,19 @@
 }
 
 /* Gallery Section */
-.gallery {
-  padding: 0 2rem;
+.gallery-text {
+  padding: 2rem;
   background: #fff;
   text-align: center;
 }
 
-.gallery h2 {
-  margin-bottom: 3rem;
+.gallery-text h2 {
+  margin-bottom: 0;
   color: #f9b37a;
   font-size: 2.5rem;
 }
 
-.gallery-grid {
+/* .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1rem;
@@ -112,4 +195,4 @@
 
 .row::-webkit-scrollbar {
   display: none;
-}
+} */
