@@ -12,7 +12,7 @@ const SpaGallery = () => {
             description: "Không gian yên tĩnh, thiết kế tinh tế với ánh sáng dịu nhẹ.",
         },
         {
-            src: "https://images.unsplash.com/photo-1583416750470-965b2707b355?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NzV8fGtoJUMzJUI0bmclMjBnaWFuJTIwc3BhfGVufDB8fDB8fHww",
+            src: "https://img.freepik.com/premium-photo/large-white-vase-with-white-flowers-room-with-fireplace_1064589-258585.jpg?w=1060",
             title: "Không gian thư giãn 2",
             description: "Được trang trí với hoa và mùi hương dễ chịu.",
         },

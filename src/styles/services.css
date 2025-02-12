@@ -52,6 +52,7 @@
     font-size: 1.5rem;
     color: #333;
     margin-bottom: 10px;
+    font-family: serif;
 }
 
 .service-description {
@@ -120,7 +121,7 @@
     .services-container {
         grid-template-columns: 1fr;
     }
-    
+
     .services-header h1 {
         font-size: 2rem;
     }

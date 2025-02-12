@@ -25,6 +25,7 @@
     font-size: 2.5rem;
     margin-bottom: 20px;
     color: #f9b37a;
+    font-family: serif;
 }
 
 .profiles {
@@ -41,6 +42,11 @@
     width: 250px;
     text-align: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* add hover effect */
+.card:hover {
+    transform: translateY(-25px);
 }
 
 .image {

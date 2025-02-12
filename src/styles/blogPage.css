@@ -25,6 +25,7 @@
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 10px;
+  font-family: serif;
 }
 
 .category-sidebar .ant-list-item {
@@ -71,6 +72,10 @@
   min-height: 180px;
   object-fit: cover;
   border-bottom: 2px solid #ddd;
+}
+
+.blog-card h3 {
+  font-family: serif;
 }
 
 /* Nội dung blog */
