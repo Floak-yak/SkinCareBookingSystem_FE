@@ -38,7 +38,7 @@
 
 .category-sidebar .ant-list-item:hover,
 .category-sidebar .selected {
-  background: #1890ff;
+  background: #f4a261;
   color: #fff;
 }
 
@@ -102,7 +102,7 @@
   text-align: center;
   padding: 8px 12px;
   margin-top: 10px;
-  background: #1890ff;
+  background: #f4a261;
   color: white;
   text-decoration: none;
   font-weight: bold;
@@ -111,13 +111,13 @@
 }
 
 .btn-view:hover {
-  background: #0077cc;
+  background: #f4a200;
 }
 
 /* Nút tạo bài viết */
 .create-blog-btn {
   display: flex;
-  background: #52c41a;
+  background: #27ae60;
   color: white;
   font-size: 16px;
   font-weight: bold;
@@ -127,7 +127,7 @@
 }
 
 .create-blog-btn:hover {
-  background: #389e0d;
+  background: #219150;
 }
 
 /* Responsive */
