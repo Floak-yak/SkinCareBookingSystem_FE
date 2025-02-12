@@ -73,6 +73,7 @@
   transition: background-color 0.3s ease;
   cursor: pointer;
   text-decoration: none;
+  font-family: serif;
 }
 
 .btn-primary:hover {
@@ -92,6 +93,7 @@
   margin-bottom: 3rem;
   color: #f9b37a;
   font-size: 2.5rem;
+  font-family: serif;
 }
 
 .testimonials-grid {
@@ -140,6 +142,7 @@
   padding: 2rem;
   background: #fff;
   text-align: center;
+  font-family: serif;
 }
 
 .gallery-text h2 {
