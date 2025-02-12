@@ -111,8 +111,8 @@
 }
 
 .progress-step.active .step-number {
-  background: #e74c3c;
-  border-color: #e74c3c;
+  background: #f4a261;
+  border-color: #f4a261;
   color: white;
 }
 
@@ -167,7 +167,7 @@
 }
 
 .booking-button {
-  background: #e74c3c;
+  background: #f4a261;
   color: white;
   padding: 15px 40px;
   border: none;
@@ -178,7 +178,7 @@
 }
 
 .booking-button:hover {
-  background: #c0392b;
+  background: #f4a200;
   transform: translateY(-2px);
 }
 
@@ -226,7 +226,7 @@
   right: 20px;
 }
 
-Tùy chỉnh màu mũi tên
+/* Tùy chỉnh màu mũi tên */
 .steps-carousel .ant-carousel .slick-prev::before,
 .steps-carousel .ant-carousel .slick-next::before {
   color: white;
@@ -237,4 +237,4 @@ Tùy chỉnh màu mũi tên
 .steps-carousel .ant-carousel .slick-prev:hover,
 .steps-carousel .ant-carousel .slick-next:hover {
   background: rgba(0, 0, 0, 0.5);
-} 
+}

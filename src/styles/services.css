@@ -62,7 +62,7 @@
 
 .service-price {
     font-weight: bold;
-    color: #4F46E5;
+    color: #f4a261;
     font-size: 1.2rem;
     margin-bottom: 5px;
 }
@@ -74,7 +74,7 @@
 }
 
 .book-service-btn {
-    background: #4F46E5;
+    background: #f4a261;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -87,13 +87,13 @@
 }
 
 .book-service-btn:hover {
-    background: #4338CA;
+    background: #f4a200;
 }
 
 .view-details-btn {
     display: block;
     text-align: center;
-    color: #4F46E5;
+    color: #f4a261;
     text-decoration: none;
     font-size: 0.9rem;
 }
@@ -105,7 +105,7 @@
 .popular-tag {
     position: absolute;
     right: -50px;
-    background: #FF4D4D;
+    background: #e74c3c;
     color: white;
     padding: 5px 40px;
     transform: rotate(45deg);
@@ -113,7 +113,7 @@
 }
 
 .popular {
-    border: 2px solid #FF4D4D;
+    border: 2px solid #e74c3c;
 }
 
 @media (max-width: 768px) {
@@ -124,4 +124,4 @@
     .services-header h1 {
         font-size: 2rem;
     }
-}     
+}
