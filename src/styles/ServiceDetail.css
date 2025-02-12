@@ -167,7 +167,7 @@
 }
 
 .booking-button {
-  
+  transform: scale(1.05);
   box-shadow: 0 0 15px rgba(193, 153, 10, 0.5);
   background: #f4a261;
   color: white;
@@ -203,7 +203,6 @@
 .booking-button:hover {
   background: #f4a200;
   transform: translateY(-2px);
-  box-shadow: 0 0 15px rgba(68, 5, 247, 0.5);
 }
 
 .price-info {
@@ -255,6 +254,11 @@
 .steps-carousel .ant-carousel .slick-next::before {
   color: white;
   font-size: 20px;
+}
+
+.ant-carousel .slick-next::after,
+.ant-carousel .slick-prev::after {
+  border: none;
 }
 
 /* Hiệu ứng hover */
