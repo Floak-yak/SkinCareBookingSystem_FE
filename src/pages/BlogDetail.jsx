@@ -32,7 +32,16 @@ const BlogDetail = () => {
         </Text>
         <Text className="blog-category">Danh mục: {blog.category}</Text>
         <Paragraph className="blog-content">{blog.content}</Paragraph>
-        <Button type="primary" onClick={() => navigate("/blogs")}>Quay lại danh sách</Button>
+        <Button
+          type="primary"
+          onClick={() => navigate("/blogs")}
+          style={{ background: "#f4a261", borderColor: "#f4a261" }}
+          onMouseEnter={(e) => (e.target.style.background = "#d35400")}
+          onMouseLeave={(e) => (e.target.style.background = "#f4a261")}
+>
+  Quay lại danh sách
+</Button>
+
       </Card>
     </div>
   );

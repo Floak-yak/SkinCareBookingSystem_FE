@@ -17,6 +17,12 @@
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
+  transition: box-shadow 0.3s;
+}
+
+/* Hiệu ứng khi hover vào blog-card */
+.blog-card:hover {
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 /* Hình ảnh đại diện của bài viết */
@@ -30,9 +36,9 @@
 
 /* Tiêu đề bài viết */
 .blog-title {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: #333;
 }
 
@@ -41,7 +47,7 @@
   display: block;
   font-size: 14px;
   color: #777;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 /* Danh mục bài viết */
@@ -51,9 +57,9 @@
   font-weight: bold;
   color: #f4a261;
   background-color: rgba(244, 162, 97, 0.1);
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 5px;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 /* Nội dung bài viết */
@@ -68,17 +74,29 @@
 /* Nút quay lại danh sách */
 .blog-card button {
   width: 100%;
-  height: 40px;
+  height: 42px;
   font-size: 16px;
   border-radius: 5px;
-  background: #f4a261;
+  background: #f4a261; /* Màu nền mặc định */
   border: none;
   color: #fff;
-  transition: all 0.3s;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s, transform 0.2s;
 }
 
+/* Hiệu ứng khi hover */
 .blog-card button:hover {
-  background: #f4a200;
+  background: #d35400; /* Màu cam đậm hơn */
+  color: #fff;
+  transform: scale(1.05); /* Phóng to nhẹ */
+  box-shadow: 0 0 15px rgba(68, 5, 247, 0.5);
+}
+
+/* Hiệu ứng khi nhấn */
+.blog-card button:active {
+  background: #b03e00;
+  transform: scale(0.98);
 }
 
 /* Hiển thị khi đang tải dữ liệu */
