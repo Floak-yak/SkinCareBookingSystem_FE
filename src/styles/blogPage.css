@@ -103,6 +103,27 @@
   font-weight: bold;
   border-radius: 5px;
   transition: background 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-view::before {
+  content: '';
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: 200%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s, transform 0.3s;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.btn-view:hover::before {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.5);
 }
 
 .btn-view:hover {
@@ -119,6 +140,27 @@
   padding: 10px 15px;
   border-radius: 5px;
   transition: background 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.create-blog-btn::before {
+  content: '';
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: 200%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s, transform 0.3s;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.create-blog-btn:hover::before {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.5);
 }
 
 .create-blog-btn:hover {
