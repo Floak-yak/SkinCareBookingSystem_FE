@@ -1,48 +1,35 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { Card, Button, Spin, Typography, message } from "antd";
-import useFetch from "../hooks/useFetch";
-import "../styles/blogDetail.css";
-
-const { Title, Paragraph, Text } = Typography;
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
+import useFetch from '../hooks/useFetch';
+import { Button } from 'antd';
+import '../styles/blogDetail.css';
 
 const BlogDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { data: blogs, loading } = useFetch("/data/blogs.json", "blogs");
+  const { data: blogs, loading, error } = useFetch('/data/blogs.json', 'blogs');
 
-  const blog = blogs.find((b) => b.id.toString() === id);
+  if (loading) return <p>Đang tải bài viết...</p>;
+  if (error) return <p>Có lỗi xảy ra khi tải bài viết.</p>;
 
-  if (loading) {
-    return <Spin size="large" className="loading-container" />;
-  }
-
-  if (!blog) {
-    message.error("Bài viết không tồn tại!");
-    navigate("/blogs");
-    return null;
-  }
+  const blog = blogs.find(b => b.id === Number(id));
+  if (!blog) return <p>Bài viết không tồn tại.</p>;
 
   return (
     <div className="blog-detail-container">
-      <Card className="blog-card">
-        <img src={blog.image || "/default.jpg"} alt={blog.title} className="blog-image" />
-        <Title level={2} className="blog-title">{blog.title}</Title>
-        <Text className="blog-meta">
-          Đăng bởi <strong>{blog.author || "Ẩn danh"}</strong> vào ngày {new Date(blog.datePost).toLocaleDateString()}
-        </Text>
-        <Text className="blog-category">Danh mục: {blog.category}</Text>
-        <Paragraph className="blog-content">{blog.content}</Paragraph>
-        <Button
-          type="primary"
-          onClick={() => navigate("/blogs")}
-          style={{ background: "#f4a261", borderColor: "#f4a261" }}
-          onMouseEnter={(e) => (e.target.style.background = "#d35400")}
-          onMouseLeave={(e) => (e.target.style.background = "#f4a261")}
->
-  Quay lại danh sách
-</Button>
-
-      </Card>
+      <h1 className="blog-detail-title">{blog.title}</h1>
+      <div className="blog-detail-meta">
+        <span className="blog-detail-author">Đăng bởi {blog.author}</span>
+        <span className="blog-detail-date">{new Date(blog.date).toLocaleDateString()}</span>
+      </div>
+      <img src={blog.image} alt={blog.title} className="blog-detail-image" />
+      <div className="blog-detail-content">
+        {blog.content}
+      </div>
+      <div className="blog-detail-back">
+        <Link to="/blogs">
+          <Button type="primary">Quay lại danh sách</Button>
+        </Link>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
-/* blogPage.css */
-.blog-page {
+/* product.css */
+.product-page {
   padding: 30px;
   max-width: 1200px;
   margin: 0 auto;
@@ -7,7 +7,7 @@
   font-family: "Roboto", sans-serif;
 }
 
-.blog-page h2 {
+.product-page h2 {
   color: #f9b37a;
   font-size: 2em;
   font-weight: bold;
@@ -16,55 +16,30 @@
   padding-bottom: 10px;
 }
 
-/* Bộ lọc */
-.blog-filters {
+.product-filters {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 20px;
   margin-bottom: 30px;
 }
 
-.filters-group {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-/* Input tìm kiếm */
-.blog-search-input {
-  width: 200px;
-  height: 40px;
-  font-size: 1em;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0 10px;
-}
-
-/* Dropdown chọn danh mục */
-.blog-category-select {
-  width: 150px;
-  height: 40px;
-  font-size: 1em;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.create-blog-btn {
-  height: 40px;
-  font-size: 1em;
-  border-radius: 4px;
-}
-
-/* Lưới bài viết */
-.blog-grid {
+.product-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
 
-/* Card bài viết */
-.blog-card {
-  width: calc(25% - 20px);  /* 4 card trên 1 hàng trên màn hình lớn */
+.product-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.product-card {
+  width: calc(25% - 20px);
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
@@ -72,35 +47,30 @@
   transition: box-shadow 0.3s ease;
 }
 
-.blog-card:hover {
+.product-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.blog-card-image {
+.product-card img {
   width: 100%;
   height: 200px;
   object-fit: cover;
 }
 
-.blog-card-content {
-  padding: 10px;
-}
-
-.blog-card-content h3 {
+.product-card .ant-card-meta-title {
   font-size: 1.2em;
   font-weight: bold;
   color: #333;
   margin: 10px 0 5px;
-  min-height: 44px;
 }
 
-.blog-card-content p {
+.product-card .ant-card-meta-description {
   font-size: 0.9em;
   color: #666;
   margin-bottom: 10px;
 }
 
-.blog-read-more {
+.product-card a {
   display: block;
   margin-top: 10px;
   text-align: center;
@@ -111,23 +81,23 @@
 
 /* Responsive styles */
 @media (max-width: 992px) {
-  .blog-card {
+  .product-card {
     width: calc(33.33% - 20px);
   }
 }
 
 @media (max-width: 768px) {
-  .blog-card {
+  .product-card {
     width: calc(50% - 20px);
   }
-  .filters-group {
+  .product-filters {
     flex-direction: column;
     gap: 10px;
   }
 }
 
 @media (max-width: 480px) {
-  .blog-card {
+  .product-card {
     width: 100%;
   }
 }
