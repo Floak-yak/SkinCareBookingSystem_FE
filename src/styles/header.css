@@ -1,5 +1,4 @@
 .header {
-  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -8,7 +7,6 @@
   align-items: center;
   padding: 12px 25px;
   background: #f9b37a;
-  /* background: #fea38e; */
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   font-family: serif;
@@ -44,7 +42,7 @@
   font-weight: bold;
 }
 
-.auth {
+.cart-auth {
   display: flex;
   gap: 15px;
 }

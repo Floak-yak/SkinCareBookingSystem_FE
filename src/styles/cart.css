@@ -1,0 +1,92 @@
+/* cart.css */
+.cart-container {
+  padding: 30px;
+  max-width: 800px;
+  margin: 30px auto;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: "Roboto", sans-serif;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.cart-container h2 {
+  margin-bottom: 20px;
+  color: #f9b37a;
+  font-size: 1.8em;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 2px solid #f9b37a;
+  padding-bottom: 10px;
+}
+
+/* Style cho danh sách giỏ hàng */
+.ant-list-item {
+  border-bottom: 1px solid #ddd;
+  padding: 15px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.ant-list-item:last-child {
+  border-bottom: none;
+}
+
+/* Style cho avatar (ảnh sản phẩm) */
+.ant-list-item-meta-avatar img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 20px;
+}
+
+/* Style cho tiêu đề và mô tả sản phẩm trong giỏ hàng */
+.ant-list-item-meta-title {
+  font-size: 1.1em;
+  color: #333;
+  margin: 0;
+}
+
+.ant-list-item-meta-description {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Style cho các thao tác (sửa số lượng, xóa) */
+.cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Tuỳ chỉnh InputNumber */
+.ant-input-number {
+  width: 70px;
+}
+
+/* Nút Xóa */
+.ant-btn-danger {
+  font-size: 0.9em;
+  padding: 4px 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .cart-container {
+    padding: 20px;
+  }
+  .ant-list-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ant-list-item-meta-avatar img {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  .cart-item-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
