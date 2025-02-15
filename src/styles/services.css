@@ -1,5 +1,6 @@
 .services-page {
     padding: 40px 20px;
+    background: #f9f9f9;
 }
 
 .services-header {
@@ -8,14 +9,34 @@
 }
 
 .services-header h1 {
-    font-size: 2.5rem;
-    color: #333;
+    font-size: 3rem;
+    color: #2c3e50;
     margin-bottom: 10px;
+    font-family: 'Playfair Display', serif;
 }
 
 .services-header p {
     font-size: 1.2rem;
-    color: #666;
+    color: #7f8c8d;
+}
+
+.service-category {
+    margin-bottom: 40px;
+    border: 1px solid #ddd; /* Add border to each category */
+    padding: 20px;
+    border-radius: 10px;
+    background: #ffffff; /* Background color */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Add shadow */
+}
+
+.category-title {
+    font-size: 2rem;
+    color: #34495e;
+    margin-bottom: 20px;
+    font-family: 'Playfair Display', serif;
+    text-align: left; /* Align to the left */
+    border-bottom: 2px solid #e67e22; /* Add bottom border */
+    padding-bottom: 10px;
 }
 
 .services-container {
@@ -30,14 +51,16 @@
     background: white;
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
+    text-align: center;
 }
 
 .service-item:hover {
-    transform: translateY(-5px);
+    transform: translateY(-10px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .service-image {
@@ -48,34 +71,34 @@
     margin-bottom: 15px;
 }
 
-.service-item h2 {
+.service-item h3 {
     font-size: 1.5rem;
-    color: #333;
+    color: #2c3e50;
     margin-bottom: 10px;
-    font-family: serif;
+    font-family: 'Playfair Display', serif;
 }
 
 .service-description {
-    color: #666;
+    color: #7f8c8d;
     margin-bottom: 15px;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .service-price {
     font-weight: bold;
-    color: #f4a261;
+    color: #e67e22;
     font-size: 1.2rem;
     margin-bottom: 5px;
 }
 
 .service-duration {
-    color: #666;
+    color: #7f8c8d;
     font-size: 0.9rem;
     margin-bottom: 20px;
 }
 
 .book-service-btn {
-    background: #f4a261;
+    background: #e67e22;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -88,13 +111,13 @@
 }
 
 .book-service-btn:hover {
-    background: #f4a200;
+    background: #d35400;
 }
 
 .view-details-btn {
     display: block;
     text-align: center;
-    color: #f4a261;
+    color: #e67e22;
     text-decoration: none;
     font-size: 0.9rem;
 }
@@ -123,6 +146,10 @@
     }
 
     .services-header h1 {
-        font-size: 2rem;
+        font-size: 2.5rem;
+    }
+
+    .category-title {
+        font-size: 1.8rem;
     }
 }
