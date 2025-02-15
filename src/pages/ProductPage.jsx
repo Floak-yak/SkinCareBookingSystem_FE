@@ -89,7 +89,7 @@ const ProductPage = () => {
                 description={`${product.price.toLocaleString()} VND`}
               />
               <div className="product-actions">
-                <Button type="primary" onClick={() => handleAddToCart(product)}>
+                <Button className="add-to-cart-btn" onClick={() => handleAddToCart(product)}>
                   Thêm vào giỏ hàng
                 </Button>
                 <Link to={`/products/${product.id}`} className="view-detail-link">
