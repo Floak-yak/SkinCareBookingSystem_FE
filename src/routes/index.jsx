@@ -11,6 +11,9 @@ import Services from "../pages/Services";
 import Booking from "../pages/Booking";
 import Contact from "../pages/Contact";
 import ServiceDetail from "../pages/ServiceDetail";
+import ProductPage from "../pages/ProductPage";
+import ProductDetail from "../pages/ProductDetail";
+import Cart from "../pages/Cart";
 
 
 
@@ -36,6 +39,9 @@ const AppRoutes = () => {
       <Route path="/booking" element={<Booking />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/service/:id" element={<ServiceDetail />} />
+      <Route path="/products" element={<ProductPage />} />
+      <Route path="/products/:id" element={<ProductDetail />} />
+      <Route path="/cart" element={<Cart />} />
     </Routes>
   );
 };

@@ -1,45 +1,92 @@
 .login-container {
-  margin-top: 200px;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  min-height: calc(90vh - 200px);
 }
 
+/* Hộp đăng nhập */
 .login-box {
-  background: white;
+  background: #fff;
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   width: 350px;
+  max-width: 90%;
   text-align: center;
 }
 
+/* Tiêu đề */
 .login-box h2 {
   margin-bottom: 20px;
-  color: #d946ef;
+  color: #f9b37a;
+  font-size: 1.8em;
+  font-weight: bold;
+  border-bottom: 2px solid #f9b37a;
+  padding-bottom: 10px;
 }
 
-.login-form .ant-input {
+/* Form đăng nhập (Ant Design) */
+.login-form .ant-input,
+.login-form .ant-input-password {
   border-radius: 8px;
+  height: 40px;
 }
 
+/* Nút đăng nhập */
 .login-button {
   width: 100%;
   border-radius: 8px;
-  background: #d946ef;
+  background: #f9b37a; /* Màu chủ đạo */
+  border: none;
+  height: 40px;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover,
+.login-button:focus {
+  background: #e08865; /* Màu đậm hơn khi hover/focus */
   border: none;
 }
 
-.login-button:hover {
-  background: #c026d3;
+.forgot-password-link {
+  margin-top: 10px;
+  text-align: center;
 }
 
+.forgot-password-link a {
+  color: #f9b37a;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.forgot-password-link a:hover {
+  color: #e08865;
+}
+
+/* Đoạn liên kết "Chưa có tài khoản? Đăng ký ngay" */
 .register-link {
   margin-top: 15px;
   color: #555;
 }
 
 .register-link a {
-  color: #d946ef;
+  color: #f9b37a;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.register-link a:hover {
+  color: #e08865;
+}
+
+/* Responsive: Màn hình nhỏ */
+@media (max-width: 480px) {
+  .login-box {
+    padding: 20px;
+  }
+  .login-box h2 {
+    font-size: 1.5em;
+  }
 }
