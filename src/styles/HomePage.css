@@ -3,7 +3,7 @@
   margin: 10px auto;
   margin-top: 20px;
   background-color: #f4a261;
-  width: 320px;
+  width: 520px;
   border-radius: 20px;
   padding: 10px;
   color: #fff;
@@ -61,7 +61,7 @@
   display: flex;
   justify-content: center;
   text-align: center;
-  margin: 0px auto 10px;
+  margin: -20px auto 15px;
   background-color: #f4a261;
   width: 200px;
   border-radius: 13px;
@@ -90,7 +90,7 @@
   transition: opacity 0.3s, transform 0.3s;
   border-radius: 50%;
   pointer-events: none;
-  
+
 }
 
 .btn-primary:hover::before {
@@ -102,7 +102,7 @@
   /* background-color: #f4a200; */
   /* background: radial-gradient(circle closest-side, #4405f7, transparent) */
   transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(68, 5, 247, 0.5);
+  box-shadow: 0 0 15px rgba(68, 5, 247, 0.5);
 }
 
 
