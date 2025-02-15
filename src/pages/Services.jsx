@@ -124,6 +124,10 @@ function Services() {
     }
   ];
 
+  const handleCardClick = (serviceId) => {
+    navigate(`/service/${serviceId}`);
+  };
+
   return (
     <div className="services-page">
       <div className="services-header">
@@ -135,14 +139,14 @@ function Services() {
           <h2 className="category-title">{category.category}</h2>
           <div className="services-container">
             {category.services.map(service => (
-              <div key={service.id} className="service-item">
+              <div key={service.id} className="service-item" onClick={() => handleCardClick(service.id)}>
                 <img src={service.image} alt={service.name} className="service-image" />
                 <h3>{service.name}</h3>
                 <p className="service-description">{service.description}</p>
                 <p className="service-price">Giá: {service.price}</p>
                 <p className="service-duration">Thời gian: {service.duration}</p>
-                <button className="book-service-btn" onClick={() => navigate(`/booking/${service.id}`)}>Đặt lịch</button>
-                <Link to={`/service/${service.id}`} className="view-details-btn">Xem chi tiết</Link>
+                <button className="book-service-btn" onClick={(e) => { e.stopPropagation(); navigate(`/booking/${service.id}`); }}>Đặt lịch</button>
+                <Link to={`/service/${service.id}`} className="view-details-btn" onClick={(e) => e.stopPropagation()}>Xem chi tiết</Link>
               </div>
             ))}
           </div>

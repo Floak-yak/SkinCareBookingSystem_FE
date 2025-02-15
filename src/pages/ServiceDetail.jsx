@@ -9,6 +9,7 @@ const ServiceDetail = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [serviceData, setServiceData] = useState(null);
+  const carouselRef = React.useRef(null);
 
   useEffect(() => {
     fetch('/data/services.json')
@@ -35,6 +36,11 @@ const ServiceDetail = () => {
     });
   };
 
+  const handleStepClick = (index) => {
+    setCurrentStep(index);
+    carouselRef.current.goTo(index);
+  };
+
   return (
     <div className="service-detail">
       <div className="service-overview">
@@ -47,13 +53,14 @@ const ServiceDetail = () => {
 
       <div className="steps-carousel">
         <Carousel
+          ref={carouselRef}
           afterChange={setCurrentStep}
           autoplay
           autoplaySpeed={5000}
           effect="fade"
           dots={true}
           arrows={true}
-          prevArrow={<LeftOutlined />}   //làm cho hình sang bên trái, phải
+          prevArrow={<LeftOutlined />}
           nextArrow={<RightOutlined />}
         >
           {serviceData.steps.map((step, index) => (
@@ -79,9 +86,13 @@ const ServiceDetail = () => {
             key={index} 
             className={`progress-step ${index === currentStep ? 'active' : ''} 
               ${index < currentStep ? 'completed' : ''}`}
+            onClick={() => handleStepClick(index)}
           >
             <div className="step-number">{index + 1}</div>
-            <div className="step-label">{step.title}</div>
+            <div className="step-label">
+              <div>Bước {index + 1}</div>
+              <div>{step.title}</div>
+            </div>
           </div>
         ))}
       </div>
@@ -107,4 +118,4 @@ const ServiceDetail = () => {
   );
 };
 
-export default ServiceDetail; 
+export default ServiceDetail;

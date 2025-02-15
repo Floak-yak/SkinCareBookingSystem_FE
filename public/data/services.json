@@ -7,37 +7,37 @@
       "duration": "60 phút",
       "steps": [
         {
-          "title": "Bước 1: Tẩy Trang",
+          "title": "Tẩy Trang",
           "description": "Loại bỏ hoàn toàn lớp trang điểm và bụi bẩn trên da",
           "image": "https://www.boshop.vn/uploads/2021/01/04/5ff2840513519-giai-dap-cau-hoi-khong-trang-diem-co-can-tay-trang-khong-8.jpg",
           "duration": "5-10 phút"
         },
         {
-          "title": "Bước 2: Rửa Mặt",
+          "title": "Rửa Mặt",
           "description": "Làm sạch sâu với sữa rửa mặt chuyên dụng",
           "image": "https://example.com/washing-face.jpg",
           "duration": "3-5 phút"
         },
         {
-          "title": "Bước 3: Tẩy Tế Bào Chết",
+          "title": "Tẩy Tế Bào Chết",
           "description": "Loại bỏ tế bào chết, làm thông thoáng lỗ chân lông",
           "image": "https://example.com/exfoliation.jpg",
           "duration": "10-15 phút"
         },
         {
-          "title": "Bước 4: Xông Hơi",
+          "title": "Xông Hơi",
           "description": "Mở rộng lỗ chân lông, giúp da sẵn sàng hấp thụ dưỡng chất",
           "image": "https://example.com/steaming.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 5: Massage Mặt",
+          "title": "Massage Mặt",
           "description": "Massage với tinh chất đặc biệt, cải thiện tuần hoàn máu",
           "image": "https://example.com/massage.jpg",
           "duration": "15-20 phút"
         },
         {
-          "title": "Bước 6: Đắp Mặt Nạ",
+          "title": "Đắp Mặt Nạ",
           "description": "Cung cấp dưỡng chất chuyên sâu với mặt nạ cao cấp",
           "image": "https://example.com/mask.jpg",
           "duration": "15-20 phút"
@@ -58,37 +58,37 @@
       "duration": "90 phút",
       "steps": [
         {
-          "title": "Bước 1: Tẩy Trang Kép",
+          "title": "Tẩy Trang Kép",
           "description": "Làm sạch sâu với phương pháp tẩy trang 2 lớp",
           "image": "https://example.com/double-cleansing.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Rửa Mặt Chuyên Sâu",
+          "title": "Rửa Mặt Chuyên Sâu",
           "description": "Sử dụng sữa rửa mặt đặc trị cho từng loại da",
           "image": "https://example.com/deep-cleansing.jpg",
           "duration": "5 phút"
         },
         {
-          "title": "Bước 3: Tẩy Da Chết Enzyme",
+          "title": "Tẩy Da Chết Enzyme",
           "description": "Tẩy tế bào chết nhẹ nhàng với enzyme tự nhiên",
           "image": "https://example.com/enzyme-peel.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 4: Hút Mụn Chuyên Sâu",
+          "title": "Hút Mụn Chuyên Sâu",
           "description": "Loại bỏ mụn đầu đen và bã nhờn sâu trong lỗ chân lông",
           "image": "https://example.com/extraction.jpg",
           "duration": "20 phút"
         },
         {
-          "title": "Bước 5: Massage Lympha",
+          "title": "Massage Lympha",
           "description": "Massage đặc biệt giúp thải độc và giảm phù nề",
           "image": "https://example.com/lymph-massage.jpg",
           "duration": "20 phút"
         },
         {
-          "title": "Bước 6: Đắp Mặt Nạ Đặc Trị",
+          "title": "Đắp Mặt Nạ Đặc Trị",
           "description": "Sử dụng mặt nạ cao cấp phù hợp với từng loại da",
           "image": "https://example.com/special-mask.jpg",
           "duration": "20 phút"
@@ -109,37 +109,37 @@
       "duration": "75 phút",
       "steps": [
         {
-          "title": "Bước 1: Làm Sạch Chuyên Sâu",
+          "title": "Làm Sạch Chuyên Sâu",
           "description": "Tẩy trang và rửa mặt kỹ lưỡng",
           "image": "https://example.com/led-cleanse.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Tẩy Tế Bào Chết",
+          "title": "Tẩy Tế Bào Chết",
           "description": "Loại bỏ tế bào chết và chuẩn bị da",
           "image": "https://example.com/led-prep.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 3: Serum Đặc Trị",
+          "title": "Serum Đặc Trị",
           "description": "Thoa serum phù hợp với mục đích điều trị",
           "image": "https://example.com/led-serum.jpg",
           "duration": "5 phút"
         },
         {
-          "title": "Bước 4: Trị Liệu LED",
+          "title": "Trị Liệu LED",
           "description": "Chiếu ánh sáng LED theo từng vùng",
           "image": "https://example.com/led-treatment.jpg",
           "duration": "30 phút"
         },
         {
-          "title": "Bước 5: Đắp Mặt Nạ Lạnh",
+          "title": "Đắp Mặt Nạ Lạnh",
           "description": "Làm dịu và se khít lỗ chân lông",
           "image": "https://example.com/cooling-mask.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 6: Dưỡng Ẩm SPF",
+          "title": "Dưỡng Ẩm SPF",
           "description": "Dưỡng ẩm và bảo vệ da",
           "image": "https://example.com/led-finish.jpg",
           "duration": "5 phút"
@@ -160,37 +160,37 @@
       "duration": "60 phút",
       "steps": [
         {
-          "title": "Bước 1: Làm Sạch Nhẹ Nhàng",
+          "title": "Làm Sạch Nhẹ Nhàng",
           "description": "Tẩy trang và rửa mặt với sản phẩm dịu nhẹ",
           "image": "https://example.com/gentle-cleanse-massage.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Xông Hơi Thảo Dược",
+          "title": "Xông Hơi Thảo Dược",
           "description": "Xông hơi với thảo dược giúp thư giãn",
           "image": "https://example.com/herbal-steam-massage.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 3: Massage Thư Giãn",
+          "title": "Massage Thư Giãn",
           "description": "Massage với tinh dầu thiên nhiên theo huyệt đạo",
           "image": "https://example.com/relaxing-massage.jpg",
           "duration": "20 phút"
         },
         {
-          "title": "Bước 4: Massage Đá Lạnh",
+          "title": "Massage Đá Lạnh",
           "description": "Sử dụng đá lạnh massage giảm căng thẳng",
           "image": "https://example.com/cold-stone-massage.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 5: Đắp Mặt Nạ Dưỡng Ẩm",
+          "title": "Đắp Mặt Nạ Dưỡng Ẩm",
           "description": "Đắp mặt nạ dưỡng ẩm làm dịu da",
           "image": "https://example.com/hydrating-mask-massage.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 6: Dưỡng Ẩm Kết Thúc",
+          "title": "Dưỡng Ẩm Kết Thúc",
           "description": "Thoa kem dưỡng ẩm và chống nắng",
           "image": "https://example.com/moisturize-finish.jpg",
           "duration": "5 phút"
@@ -211,37 +211,37 @@
       "duration": "90 phút",
       "steps": [
         {
-          "title": "Bước 1: Tẩy Trang & Rửa Mặt",
+          "title": "Tẩy Trang & Rửa Mặt",
           "description": "Làm sạch da với sản phẩm dành cho da mụn",
           "image": "https://example.com/acne-cleansing.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Phân Tích Da",
+          "title": "Phân Tích Da",
           "description": "Kiểm tra tình trạng da và loại mụn",
           "image": "https://example.com/skin-analysis.jpg",
           "duration": "5 phút"
         },
         {
-          "title": "Bước 3: Xông Hơi",
+          "title": "Xông Hơi",
           "description": "Làm mềm da và mở lỗ chân lông",
           "image": "https://example.com/steam-acne.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 4: Điều Trị Mụn",
+          "title": "Điều Trị Mụn",
           "description": "Lấy nhân mụn và điều trị chuyên sâu",
           "image": "https://example.com/acne-extract.jpg",
           "duration": "30 phút"
         },
         {
-          "title": "Bước 5: Đắp Mặt Nạ Kháng Khuẩn",
+          "title": "Đắp Mặt Nạ Kháng Khuẩn",
           "description": "Sử dụng mặt nạ đặc trị cho da mụn",
           "image": "https://example.com/acne-mask.jpg",
           "duration": "20 phút"
         },
         {
-          "title": "Bước 6: Bôi Kem Dưỡng",
+          "title": "Bôi Kem Dưỡng",
           "description": "Dưỡng ẩm và bảo vệ da sau điều trị",
           "image": "https://example.com/acne-moisturizer.jpg",
           "duration": "5 phút"
@@ -262,37 +262,37 @@
       "duration": "120 phút",
       "steps": [
         {
-          "title": "Bước 1: Làm Sạch Chuyên Sâu",
+          "title": "Làm Sạch Chuyên Sâu",
           "description": "Tẩy trang và rửa mặt với sản phẩm chống lão hóa",
           "image": "https://example.com/anti-aging-cleanse.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 2: Tẩy Tế Bào Chết AHA/BHA",
+          "title": "Tẩy Tế Bào Chết AHA/BHA",
           "description": "Loại bỏ tế bào chết với acid nhẹ nhàng",
           "image": "https://example.com/chemical-peel.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 3: Massage Nâng Cơ",
+          "title": "Massage Nâng Cơ",
           "description": "Massage đặc biệt giúp nâng cơ và săn chắc da",
           "image": "https://example.com/lifting-massage.jpg",
           "duration": "30 phút"
         },
         {
-          "title": "Bước 4: Đắp Mặt Nạ Vàng 24K",
+          "title": "Đắp Mặt Nạ Vàng 24K",
           "description": "Cung cấp dưỡng chất và tăng độ đàn hồi",
           "image": "https://example.com/gold-mask.jpg",
           "duration": "30 phút"
         },
         {
-          "title": "Bước 5: Serum Chống Lão Hóa",
+          "title": "Serum Chống Lão Hóa",
           "description": "Thẩm thấu serum giàu peptide và vitamin",
           "image": "https://example.com/anti-aging-serum.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 6: Kem Dưỡng & Chống Nắng",
+          "title": "Kem Dưỡng & Chống Nắng",
           "description": "Khóa ẩm và bảo vệ da",
           "image": "https://example.com/moisturizer-spf.jpg",
           "duration": "15 phút"
@@ -313,37 +313,37 @@
       "duration": "90 phút",
       "steps": [
         {
-          "title": "Bước 1: Làm Sạch Chuyên Sâu",
+          "title": "Làm Sạch Chuyên Sâu",
           "description": "Tẩy trang và rửa mặt với sản phẩm dành cho da nám",
           "image": "https://example.com/pigment-cleanse.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Phân Tích Da",
+          "title": "Phân Tích Da",
           "description": "Kiểm tra mức độ và loại nám, tàn nhang",
           "image": "https://example.com/pigment-analysis.jpg",
           "duration": "5 phút"
         },
         {
-          "title": "Bước 3: Tẩy Tế Bào Chết Nhẹ",
+          "title": "Tẩy Tế Bào Chết Nhẹ",
           "description": "Loại bỏ tế bào chết với enzyme tự nhiên",
           "image": "https://example.com/gentle-pigment-peel.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 4: Điều Trị Chuyên Sâu",
+          "title": "Điều Trị Chuyên Sâu",
           "description": "Sử dụng công nghệ IPL hoặc laser điều trị đốm nâu",
           "image": "https://example.com/pigment-treatment.jpg",
           "duration": "30 phút"
         },
         {
-          "title": "Bước 5: Đắp Mặt Nạ Làm Sáng",
+          "title": "Đắp Mặt Nạ Làm Sáng",
           "description": "Mặt nạ đặc trị với thành phần làm sáng da",
           "image": "https://example.com/brightening-mask.jpg",
           "duration": "20 phút"
         },
         {
-          "title": "Bước 6: Dưỡng Sáng & Chống Nắng",
+          "title": "Dưỡng Sáng & Chống Nắng",
           "description": "Thoa serum làm sáng và kem chống nắng bảo vệ",
           "image": "https://example.com/pigment-protection.jpg",
           "duration": "10 phút"
@@ -364,37 +364,37 @@
       "duration": "60 phút",
       "steps": [
         {
-          "title": "Bước 1: Làm Sạch Da",
+          "title": "Làm Sạch Da",
           "description": "Tẩy trang và rửa mặt để chuẩn bị da",
           "image": "https://example.com/cleansing-prep.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Xông Hơi",
+          "title": "Xông Hơi",
           "description": "Xông hơi làm mềm da và mở lỗ chân lông",
           "image": "https://example.com/steam-prep.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 3: Tẩy Tế Bào Chết Vật Lý",
+          "title": "Tẩy Tế Bào Chết Vật Lý",
           "description": "Sử dụng hạt tẩy tế bào chết tự nhiên",
           "image": "https://example.com/physical-scrub.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 4: Tẩy Tế Bào Chết Hóa Học",
+          "title": "Tẩy Tế Bào Chết Hóa Học",
           "description": "Sử dụng AHA/BHA nhẹ nhàng loại bỏ tế bào chết sâu",
           "image": "https://example.com/chemical-exfoliation.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 5: Đắp Mặt Nạ Dưỡng Ẩm",
+          "title": "Đắp Mặt Nạ Dưỡng Ẩm",
           "description": "Cấp ẩm và làm dịu da sau tẩy tế bào chết",
           "image": "https://example.com/hydrating-mask-post.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 6: Dưỡng Ẩm & Chống Nắng",
+          "title": "Dưỡng Ẩm & Chống Nắng",
           "description": "Bảo vệ và dưỡng ẩm cho da mới",
           "image": "https://example.com/moisturize-protect.jpg",
           "duration": "5 phút"
@@ -415,37 +415,37 @@
       "duration": "60 phút",
       "steps": [
         {
-          "title": "Bước 1: Làm Sạch Không Kích Ứng",
+          "title": "Làm Sạch Không Kích Ứng",
           "description": "Sử dụng sản phẩm đặc biệt cho da nhạy cảm",
           "image": "https://example.com/sensitive-cleanse.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Kiểm Tra Độ Nhạy Cảm",
+          "title": "Kiểm Tra Độ Nhạy Cảm",
           "description": "Đánh giá tình trạng kích ứng của da",
           "image": "https://example.com/sensitivity-test.jpg",
           "duration": "5 phút"
         },
         {
-          "title": "Bước 3: Massage Làm Dịu",
+          "title": "Massage Làm Dịu",
           "description": "Massage nhẹ nhàng với tinh dầu làm dịu",
           "image": "https://example.com/calming-massage.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 4: Đắp Mặt Nạ Làm Dịu",
+          "title": "Đắp Mặt Nạ Làm Dịu",
           "description": "Mặt nạ đặc trị cho da nhạy cảm",
           "image": "https://example.com/sensitive-mask.jpg",
           "duration": "20 phút"
         },
         {
-          "title": "Bước 5: Serum Phục Hồi",
+          "title": "Serum Phục Hồi",
           "description": "Thẩm thấu serum làm dịu và phục hồi",
           "image": "https://example.com/repair-serum.jpg",
           "duration": "5 phút"
         },
         {
-          "title": "Bước 6: Kem Chống Nắng Dịu Nhẹ",
+          "title": "Kem Chống Nắng Dịu Nhẹ",
           "description": "Bảo vệ da với kem chống nắng vật lý",
           "image": "https://example.com/gentle-spf.jpg",
           "duration": "5 phút"
@@ -465,39 +465,38 @@
       "price": "599.000đ",
       "duration": "75 phút",
       "steps": [
-
         {
-          "title": "Bước 1: Làm Sạch Dịu Nhẹ",
+          "title": "Làm Sạch Dịu Nhẹ",
           "description": "Tẩy trang và rửa mặt với sản phẩm không gây khô da",
           "image": "https://example.com/gentle-cleanse.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Tẩy Tế Bào Chết Dịu Nhẹ",
+          "title": "Tẩy Tế Bào Chết Dịu Nhẹ",
           "description": "Loại bỏ tế bào chết với hạt mềm tự nhiên",
           "image": "https://example.com/gentle-scrub.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 3: Xông Hơi Thảo Dược",
+          "title": "Xông Hơi Thảo Dược",
           "description": "Xông hơi với thảo dược giúp da thẩm thấu",
           "image": "https://example.com/herbal-steam.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 4: Massage Hyaluronic",
+          "title": "Massage Hyaluronic",
           "description": "Massage với serum giàu hyaluronic acid",
           "image": "https://example.com/hyaluronic-massage.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 5: Đắp Mặt Nạ Cấp Ẩm",
+          "title": "Đắp Mặt Nạ Cấp Ẩm",
           "description": "Mặt nạ gel với các thành phần giữ ẩm",
           "image": "https://example.com/hydrating-mask.jpg",
           "duration": "20 phút"
         },
         {
-          "title": "Bước 6: Dưỡng Ẩm Kết Thúc",
+          "title": "Dưỡng Ẩm Kết Thúc",
           "description": "Khóa ẩm với kem dưỡng đặc biệt",
           "image": "https://example.com/moisturizer.jpg",
           "duration": "5 phút"
@@ -518,37 +517,37 @@
       "duration": "90 phút",
       "steps": [
         {
-          "title": "Bước 1: Làm Sạch Chuyên Sâu",
+          "title": "Làm Sạch Chuyên Sâu",
           "description": "Tẩy trang và rửa mặt với sản phẩm chuyên biệt",
           "image": "https://example.com/lifting-cleanse.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Tẩy Tế Bào Chết",
+          "title": "Tẩy Tế Bào Chết",
           "description": "Loại bỏ tế bào chết và làm mịn da",
           "image": "https://example.com/lifting-exfoliate.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 3: Massage Nâng Cơ",
+          "title": "Massage Nâng Cơ",
           "description": "Kỹ thuật massage chuyên sâu kích thích cơ mặt",
           "image": "https://example.com/lifting-massage.jpg",
           "duration": "25 phút"
         },
         {
-          "title": "Bước 4: Siêu Âm Nâng Cơ",
+          "title": "Siêu Âm Nâng Cơ",
           "description": "Sử dụng công nghệ siêu âm tăng cường hiệu quả",
           "image": "https://example.com/ultrasound-lifting.jpg",
           "duration": "20 phút"
         },
         {
-          "title": "Bước 5: Đắp Mặt Nạ Collagen",
+          "title": "Đắp Mặt Nạ Collagen",
           "description": "Mặt nạ đặc biệt giúp săn chắc và nâng cơ",
           "image": "https://example.com/collagen-mask-lift.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 6: Serum Và Kem Nâng Cơ",
+          "title": "Serum Và Kem Nâng Cơ",
           "description": "Kết thúc với các sản phẩm dưỡng chuyên sâu",
           "image": "https://example.com/lifting-finish-care.jpg",
           "duration": "5 phút"
@@ -569,37 +568,37 @@
       "duration": "60 phút",
       "steps": [
         {
-          "title": "Bước 1: Làm Sạch Nhẹ Nhàng",
+          "title": "Làm Sạch Nhẹ Nhàng",
           "description": "Làm sạch da với nước muối sinh lý và sản phẩm dịu nhẹ",
           "image": "https://example.com/gentle-cleanse-laser.jpg",
           "duration": "10 phút"
         },
         {
-          "title": "Bước 2: Xịt Khoáng Làm Dịu",
+          "title": "Xịt Khoáng Làm Dịu",
           "description": "Phun sương khoáng làm dịu và giảm nhiệt độ da",
           "image": "https://example.com/mineral-spray.jpg",
           "duration": "5 phút"
         },
         {
-          "title": "Bước 3: Đắp Mặt Nạ Lạnh",
+          "title": "Đắp Mặt Nạ Lạnh",
           "description": "Sử dụng mặt nạ lạnh đặc biệt giảm kích ứng",
           "image": "https://example.com/cooling-mask-laser.jpg",
           "duration": "20 phút"
         },
         {
-          "title": "Bước 4: Serum Phục Hồi",
+          "title": "Serum Phục Hồi",
           "description": "Thoa serum giàu EGF và yếu tố tăng trưởng",
           "image": "https://example.com/healing-serum.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 5: Massage Lympha Nhẹ",
+          "title": "Massage Lympha Nhẹ",
           "description": "Massage nhẹ nhàng giúp giảm sưng tấy",
           "image": "https://example.com/gentle-lymph.jpg",
           "duration": "15 phút"
         },
         {
-          "title": "Bước 6: Kem Chống Nắng Vật Lý",
+          "title": "Kem Chống Nắng Vật Lý",
           "description": "Bảo vệ da với kem chống nắng khoáng chất",
           "image": "https://example.com/physical-sunscreen.jpg",
           "duration": "10 phút"
@@ -614,4 +613,4 @@
       ]
     }
   }
-} 
+}
