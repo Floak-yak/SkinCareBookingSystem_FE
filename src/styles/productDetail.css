@@ -31,23 +31,46 @@
 .product-detail-info h1 {
   font-size: 2em;
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .product-price {
   font-size: 1.5em;
   font-weight: bold;
   color: #f9b37a;
+  margin-bottom: 10px;
+}
+
+/* Đánh giá */
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 20px;
+}
+
+.rating-text {
+  font-size: 0.9em;
+  color: #555;
+}
+
+/* Nút thêm giỏ hàng */
+.add-cart-btn {
+  margin-bottom: 20px;
+}
+
+/* Tabs */
+.product-tabs {
+  margin-top: 20px;
 }
 
 .product-description {
   font-size: 1em;
   line-height: 1.8;
   color: #555;
-  margin-bottom: 30px;
 }
 
+/* Sản phẩm liên quan */
 .related-products {
   margin-top: 40px;
 }
@@ -72,9 +95,14 @@
 .related-product-card {
   flex: 0 0 auto;
   width: 250px;
+  cursor: pointer;
 }
 
-/* Responsive styles */
+.related-product-card .ant-card {
+  border-radius: 8px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .product-detail-main {
     flex-direction: column;

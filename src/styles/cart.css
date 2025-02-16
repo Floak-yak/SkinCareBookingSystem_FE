@@ -7,7 +7,7 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   font-family: "Roboto", sans-serif;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .cart-container h2 {
@@ -26,6 +26,7 @@
   padding: 15px 10px;
   display: flex;
   align-items: center;
+  cursor: pointer; /* Giúp item trông clickable khi nhấn để xem chi tiết */
 }
 
 .ant-list-item:last-child {
@@ -54,22 +55,39 @@
   margin-top: 4px;
 }
 
-/* Style cho các thao tác (sửa số lượng, xóa) */
+/* Style cho các thao tác (giảm, tăng, xóa) */
 .cart-item-actions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* Tuỳ chỉnh InputNumber */
-.ant-input-number {
-  width: 70px;
+.ant-list-item .ant-list-item-action > li > span {
+  display: inline-block;
+  width: 30px;
+  text-align: center;
+  font-weight: bold;
 }
 
 /* Nút Xóa */
 .ant-btn-danger {
   font-size: 0.9em;
   padding: 4px 10px;
+}
+
+/* Phần footer hiển thị tổng tiền và nút thanh toán */
+.cart-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+}
+
+.cart-total {
+  font-size: 1.1em;
+  font-weight: bold;
 }
 
 /* Responsive adjustments */
@@ -88,5 +106,10 @@
   .cart-item-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+  .cart-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 }

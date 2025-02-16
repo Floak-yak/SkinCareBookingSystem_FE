@@ -14,7 +14,6 @@ import ServiceDetail from "../pages/ServiceDetail";
 import ProductPage from "../pages/ProductPage";
 import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
-import ResetPassword from "../pages/ResetPassword";
 import ForgotPassword from "../pages/ForgotPassword";
 
 const AppRoutes = () => {
@@ -34,7 +33,6 @@ const AppRoutes = () => {
         element={user ? <Navigate to="/" /> : <LoginPage />}
       />
       <Route path="/forgot-password" element={<ForgotPassword />} /> 
-      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/blogs" element={<BlogPage />} />
       <Route path="/blogs/:id" element={<BlogDetail />} />

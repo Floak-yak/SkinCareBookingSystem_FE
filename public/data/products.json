@@ -78,5 +78,37 @@
     "category": "Chăm sóc da",
     "description": "Serum dưỡng ẩm ban ngày giúp cân bằng độ ẩm cho da, tạo lớp bảo vệ và giữ cho làn da luôn mềm mịn suốt cả ngày.",
     "image": "/images/a.png"
+  },
+  {
+    "id": 11,
+    "name": "Phấn Nước Cushion",
+    "price": 280000,
+    "category": "Trang điểm",
+    "description": "Phấn nước giúp che phủ khuyết điểm nhẹ, giữ ẩm và mang lại lớp nền căng mịn.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 12,
+    "name": "Son Môi Lì",
+    "price": 180000,
+    "category": "Trang điểm",
+    "description": "Son lì với nhiều tông màu trẻ trung, lên màu chuẩn và bền màu suốt nhiều giờ.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 13,
+    "name": "Bông Rửa Mặt Silicon",
+    "price": 100000,
+    "category": "Dụng cụ skincare",
+    "description": "Bông rửa mặt silicon mềm, làm sạch sâu lỗ chân lông và tẩy tế bào chết nhẹ nhàng.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 14,
+    "name": "Cọ Trang Điểm Đa Năng",
+    "price": 150000,
+    "category": "Dụng cụ skincare",
+    "description": "Bộ cọ trang điểm đa năng với lông cọ mịn, không gây kích ứng, dễ tán phấn và kem nền.",
+    "image": "/images/a.png"
   }
 ]

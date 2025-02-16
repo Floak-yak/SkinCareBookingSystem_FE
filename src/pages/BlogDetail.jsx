@@ -16,15 +16,33 @@ const BlogDetail = () => {
 
   return (
     <div className="blog-detail-container">
+      {/* Tiêu đề */}
       <h1 className="blog-detail-title">{blog.title}</h1>
+
+      {/* Tác giả, ngày đăng */}
       <div className="blog-detail-meta">
         <span className="blog-detail-author">Đăng bởi {blog.author}</span>
-        <span className="blog-detail-date">{new Date(blog.date).toLocaleDateString()}</span>
+        <span className="blog-detail-date">
+          {new Date(blog.date).toLocaleDateString()}
+        </span>
       </div>
-      <img src={blog.image} alt={blog.title} className="blog-detail-image" />
-      <div className="blog-detail-content">
-        {blog.content}
-      </div>
+
+      {/* Ảnh minh hoạ (thumbnail) */}
+      {blog.image && (
+        <img
+          src={blog.image}
+          alt={blog.title}
+          className="blog-detail-image"
+        />
+      )}
+
+      {/* Nội dung bài viết: parse HTML thay vì text */}
+      <div
+        className="blog-detail-content"
+        dangerouslySetInnerHTML={{ __html: blog.content }}
+      />
+
+      {/* Nút quay lại */}
       <div className="blog-detail-back">
         <Link to="/blogs">
           <Button type="primary">Quay lại danh sách</Button>
