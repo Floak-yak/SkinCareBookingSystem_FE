@@ -37,10 +37,10 @@
     text-align: left; /* Align to the left */
     border-bottom: 2px solid #e67e22; /* Add bottom border */
     padding-bottom: 10px;
-    background: #f9b37a; /* Background color */
+    /* background: #f9b37a; Background color */
     padding: 10px 20px; /* Padding for better spacing */
     border-radius: 5px; /* Rounded corners */
-    color: white; /* Text color */
+    color: rgb(17, 17, 17); /* Text color */
 }
 
 .category-title::before {
