@@ -126,6 +126,8 @@
   font-size: 0.9rem;
   color: #666;
   text-align: center;
+  display: flex;
+  flex-direction: column; /* Display in two lines */
 }
 
 .service-benefits {
