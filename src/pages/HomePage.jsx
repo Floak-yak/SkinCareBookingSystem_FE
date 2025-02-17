@@ -7,7 +7,6 @@ import "../styles/HomePage.css";
 import { FaQuoteLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import AboutUs from "../components/AboutUs";
 import SpaGallery from "../components/SpaGallery";
-import BookingPage from "../components/BookingPage";
 
 const SpaDATA = [
   {
@@ -77,8 +76,6 @@ const HomePage = () => {
   return (
     <div>
       <Hero></Hero>
-
-      <BookingPage></BookingPage>
 
       <AboutUs></AboutUs>
 
