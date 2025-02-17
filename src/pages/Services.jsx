@@ -145,7 +145,7 @@ function Services() {
                 <p className="service-description">{service.description}</p>
                 <p className="service-price">Giá: {service.price}</p>
                 <p className="service-duration">Thời gian: {service.duration}</p>
-                <button className="book-service-btn" onClick={(e) => { e.stopPropagation(); navigate(`/booking/${service.id}`); }}>Đặt lịch</button>
+                <button className="book-service-btn" onClick={(e) => { e.stopPropagation(); navigate(`/booking`); }}>Đặt lịch</button>
                 <Link to={`/service/${service.id}`} className="view-details-btn" onClick={(e) => e.stopPropagation()}>Xem chi tiết</Link>
               </div>
             ))}
