@@ -213,6 +213,10 @@ const BookingPage = () => {
             style={{ width: "100%", padding: "10px", border: "1px solid #ddd", borderRadius: "5px", fontSize: "16px" }}
           />
         </div>
+        {selectedService && selectedDate && selectedTime && selectedStaff && name && phone && !bookingConfirmed && (
+          <p style={{ textAlign: "center", color: "#28a745", cursor: "pointer" }} onClick={handleBooking}>Xác nhận đặt lịch</p>
+        )
+        }
         <div style={{ textAlign: "center" }}>
           <button
             onClick={handleBooking}

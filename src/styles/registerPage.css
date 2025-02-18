@@ -29,6 +29,7 @@
   font-weight: bold;
   border-bottom: 2px solid #f9b37a;
   padding-bottom: 10px;
+  font-family: serif;
 }
 
 /* Form đăng ký */
@@ -47,6 +48,7 @@
   height: 40px;
   font-size: 1em;
   transition: background-color 0.3s ease;
+  font-family: serif;
 }
 
 .register-button:hover,
@@ -59,6 +61,7 @@
 .login-link {
   margin-top: 15px;
   color: #555;
+  font-family: serif;
 }
 
 .login-link a {
@@ -76,6 +79,7 @@
   .register-box {
     padding: 20px;
   }
+
   .register-box h2 {
     font-size: 1.5em;
   }

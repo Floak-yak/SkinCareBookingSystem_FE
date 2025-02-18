@@ -57,6 +57,7 @@
 /* Nút thêm giỏ hàng */
 .add-cart-btn {
   margin-bottom: 20px;
+  font-family: serif;
 }
 
 /* Tabs */
@@ -83,6 +84,7 @@
   border-bottom: 2px solid #f9b37a;
   padding-bottom: 10px;
   text-align: center;
+  font-family: serif;
 }
 
 .related-products-container {

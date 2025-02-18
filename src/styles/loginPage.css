@@ -24,6 +24,7 @@
   font-weight: bold;
   border-bottom: 2px solid #f9b37a;
   padding-bottom: 10px;
+  font-family: serif;
 }
 
 /* Form đăng nhập (Ant Design) */
@@ -37,22 +38,26 @@
 .login-button {
   width: 100%;
   border-radius: 8px;
-  background: #f9b37a; /* Màu chủ đạo */
+  background: #f9b37a;
+  /* Màu chủ đạo */
   border: none;
   height: 40px;
   font-size: 1em;
   transition: background-color 0.3s ease;
+  font-family: serif;
 }
 
 .login-button:hover,
 .login-button:focus {
-  background: #e08865; /* Màu đậm hơn khi hover/focus */
+  background: #e08865;
+  /* Màu đậm hơn khi hover/focus */
   border: none;
 }
 
 .forgot-password-link {
   margin-top: 10px;
   text-align: center;
+  font-family: serif;
 }
 
 .forgot-password-link a {
@@ -69,6 +74,7 @@
 .register-link {
   margin-top: 15px;
   color: #555;
+  font-family: serif;
 }
 
 .register-link a {
@@ -86,6 +92,7 @@
   .login-box {
     padding: 20px;
   }
+
   .login-box h2 {
     font-size: 1.5em;
   }
