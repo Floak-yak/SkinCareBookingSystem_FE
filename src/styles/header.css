@@ -5,55 +5,60 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
-  background: linear-gradient(to right, #a6c1ee, #fbc2eb);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 12px 25px;
+  background: #f9b37a;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  font-family: serif;
 }
 
 .header .logo {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
   text-decoration: none;
   color: white;
+  transition: color 0.3s ease;
 }
 
 .header .logo:hover {
-  color: #e879f9;
+  color: #6c5b7b;
 }
 
 .nav {
   display: flex;
-  gap: 20px;
+  gap: 30px;
 }
 
 .nav a {
   color: white;
   text-decoration: none;
-  font-size: 16px;
-  transition: color 0.3s;
+  font-size: 18px;
+  font-weight: 500;
+  transition: color 0.3s ease-in-out;
 }
 
 .nav a:hover {
-  color: #e879f9;
+  color: #6c5b7b;
+  font-weight: bold;
 }
 
-.auth {
+.cart-auth {
   display: flex;
-  gap: 10px;
+  gap: 15px;
 }
 
 .auth button {
   color: white;
   border: none;
   background: none;
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 500;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: color 0.3s ease-in-out;
 }
 
 .auth button:hover {
-  color: #e879f9;
+  color: #6c5b7b;
 }
 
 .menu-toggle {
@@ -61,10 +66,16 @@
   background: none;
   border: none;
   color: white;
-  font-size: 24px;
+  font-size: 28px;
   cursor: pointer;
+  transition: color 0.3s ease;
 }
 
+.menu-toggle:hover {
+  color: #6c5b7b;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .menu-toggle {
     display: block;
@@ -77,7 +88,7 @@
     top: 60px;
     left: 0;
     width: 100%;
-    background: rgba(166, 193, 238, 0.9);
+    background: rgba(248, 165, 194, 0.95);
     text-align: center;
     padding: 15px 0;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -88,16 +99,9 @@
   }
 
   .nav a {
-    padding: 10px;
+    padding: 12px;
     width: 100%;
-  }
-
-  .staff-approve-btn a {
-    color: #52c41a !important;
-    font-weight: bold;
-  }
-
-  .staff-approve-btn a:hover {
-    color: #389e0d !important;
+    display: block;
+    font-size: 20px;
   }
 }

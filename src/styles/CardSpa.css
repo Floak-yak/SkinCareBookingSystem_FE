@@ -1,0 +1,41 @@
+.card-spa {
+    background-color: #fff8f0;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    padding: 15px;
+    margin: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 300px;
+    flex: 0 0 auto;
+    /* Ngăn card co lại */
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.card-spa:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-spa img {
+    height: 180px;
+    width: 270px;
+    object-fit: cover;
+    transition: filter 0.3s ease;
+}
+
+.card-spa img:hover {
+    filter: brightness(0.9);
+}
+
+.card-spa-body {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.card-spa-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #333;
+}

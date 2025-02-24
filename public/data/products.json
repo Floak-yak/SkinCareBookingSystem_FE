@@ -1,0 +1,114 @@
+[
+  {
+    "id": 1,
+    "name": "Kem Dưỡng Ẩm Sữa Chua",
+    "price": 250000,
+    "category": "Chăm sóc da",
+    "description": "Kem dưỡng ẩm chứa thành phần sữa chua giúp nuôi dưỡng làn da mềm mịn và chống lão hóa.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 2,
+    "name": "Serum Vitamin C",
+    "price": 350000,
+    "category": "Chăm sóc da",
+    "description": "Serum Vitamin C giúp làm sáng da, giảm thâm nám và tái tạo làn da trẻ trung.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 3,
+    "name": "Mặt Nạ Thải Độc",
+    "price": 150000,
+    "category": "Chăm sóc da",
+    "description": "Mặt nạ thải độc giúp se khít lỗ chân lông và mang lại làn da sáng mịn tự nhiên.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 4,
+    "name": "Kem Chống Nắng SPF50",
+    "price": 300000,
+    "category": "Chăm sóc da",
+    "description": "Kem chống nắng SPF50 bảo vệ da khỏi tác hại của tia UV, phù hợp cho mọi loại da.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 5,
+    "name": "Tinh Chất Dưỡng Da Trắng",
+    "price": 450000,
+    "category": "Chăm sóc da",
+    "description": "Tinh chất dưỡng da giúp làm sáng da, cải thiện tình trạng da xỉn màu và tạo độ đàn hồi.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 6,
+    "name": "Sữa Rửa Mặt Dành Cho Da Dầu",
+    "price": 200000,
+    "category": "Chăm sóc da",
+    "description": "Sữa rửa mặt giúp làm sạch bã nhờn, kiểm soát dầu thừa và se khít lỗ chân lông.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 7,
+    "name": "Kem Dưỡng Da Ban Đêm",
+    "price": 400000,
+    "category": "Chăm sóc da",
+    "description": "Kem dưỡng da ban đêm giúp tái tạo làn da khi ngủ, mang lại làn da mềm mại và sáng mịn vào sáng hôm sau.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 8,
+    "name": "Tinh Chất Dưỡng Da Anti-Aging",
+    "price": 550000,
+    "category": "Chăm sóc da",
+    "description": "Tinh chất dưỡng da chứa các thành phần chống lão hóa, giúp giảm nếp nhăn và cải thiện độ đàn hồi của da.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 9,
+    "name": "Mặt Nạ Đất Sét",
+    "price": 180000,
+    "category": "Chăm sóc da",
+    "description": "Mặt nạ đất sét giúp thải độc, thu nhỏ lỗ chân lông và làm sáng da hiệu quả.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 10,
+    "name": "Serum Dưỡng Ẩm Ban Ngày",
+    "price": 320000,
+    "category": "Chăm sóc da",
+    "description": "Serum dưỡng ẩm ban ngày giúp cân bằng độ ẩm cho da, tạo lớp bảo vệ và giữ cho làn da luôn mềm mịn suốt cả ngày.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 11,
+    "name": "Phấn Nước Cushion",
+    "price": 280000,
+    "category": "Trang điểm",
+    "description": "Phấn nước giúp che phủ khuyết điểm nhẹ, giữ ẩm và mang lại lớp nền căng mịn.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 12,
+    "name": "Son Môi Lì",
+    "price": 180000,
+    "category": "Trang điểm",
+    "description": "Son lì với nhiều tông màu trẻ trung, lên màu chuẩn và bền màu suốt nhiều giờ.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 13,
+    "name": "Bông Rửa Mặt Silicon",
+    "price": 100000,
+    "category": "Dụng cụ skincare",
+    "description": "Bông rửa mặt silicon mềm, làm sạch sâu lỗ chân lông và tẩy tế bào chết nhẹ nhàng.",
+    "image": "/images/a.png"
+  },
+  {
+    "id": 14,
+    "name": "Cọ Trang Điểm Đa Năng",
+    "price": 150000,
+    "category": "Dụng cụ skincare",
+    "description": "Bộ cọ trang điểm đa năng với lông cọ mịn, không gây kích ứng, dễ tán phấn và kem nền.",
+    "image": "/images/a.png"
+  }
+]

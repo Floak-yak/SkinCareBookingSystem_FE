@@ -1,71 +1,95 @@
-import { useState } from "react";
-import { Card, Row, Col, Button, List } from "antd";
-import { Link } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
+import { Input, Select, Button } from "antd";
+import useAuth from "../hooks/useAuth";
 import "../styles/blogPage.css";
 
+const { Option } = Select;
+
 const BlogPage = () => {
+  // Giả sử file blogs.json được đặt tại /data/blogs.json
+  const { data: blogs, loading, error } = useFetch("/data/blogs.json", "blogs");
   const { user: currentUser } = useAuth();
-  const { data: blogs, loading } = useFetch("/data/blogs.json", "blogs");
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
 
-  const approvedBlogs = blogs.filter((blog) => blog.isApproved);
-  const categories = [...new Set(approvedBlogs.map((b) => b.category))];
+  // Dùng useNavigate để chuyển trang
+  const navigate = useNavigate();
 
-  const filteredBlogs = selectedCategory ? approvedBlogs.filter((blog) => blog.category === selectedCategory) : approvedBlogs;
+  // Lọc bài viết (đã duyệt + tiêu đề + danh mục)
+  const filteredBlogs = blogs?.filter((blog) => {
+    const isApproved = blog.isApproved;
+    const matchesTitle = blog.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory
+      ? blog.category === filterCategory
+      : true;
+    return isApproved && matchesTitle && matchesCategory;
+  });
+
+  if (loading) return <p>Đang tải bài viết...</p>;
+  if (error) return <p>Có lỗi xảy ra khi tải bài viết.</p>;
+
+  // Khi click card => chuyển sang chi tiết
+  const handleCardClick = (id) => {
+    navigate(`/blogs/${id}`);
+  };
 
   return (
-    <div className="blog-container">
-      <h1>Blog Skincare</h1>
+    <div className="blog-page">
+      <h2>Danh sách bài viết</h2>
 
-      {/* 🔹 Nút đăng bài viết */}
-      {currentUser && (
-        <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <Link to="/blogs/create">
-            <Button type="primary" className="create-blog-btn">Đăng Bài Viết</Button>
-          </Link>
-        </div>
-      )}
-
-      <Row gutter={[16, 16]}>
-        <Col xs={24} md={6}>
-          <div className="category-sidebar">
-            <h3>Danh mục</h3>
-            <List
-              bordered
-              dataSource={["Tất cả", ...categories]}
-              renderItem={(item) => (
-                <List.Item
-                  key={item}
-                  className={selectedCategory === item ? "selected" : ""}
-                  onClick={() => setSelectedCategory(item === "Tất cả" ? null : item)}
-                >
-                  {item}
-                </List.Item>
-              )}
-            />
-          </div>
-        </Col>
-        <Col xs={24} md={18}>
-          {loading ? (
-            <p>Đang tải...</p>
-          ) : (
-            <Row gutter={[16, 16]}>
-              {filteredBlogs.map((blog) => (
-                <Col key={blog.id} xs={24} sm={12} md={8}>
-                  <Card className="blog-card" hoverable>
-                    <img src={blog.image || "/public/images/a.png"} alt={blog.title} className="blog-image" />
-                    <h3>{blog.title}</h3>
-                    <p>{blog.category}</p>
-                    <Link to={`/blogs/${blog.id}`} className="btn-view">Xem chi tiết</Link>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+      <div className="blog-filters">
+        <div className="filters-group">
+          <Input
+            placeholder="Tìm kiếm bài viết"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="blog-search-input"
+          />
+          <Select
+            placeholder="Chọn danh mục"
+            onChange={(value) => setFilterCategory(value)}
+            className="blog-category-select"
+            defaultValue={""}
+          >
+            <Option value="">Tất cả</Option>
+            <Option value="Chăm sóc da">Chăm sóc da</Option>
+            <Option value="Hướng dẫn skincare">Hướng dẫn skincare</Option>
+            <Option value="Sản phẩm">Sản phẩm</Option>
+          </Select>
+          {currentUser && (
+            <div className="create-blog-btn-group">
+              <Button type="primary" className="create-blog-btn">
+                <a href="/blogs/create" style={{ color: "#fff" }}>
+                  Đăng Bài Viết
+                </a>
+              </Button>
+            </div>
           )}
-        </Col>
-      </Row>
+        </div>
+      </div>
+
+      <div className="blog-grid">
+        {filteredBlogs.map((blog) => (
+          <div
+            key={blog.id}
+            className="blog-card"
+            onClick={() => handleCardClick(blog.id)}
+          >
+            <img alt={blog.title} src={blog.image} className="blog-card-image" />
+            <div className="blog-card-content">
+              <h3>{blog.title}</h3>
+              <p>
+                {`Đăng bởi ${blog.author} - ${new Date(blog.date).toLocaleDateString()}`}
+              </p>
+              {/* Bỏ Link "Xem chi tiết" để toàn card có thể click */}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

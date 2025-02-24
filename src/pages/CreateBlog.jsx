@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Input, Button, Upload, Select, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
@@ -19,6 +19,9 @@ const CreateBlog = () => {
   const [content, setContent] = useState("");
   const [imageBase64, setImageBase64] = useState(null);
 
+  // Quill ref để truy cập editor
+  const quillRef = useRef(null);
+
   useEffect(() => {
     if (!user) {
       message.error("Bạn cần đăng nhập để viết bài!");
@@ -26,39 +29,83 @@ const CreateBlog = () => {
     }
   }, [user, navigate]);
 
+  // Hàm upload ảnh đại diện (thumbnail)
   const handleImageUpload = (file) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => setImageBase64(reader.result);
-    return false;
+    return false; // Ngăn antd upload mặc định
   };
 
+  // ====== CUSTOM IMAGE HANDLER CHO REACT QUILL ======
+  const handleQuillImage = () => {
+    // Tạo input file
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
+    input.setAttribute("accept", "image/*");
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (file) {
+        // Chuyển file -> base64
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          const base64 = reader.result;
+          // Lấy editor quill
+          const quillEditor = quillRef.current.getEditor();
+          // Vị trí con trỏ
+          const range = quillEditor.getSelection();
+          // Chèn ảnh (base64) vào nội dung
+          quillEditor.insertEmbed(range.index, "image", base64, "user");
+        };
+      }
+    };
+  };
+
+  // Cấu hình toolbar cho React Quill, thêm handler image
+  const quillModules = useMemo(() => ({
+    toolbar: {
+      container: [
+        ["bold", "italic", "underline", "strike"],
+        [{ header: 1 }, { header: 2 }],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link", "image"], // Nút chèn ảnh
+        ["clean"]
+      ],
+      handlers: {
+        image: handleQuillImage
+      }
+    }
+  }), []);
+
+  // Khi submit form => Lưu bài viết
   const handleSubmit = (values) => {
     if (!user) {
       message.error("Bạn cần đăng nhập để đăng bài!");
       return;
     }
-
     if (!content.trim()) {
       message.error("Nội dung bài viết không được để trống!");
       return;
     }
-
     setLoading(true);
+
     try {
       const newBlog = {
         id: Date.now(),
         userId: user.id,
         author: user.FullName,
         datePost: new Date().toISOString(),
-        image: imageBase64 || "/default.jpg",
+        image: imageBase64 || "/images/a.png", // Ảnh đại diện
         category: values.category,
         title: values.title,
-        content,
-        isApproved: user.Role === "Staff",
+        content, // Nội dung gồm cả ảnh nhúng
+        isApproved: user.Role === "Staff"
       };
 
-      // Lưu vào localStorage và cập nhật state mà không ghi đè mock data
+      // Lưu vào mock data (updateData là hàm custom từ useFetch)
       updateData(newBlog);
 
       message.success(
@@ -66,7 +113,6 @@ const CreateBlog = () => {
           ? "Bài viết đã được đăng thành công!"
           : "Bài viết đã lưu, chờ duyệt!"
       );
-
       navigate("/blogs");
     } catch (error) {
       message.error("Lỗi khi lưu bài viết!");
@@ -87,10 +133,13 @@ const CreateBlog = () => {
           <Input placeholder="Nhập tiêu đề bài viết..." />
         </Form.Item>
 
+        {/* Nội dung bài viết => ReactQuill với custom image handler */}
         <Form.Item label="Nội dung">
           <ReactQuill
+            ref={quillRef}
             value={content}
             onChange={setContent}
+            modules={quillModules}
             className="rich-text-editor"
           />
         </Form.Item>
@@ -102,11 +151,12 @@ const CreateBlog = () => {
         >
           <Select placeholder="Chọn danh mục">
             <Option value="Chăm sóc da">Chăm sóc da</Option>
-            <Option value="Sản phẩm skincare">Sản phẩm skincare</Option>
+            <Option value="Sản phẩm">Sản phẩm skincare</Option>
             <Option value="Hướng dẫn skincare">Hướng dẫn skincare</Option>
           </Select>
         </Form.Item>
 
+        {/* Ảnh đại diện (thumbnail) */}
         <Form.Item label="Ảnh đại diện">
           <Upload
             showUploadList={false}

@@ -1,0 +1,270 @@
+.service-detail {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.service-overview {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.service-overview h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.overview-description {
+  color: #666;
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.steps-carousel {
+  margin: 40px 0;
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.step-slide {
+  padding: 20px;
+}
+
+.step-content {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.step-image {
+  flex: 1;
+  max-width: 500px;
+}
+
+.step-image img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.step-info {
+  flex: 1;
+  padding: 20px;
+}
+
+.step-info h2 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.step-description {
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.step-duration {
+  color: #e74c3c;
+  font-weight: 500;
+}
+
+.steps-progress {
+  display: flex;
+  justify-content: space-between;
+  margin: 40px 0;
+  position: relative;
+}
+
+.steps-progress::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ddd;
+  z-index: -1;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #666;
+}
+
+.progress-step.active .step-number {
+  background: #f4a261;
+  border-color: #f4a261;
+  color: white;
+}
+
+.progress-step.completed .step-number {
+  background: #27ae60;
+  border-color: #27ae60;
+  color: white;
+}
+
+.step-label {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  display: flex;
+  flex-direction: column; /* Display in two lines */
+}
+
+.service-benefits {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  margin: 40px 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.service-benefits h2 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.service-benefits ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.service-benefits li {
+  padding: 10px 0;
+  padding-left: 30px;
+  position: relative;
+  color: #666;
+}
+
+.service-benefits li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.booking-section {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.booking-button {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(193, 153, 10, 0.5);
+  background: #f4a261;
+  color: white;
+  padding: 15px 40px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.booking-button::before {
+  content: '';
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: 200%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s, transform 0.3s;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.booking-button:hover::before {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.5);
+}
+
+.booking-button:hover {
+  background: #f4a200;
+  transform: translateY(-2px);
+}
+
+.price-info {
+  margin-top: 15px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .step-content {
+    flex-direction: column;
+  }
+
+  .steps-progress {
+    display: none;
+  }
+
+  .step-image img {
+    height: 200px;
+  }
+}
+
+/* Tùy chỉnh nút chuyển ảnh */
+.steps-carousel .ant-carousel .slick-prev,
+.steps-carousel .ant-carousel .slick-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  z-index: 2;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.steps-carousel .ant-carousel .slick-prev {
+  left: 20px;
+}
+
+.steps-carousel .ant-carousel .slick-next {
+  right: 20px;
+}
+
+/* Tùy chỉnh màu mũi tên */
+.steps-carousel .ant-carousel .slick-prev::before,
+.steps-carousel .ant-carousel .slick-next::before {
+  color: white;
+  font-size: 20px;
+}
+
+.ant-carousel .slick-next::after,
+.ant-carousel .slick-prev::after {
+  border: none;
+}
+
+/* Hiệu ứng hover */
+.steps-carousel .ant-carousel .slick-prev:hover,
+.steps-carousel .ant-carousel .slick-next:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
