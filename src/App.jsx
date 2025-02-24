@@ -1,11 +1,12 @@
 import React from "react";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AppRoutes from "./routes";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
-import "./styles/index.css"; 
+import "./styles/index.css";
+import AboutUs from './pages/AboutUs';
 
 const App = () => {
   return (
@@ -14,7 +15,10 @@ const App = () => {
         <Router>
           <Header />
           <main className="main-content">
-            <AppRoutes />
+            <Routes>
+              <Route path="/" element={<AppRoutes />} />
+              <Route path="/about" element={<AboutUs />} />
+            </Routes>
           </main>
           <Footer />
         </Router>

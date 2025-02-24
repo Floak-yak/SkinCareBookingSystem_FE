@@ -80,6 +80,7 @@ const Header = () => {
         <Link to="/products">Sản phẩm</Link>
         <Link to="/blogs">Blogs</Link>
         <Link to="/contact">Liên hệ</Link>
+        <Link to="/about">Về chúng tôi</Link>
       </nav>
 
       <div className="cart-auth">
