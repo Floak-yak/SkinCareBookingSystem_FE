@@ -247,218 +247,376 @@ const BookingPage = () => {
   };
 
   return (
-    <div style={{ display: "flex", width: "90%", margin: "auto", padding: "20px", borderRadius: "10px", boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", background: "#fff" }}>
+    <div style={{ 
+      maxWidth: "1200px", 
+      margin: "40px auto", 
+      padding: "30px",
+      backgroundColor: "#fff",
+      borderRadius: "15px",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+    }}>
       <ToastContainer position="top-right" autoClose={3000} />
       
       <div style={{ flex: 2, marginRight: "20px" }}>
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Đặt lịch dịch vụ</h2>
+        <h2 style={{ 
+          textAlign: "center", 
+          marginBottom: "30px",
+          color: "#2c3e50",
+          fontSize: "28px",
+          fontWeight: "600"
+        }}>Đặt Lịch Dịch Vụ</h2>
         
         {!bookingConfirmed ? (
           <>
-            {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontWeight: "bold", marginBottom: "10px" }}>Chọn dịch vụ:</label>
-              <select
-                value={selectedService}
-                onChange={(e) => setSelectedService(e.target.value)}
-                style={{ width: "100%", padding: "10px", border: "1px solid #ddd", borderRadius: "5px", fontSize: "16px" }}
-              >
-                <option value="">Chọn dịch vụ</option>
-                {services.map((service, index) => (
-                  <option key={index} value={service.name}>{service.name} ({service.duration})</option>
-                ))}
-              </select>
-            </div>
-            {selectedService && (
-              <div style={{ marginBottom: "20px" }}>
-                <label style={{ display: "block", fontWeight: "bold", marginBottom: "10px" }}>Chọn ngày và giờ:</label>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                  <button
-                    onClick={() => setCurrentWeek(Math.max(0, currentWeek - 1))}
-                    style={{ padding: "10px", border: "none", background: "#28a745", color: "#fff", borderRadius: "5px", cursor: "pointer" }}
-                  >
-                    &lt;
-                  </button>
-                  <div style={{ flex: 1, margin: "0 10px", overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
-                      <thead>
-                        <tr style={{ background: "#f8f9fa" }}>
-                          <th style={{ padding: "10px", border: "1px solid #ddd" }}>Giờ</th>
-                          {weeks[currentWeek].map((d, index) => (
-                            <th key={index} style={{ padding: "10px", border: "1px solid #ddd" }}>
-                              {new Date(d).toLocaleDateString("vi-VN", { weekday: "short", day: "numeric", month: "numeric" })}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {services.find(service => service.name === selectedService).times.map((time, rowIndex) => (
-                          <tr key={rowIndex}>
-                            <td style={{ padding: "10px", border: "1px solid #ddd", fontWeight: "bold" }}>{time}</td>
-                            {weeks[currentWeek].map((d, colIndex) => {
-                              const isBooked = isTimeSlotBooked(d, time, selectedStaff);
-                              return (
-                                <td key={colIndex} style={{ padding: "10px", border: "1px solid #ddd" }}>
-                                  <button
-                                    onClick={() => handleSelectDateTime(d, time)}
-                                    disabled={isBooked}
-                                    style={{
-                                      padding: "10px",
-                                      border: "1px solid #28a745",
-                                      borderRadius: "5px",
-                                      background: isBooked ? "#ddd" : selectedDate === d && selectedTime === time ? "#28a745" : "#fff",
-                                      color: isBooked ? "#888" : selectedDate === d && selectedTime === time ? "#fff" : "#28a745",
-                                      cursor: isBooked ? "not-allowed" : "pointer",
-                                      width: "100%"
-                                    }}
-                                  >
-                                    {isBooked ? "Đã đặt" : selectedDate === d && selectedTime === time ? "✔" : "Chọn"}
-                                  </button>
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <button
-                    onClick={() => setCurrentWeek(Math.min(weeks.length - 1, currentWeek + 1))}
-                    style={{ padding: "10px", border: "none", background: "#28a745", color: "#fff", borderRadius: "5px", cursor: "pointer" }}
-                  >
-                    &gt;
-                  </button>
-                </div>
-              </div>
-            )}
-            {selectedTime && (
-              <div style={{ marginBottom: "20px" }}>
-                <label style={{ display: "block", fontWeight: "bold", marginBottom: "10px" }}>Chọn nhân viên:</label>
+            {/* Form đặt lịch */}
+            <div style={{ marginBottom: "30px" }}>
+              <div style={{ marginBottom: "25px" }}>
+                <label style={{ 
+                  display: "block", 
+                  fontWeight: "500", 
+                  marginBottom: "10px",
+                  color: "#34495e"
+                }}>Chọn dịch vụ:</label>
                 <select
-                  value={selectedStaff}
-                  onChange={(e) => setSelectedStaff(e.target.value)}
-                  style={{ width: "100%", padding: "10px", border: "1px solid #ddd", borderRadius: "5px", fontSize: "16px" }}
+                  value={selectedService}
+                  onChange={(e) => setSelectedService(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    backgroundColor: "#f8f9fa",
+                    transition: "border-color 0.3s ease"
+                  }}
                 >
-                  <option value="">Chọn nhân viên</option>
-                  {staffList.map((staff, index) => (
-                    <option key={index} value={staff}>{staff}</option>
+                  <option value="">Chọn dịch vụ</option>
+                  {services.map((service, index) => (
+                    <option key={index} value={service.name}>
+                      {service.name} ({service.duration})
+                    </option>
                   ))}
                 </select>
               </div>
-            )}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontWeight: "bold", marginBottom: "10px" }}>Tên khách hàng:</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={{ width: "100%", padding: "10px", border: "1px solid #ddd", borderRadius: "5px", fontSize: "16px" }}
-              />
-            </div>
-            <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontWeight: "bold", marginBottom: "10px" }}>Số điện thoại:</label>
-              <input
-                type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                style={{ width: "100%", padding: "10px", border: "1px solid #ddd", borderRadius: "5px", fontSize: "16px" }}
-              />
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <button
-                onClick={handleBooking}
-                disabled={isLoading}
-                style={{
-                  padding: "10px 20px",
-                  border: "none",
-                  borderRadius: "5px",
-                  cursor: isLoading ? "not-allowed" : "pointer",
-                  background: "#28a745",
-                  color: "white",
-                  marginRight: "10px",
-                  fontSize: "16px",
-                  opacity: isLoading ? 0.7 : 1
-                }}
-              >
-                {isLoading ? "Đang xử lý..." : "Xác nhận đặt lịch"}
-              </button>
-            </div>
-            
-            {/* Danh sách lịch đã đặt */}
-            {currentUser && (
-              <div style={{ marginTop: "30px", borderTop: "1px solid #ddd", paddingTop: "20px" }}>
-                <h3 style={{ textAlign: "center", marginBottom: "20px" }}>Lịch đã đặt của bạn</h3>
-                {getCurrentUserBookings().length === 0 ? (
-                  <p style={{ textAlign: "center" }}>Bạn chưa có lịch đặt nào</p>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {getCurrentUserBookings().map((booking) => (
-                      <div
-                        key={booking.id}
-                        style={{
-                          padding: "15px",
-                          border: "1px solid #ddd",
-                          borderRadius: "8px",
-                          backgroundColor: "#f8f9fa"
-                        }}
-                      >
-                        <p><strong>Dịch vụ:</strong> {booking.service}</p>
-                        <p><strong>Ngày:</strong> {new Date(booking.date).toLocaleDateString("vi-VN")}</p>
-                        <p><strong>Giờ:</strong> {booking.time}</p>
-                        <p><strong>Nhân viên:</strong> {booking.staff}</p>
-                        <p><strong>Trạng thái:</strong> {booking.status}</p>
-                        <button
-                          onClick={() => handleDeleteBooking(booking)}
+
+              {/* Calendar section with improved styling */}
+              {selectedService && (
+                <div style={{ 
+                  marginBottom: "25px",
+                  backgroundColor: "#f8f9fa",
+                  padding: "20px",
+                  borderRadius: "10px"
+                }}>
+                  <label style={{ 
+                    display: "block", 
+                    fontWeight: "500", 
+                    marginBottom: "15px",
+                    color: "#34495e"
+                  }}>Chọn ngày và giờ:</label>
+                  <div style={{ 
+                    display: "flex", 
+                    justifyContent: "space-between", 
+                    alignItems: "center"
+                  }}>
+                    <button
+                      onClick={() => setCurrentWeek(Math.max(0, currentWeek - 1))}
+                      style={{
+                        padding: "10px 15px",
+                        border: "none",
+                        background: "#3498db",
+                        color: "#fff",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        transition: "background 0.3s ease"
+                      }}
+                    >
+                      &lt;
+                    </button>
+                    <div style={{ flex: 1, margin: "0 10px", overflowX: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
+                        <thead>
+                          <tr style={{ background: "#f8f9fa" }}>
+                            <th style={{ padding: "10px", border: "1px solid #ddd" }}>Giờ</th>
+                            {weeks[currentWeek].map((d, index) => (
+                              <th key={index} style={{ padding: "10px", border: "1px solid #ddd" }}>
+                                {new Date(d).toLocaleDateString("vi-VN", { weekday: "short", day: "numeric", month: "numeric" })}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {services.find(service => service.name === selectedService).times.map((time, rowIndex) => (
+                            <tr key={rowIndex}>
+                              <td style={{ padding: "10px", border: "1px solid #ddd", fontWeight: "bold" }}>{time}</td>
+                              {weeks[currentWeek].map((d, colIndex) => {
+                                const isBooked = isTimeSlotBooked(d, time, selectedStaff);
+                                return (
+                                  <td key={colIndex} style={{ padding: "10px", border: "1px solid #ddd" }}>
+                                    <button
+                                      onClick={() => handleSelectDateTime(d, time)}
+                                      disabled={isBooked}
+                                      style={{
+                                        padding: "10px",
+                                        border: "1px solid #28a745",
+                                        borderRadius: "5px",
+                                        background: isBooked ? "#ddd" : selectedDate === d && selectedTime === time ? "#28a745" : "#fff",
+                                        color: isBooked ? "#888" : selectedDate === d && selectedTime === time ? "#fff" : "#28a745",
+                                        cursor: isBooked ? "not-allowed" : "pointer",
+                                        width: "100%"
+                                      }}
+                                    >
+                                      {isBooked ? "Đã đặt" : selectedDate === d && selectedTime === time ? "✔" : "Chọn"}
+                                    </button>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <button
+                      onClick={() => setCurrentWeek(Math.min(weeks.length - 1, currentWeek + 1))}
+                      style={{
+                        padding: "10px 15px",
+                        border: "none",
+                        background: "#3498db",
+                        color: "#fff",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        transition: "background 0.3s ease"
+                      }}
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Staff selection with new styling */}
+              {selectedTime && (
+                <div style={{ marginBottom: "25px" }}>
+                  <label style={{ 
+                    display: "block", 
+                    fontWeight: "500", 
+                    marginBottom: "10px",
+                    color: "#34495e"
+                  }}>Chọn nhân viên:</label>
+                  <select
+                    value={selectedStaff}
+                    onChange={(e) => setSelectedStaff(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      borderRadius: "8px",
+                      fontSize: "16px",
+                      backgroundColor: "#f8f9fa",
+                      transition: "border-color 0.3s ease"
+                    }}
+                  >
+                    <option value="">Chọn nhân viên</option>
+                    {staffList.map((staff, index) => (
+                      <option key={index} value={staff}>{staff}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Customer info section */}
+              <div style={{ marginBottom: "25px" }}>
+                <label style={{ 
+                  display: "block", 
+                  fontWeight: "500", 
+                  marginBottom: "10px",
+                  color: "#34495e"
+                }}>Tên khách hàng:</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    backgroundColor: "#f8f9fa"
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "30px" }}>
+                <label style={{ 
+                  display: "block", 
+                  fontWeight: "500", 
+                  marginBottom: "10px",
+                  color: "#34495e"
+                }}>Số điện thoại:</label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    backgroundColor: "#f8f9fa"
+                  }}
+                />
+              </div>
+
+              {/* Submit button */}
+              <div style={{ textAlign: "center" }}>
+                <button
+                  onClick={handleBooking}
+                  disabled={isLoading}
+                  style={{
+                    padding: "14px 30px",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: isLoading ? "not-allowed" : "pointer",
+                    background: "#2ecc71",
+                    color: "white",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    transition: "background 0.3s ease",
+                    opacity: isLoading ? 0.7 : 1
+                  }}
+                >
+                  {isLoading ? "Đang xử lý..." : "Xác nhận đặt lịch"}
+                </button>
+              </div>
+
+              {/* Booked appointments section */}
+              {currentUser && (
+                <div style={{ 
+                  marginTop: "40px", 
+                  borderTop: "2px solid #eee", 
+                  paddingTop: "30px"
+                }}>
+                  <h3 style={{ 
+                    textAlign: "center", 
+                    marginBottom: "25px",
+                    color: "#2c3e50",
+                    fontSize: "22px"
+                  }}>Lịch đã đặt của bạn</h3>
+                  {getCurrentUserBookings().length === 0 ? (
+                    <p style={{ 
+                      textAlign: "center",
+                      color: "#7f8c8d"
+                    }}>Bạn chưa có lịch đặt nào</p>
+                  ) : (
+                    <div style={{ 
+                      display: "flex", 
+                      flexDirection: "column", 
+                      gap: "15px"
+                    }}>
+                      {getCurrentUserBookings().map((booking) => (
+                        <div
+                          key={booking.id}
                           style={{
-                            marginTop: "10px",
-                            padding: "8px 15px",
-                            border: "none",
-                            borderRadius: "5px",
-                            backgroundColor: "#dc3545",
-                            color: "white",
-                            cursor: "pointer"
+                            padding: "20px",
+                            border: "1px solid #e1e8ed",
+                            borderRadius: "10px",
+                            backgroundColor: "#f8f9fa",
+                            transition: "transform 0.2s ease",
+                            ':hover': {
+                              transform: "translateY(-2px)"
+                            }
                           }}
                         >
-                          Hủy lịch
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+                          <p style={{ marginBottom: "8px" }}><strong>Dịch vụ:</strong> {booking.service}</p>
+                          <p style={{ marginBottom: "8px" }}><strong>Ngày:</strong> {new Date(booking.date).toLocaleDateString("vi-VN")}</p>
+                          <p style={{ marginBottom: "8px" }}><strong>Giờ:</strong> {booking.time}</p>
+                          <p style={{ marginBottom: "8px" }}><strong>Nhân viên:</strong> {booking.staff}</p>
+                          <p style={{ marginBottom: "12px" }}><strong>Trạng thái:</strong> {booking.status}</p>
+                          <button
+                            onClick={() => handleDeleteBooking(booking)}
+                            style={{
+                              padding: "10px 20px",
+                              border: "none",
+                              borderRadius: "6px",
+                              backgroundColor: "#e74c3c",
+                              color: "white",
+                              cursor: "pointer",
+                              transition: "background 0.3s ease",
+                              fontSize: "14px",
+                              fontWeight: "500"
+                            }}
+                          >
+                            Hủy lịch
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </>
         ) : (
-          <div style={{ padding: "20px" }}>
-            <h3 style={{ textAlign: "center", marginBottom: "20px" }}>Thông tin đặt lịch</h3>
-            <div style={{ marginBottom: "20px" }}>
-              <p><strong>Dịch vụ:</strong> {selectedService}</p>
-              <p><strong>Ngày:</strong> {new Date(selectedDate).toLocaleDateString("vi-VN")}</p>
-              <p><strong>Giờ:</strong> {selectedTime}</p>
-              <p><strong>Nhân viên:</strong> {selectedStaff}</p>
-              <p><strong>Tên khách hàng:</strong> {name}</p>
-              <p><strong>Số điện thoại:</strong> {phone}</p>
+          // Confirmation and payment section
+          <div style={{ 
+            padding: "30px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "12px"
+          }}>
+            <h3 style={{ 
+              textAlign: "center", 
+              marginBottom: "25px",
+              color: "#2c3e50",
+              fontSize: "24px"
+            }}>Thông tin đặt lịch</h3>
+            <div style={{ marginBottom: "30px" }}>
+              <p style={{ marginBottom: "12px" }}><strong>Dịch vụ:</strong> {selectedService}</p>
+              <p style={{ marginBottom: "12px" }}><strong>Ngày:</strong> {new Date(selectedDate).toLocaleDateString("vi-VN")}</p>
+              <p style={{ marginBottom: "12px" }}><strong>Giờ:</strong> {selectedTime}</p>
+              <p style={{ marginBottom: "12px" }}><strong>Nhân viên:</strong> {selectedStaff}</p>
+              <p style={{ marginBottom: "12px" }}><strong>Tên khách hàng:</strong> {name}</p>
+              <p style={{ marginBottom: "12px" }}><strong>Số điện thoại:</strong> {phone}</p>
             </div>
+            
+            {/* QR Code section */}
             {qrCode && (
               <div style={{ textAlign: "center" }}>
-                <img src={qrCode} alt="QR Code" style={{ width: "200px", height: "200px" }} />
+                <img 
+                  src={qrCode} 
+                  alt="QR Code" 
+                  style={{ 
+                    width: "200px", 
+                    height: "200px",
+                    marginBottom: "20px"
+                  }} 
+                />
                 {isLoading ? (
                   <p>Đang xử lý thanh toán...</p>
                 ) : paymentStatus === "success" ? (
-                  <p style={{ color: "#28a745", marginTop: "10px" }}>Thanh toán thành công!</p>
+                  <p style={{ 
+                    color: "#27ae60", 
+                    marginTop: "15px",
+                    fontSize: "18px",
+                    fontWeight: "500"
+                  }}>Thanh toán thành công!</p>
                 ) : paymentStatus === "failed" ? (
                   <div>
-                    <p style={{ color: "#dc3545", marginTop: "10px" }}>Thanh toán thất bại</p>
+                    <p style={{ 
+                      color: "#e74c3c", 
+                      marginTop: "15px",
+                      marginBottom: "15px"
+                    }}>Thanh toán thất bại</p>
                     <button
                       onClick={handleQRScanned}
                       style={{
-                        padding: "8px 15px",
+                        padding: "12px 25px",
                         border: "none",
-                        borderRadius: "5px",
-                        background: "#28a745",
+                        borderRadius: "6px",
+                        background: "#3498db",
                         color: "white",
-                        marginTop: "10px",
-                        cursor: "pointer"
+                        cursor: "pointer",
+                        fontSize: "16px"
                       }}
                     >
                       Thử lại
@@ -468,13 +626,14 @@ const BookingPage = () => {
                   <button
                     onClick={handleQRScanned}
                     style={{
-                      padding: "10px 20px",
+                      padding: "14px 30px",
                       border: "none",
-                      borderRadius: "5px",
-                      background: "#28a745",
+                      borderRadius: "8px",
+                      background: "#2ecc71",
                       color: "white",
-                      marginTop: "10px",
-                      cursor: "pointer"
+                      cursor: "pointer",
+                      fontSize: "16px",
+                      fontWeight: "500"
                     }}
                   >
                     Quét mã QR để thanh toán
@@ -482,16 +641,20 @@ const BookingPage = () => {
                 )}
               </div>
             )}
-            <div style={{ textAlign: "center", marginTop: "20px" }}>
+            
+            {/* Cancel button */}
+            <div style={{ textAlign: "center", marginTop: "30px" }}>
               <button
                 onClick={handleCancel}
                 style={{
-                  padding: "10px 20px",
+                  padding: "12px 25px",
                   border: "none",
-                  borderRadius: "5px",
-                  background: "#dc3545",
+                  borderRadius: "6px",
+                  background: "#e74c3c",
                   color: "white",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  transition: "background 0.3s ease"
                 }}
               >
                 Hủy đặt lịch

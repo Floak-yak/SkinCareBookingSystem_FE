@@ -9,7 +9,7 @@ const Hero = () => {
             <div className="hero-content">
                 <h1>Thiên đường thư giãn của bạn</h1>
                 <p>Trải nghiệm dịch vụ spa cao cấp với công nghệ hàng đầu từ Châu Âu</p>
-                <a href="/" className="cta-button">
+                <a href="/booking" className="cta-button">
                     Đặt lịch ngay
                 </a>
             </div>
