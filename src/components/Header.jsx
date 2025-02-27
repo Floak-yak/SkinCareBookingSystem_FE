@@ -86,7 +86,7 @@ const Header = () => {
       <div className="cart-auth">
         <Link to="/cart" className="cart-link">
           <Badge count={totalItems} showZero={false} offset={[0, 0]}>
-            <ShoppingCartOutlined style={{fontSize:"25px", color:"white"}}/>
+            <ShoppingCartOutlined style={{ fontSize: "25px", color: "white" }} />
           </Badge>
         </Link>
         <div className="auth">
@@ -102,7 +102,7 @@ const Header = () => {
                 <Button type="text">Đăng nhập</Button>
               </Link>
               <Link to="/register">
-                <Button type="primary">Đăng ký</Button>
+                <Button type="text">Đăng ký</Button>
               </Link>
             </>
           )}
