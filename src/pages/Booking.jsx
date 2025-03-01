@@ -43,6 +43,7 @@ const BookingPage = () => {
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [bookedAppointments, setBookedAppointments] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isRescheduling, setIsRescheduling] = useState(false);
 
   useEffect(() => {
     // Load current user và tự động điền số điện thoại
@@ -50,7 +51,8 @@ const BookingPage = () => {
     if (userJson) {
       const user = JSON.parse(userJson);
       setCurrentUser(user);
-      if (user.PhoneNumber) {
+      if (user.PhoneNumber || user.FullName) {
+        setName(user.FullName);
         setPhone(user.PhoneNumber);
       }
     }
@@ -94,11 +96,25 @@ const BookingPage = () => {
 
   // Kiểm tra xem thời gian đã được đặt chưa
   const isTimeSlotBooked = (date, time, staff) => {
-    return bookedAppointments.some(appointment => 
-      appointment.date === date && 
-      appointment.time === time && 
+    return bookedAppointments.some(appointment =>
+      appointment.date === date &&
+      appointment.time === time &&
       appointment.staff === staff
     );
+  };
+
+  // Sửa lại hàm kiểm tra thời gian
+  const checkBookingTime = (bookingDate, bookingTime) => {
+    const now = new Date();
+    const [hours, minutes] = bookingTime.split(':').map(Number);
+
+    // Tạo datetime chính xác của lịch hẹn
+    const bookingDateTime = new Date(bookingDate);
+    bookingDateTime.setHours(hours, minutes, 0, 0);
+
+    // Tính số giờ chênh lệch
+    const hoursDiff = (bookingDateTime - now) / (1000 * 60 * 60);
+    return hoursDiff >= 24; // true nếu còn từ 24h trở lên
   };
 
   const handleBooking = async () => {
@@ -110,7 +126,6 @@ const BookingPage = () => {
       if (!phone) errors.push("Vui lòng nhập số điện thoại.");
       if (phone && !validatePhone(phone)) errors.push("Số điện thoại không hợp lệ.");
 
-      // Kiểm tra xem thời gian đã được đặt chưa
       if (selectedStaff && isTimeSlotBooked(selectedDate, selectedTime, selectedStaff)) {
         errors.push("Thời gian này đã được đặt cho nhân viên này. Vui lòng chọn thời gian khác hoặc nhân viên khác.");
       }
@@ -121,13 +136,11 @@ const BookingPage = () => {
       }
 
       setIsLoading(true);
-      // Giả lập API call
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Nếu khách không chọn nhân viên, hệ thống sẽ tự động chọn ngẫu nhiên
       let finalStaff = selectedStaff;
       if (!selectedStaff) {
-        const availableStaff = staffList.filter(staff => 
+        const availableStaff = staffList.filter(staff =>
           !isTimeSlotBooked(selectedDate, selectedTime, staff)
         );
         if (availableStaff.length === 0) {
@@ -138,7 +151,6 @@ const BookingPage = () => {
         setSelectedStaff(finalStaff);
       }
 
-      // Tạo đối tượng booking mới
       const newBooking = {
         id: Date.now(),
         service: selectedService,
@@ -147,18 +159,22 @@ const BookingPage = () => {
         staff: finalStaff,
         customerName: name,
         phone: phone,
-        status: 'pending' // pending, confirmed, cancelled
+        status: 'pending'
       };
 
-      // Cập nhật localStorage và state
       const updatedAppointments = [...bookedAppointments, newBooking];
       setBookedAppointments(updatedAppointments);
       localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
 
       setError("");
-      setQrCode("https://th.bing.com/th/id/OIP.yBVcQn2EXjmzi8z3jq49IAHaHa?w=168&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7");
+      
+      // Chỉ hiện QR code nếu không phải đang dời lịch
+      if (!isRescheduling) {
+        setQrCode("https://th.bing.com/th/id/OIP.yBVcQn2EXjmzi8z3jq49IAHaHa?w=168&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7");
+      }
+      
       setBookingConfirmed(true);
-      toast.success("Đặt lịch thành công!");
+      toast.success(isRescheduling ? "Dời lịch thành công!" : "Đặt lịch thành công!");
     } catch (error) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
     } finally {
@@ -173,6 +189,27 @@ const BookingPage = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       setPaymentStatus("success");
       toast.success("Thanh toán thành công!");
+      
+      // Đợi cho toast hiển thị xong (3 giây) rồi mới reset form
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Reset tất cả các trường về trạng thái ban đầu
+      setBookingConfirmed(false);
+      setQrCode("");
+      setSelectedService("");
+      setSelectedDate("");
+      setSelectedTime("");
+      setSelectedStaff("");
+      setPaymentStatus("pending");
+      
+      // Giữ lại thông tin người dùng nếu đã đăng nhập
+      if (currentUser) {
+        setName(currentUser.FullName || "");
+        setPhone(currentUser.PhoneNumber || "");
+      } else {
+        setName("");
+        setPhone("");
+      }
     } catch (error) {
       setPaymentStatus("failed");
       toast.error("Thanh toán thất bại. Vui lòng thử lại!");
@@ -185,8 +222,8 @@ const BookingPage = () => {
     // Xóa booking khỏi localStorage
     const updatedAppointments = bookedAppointments.filter(
       appointment => !(
-        appointment.date === selectedDate && 
-        appointment.time === selectedTime && 
+        appointment.date === selectedDate &&
+        appointment.time === selectedTime &&
         appointment.staff === selectedStaff
       )
     );
@@ -200,10 +237,19 @@ const BookingPage = () => {
     setSelectedDate("");
     setSelectedTime("");
     setSelectedStaff("");
-    setName("");
-    setPhone("");
+
+    // Kiểm tra và điền lại thông tin từ currentUser
+    if (currentUser) {
+      setName(currentUser.FullName || "");
+      setPhone(currentUser.PhoneNumber || "");
+    } else {
+      setName("");
+      setPhone("");
+    }
+
     setPaymentStatus("pending");
     toast.info("Đã hủy đặt lịch thành công!");
+    setIsRescheduling(false);
   };
 
   const handleSelectDateTime = (date, time) => {
@@ -222,21 +268,41 @@ const BookingPage = () => {
     }
   };
 
-  // Thêm hàm xóa lịch đã đặt
-  const handleDeleteBooking = (bookingToDelete) => {
+  // Cập nhật hàm handleDeleteBooking
+  const handleDeleteBooking = (booking) => {
     try {
-      // Lọc ra các lịch đặt khác, loại bỏ lịch cần xóa
-      const updatedAppointments = bookedAppointments.filter(
-        appointment => appointment.id !== bookingToDelete.id
-      );
-      
-      // Cập nhật state và localStorage
-      setBookedAppointments(updatedAppointments);
-      localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
-      
-      toast.success("Đã xóa lịch đặt thành công!");
+      const canReschedule = checkBookingTime(booking.date, booking.time);
+
+      if (canReschedule) {
+        // Đánh dấu là đang dời lịch
+        setIsRescheduling(true);
+        
+        // Hiển thị modal hoặc chuyển sang form đặt lại lịch
+        setSelectedService(booking.service);
+        setName(booking.customerName);
+        setPhone(booking.phone);
+        setSelectedStaff(booking.staff);
+
+        // Xóa lịch cũ
+        const updatedAppointments = bookedAppointments.filter(
+          appointment => appointment.id !== booking.id
+        );
+        setBookedAppointments(updatedAppointments);
+        localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
+
+        toast.info("Vui lòng chọn thời gian mới cho lịch đặt của bạn");
+      } else {
+        // Xử lý hủy lịch như cũ
+        const updatedAppointments = bookedAppointments.filter(
+          appointment => appointment.id !== booking.id
+        );
+        setBookedAppointments(updatedAppointments);
+        localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
+
+        toast.warning("Lịch đặt đã bị hủy do thời gian còn lại dưới 24 giờ");
+      }
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi xóa lịch đặt!");
+      toast.error("Có lỗi xảy ra khi xử lý lịch đặt!");
     }
   };
 
@@ -246,34 +312,70 @@ const BookingPage = () => {
     return bookedAppointments.filter(booking => booking.phone === currentUser.PhoneNumber);
   };
 
+  // Sửa lại hàm handleDirectBooking
+  const handleDirectBooking = async () => {
+    try {
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setPaymentStatus("success");
+      toast.success("Đặt lịch thành công!");
+      
+      // Đợi cho toast hiển thị xong (3 giây) rồi mới reset form
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Reset tất cả các trường về trạng thái ban đầu
+      setBookingConfirmed(false);
+      setQrCode("");
+      setSelectedService("");
+      setSelectedDate("");
+      setSelectedTime("");
+      setSelectedStaff("");
+      setPaymentStatus("pending");
+      setIsRescheduling(false);
+      
+      // Giữ lại thông tin người dùng nếu đã đăng nhập
+      if (currentUser) {
+        setName(currentUser.FullName || "");
+        setPhone(currentUser.PhoneNumber || "");
+      } else {
+        setName("");
+        setPhone("");
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div style={{ 
-      maxWidth: "1200px", 
-      margin: "40px auto", 
+    <div style={{
+      maxWidth: "1200px",
+      margin: "40px auto",
       padding: "30px",
       backgroundColor: "#fff",
       borderRadius: "15px",
       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
     }}>
       <ToastContainer position="top-right" autoClose={3000} />
-      
+
       <div style={{ flex: 2, marginRight: "20px" }}>
-        <h2 style={{ 
-          textAlign: "center", 
+        <h2 style={{
+          textAlign: "center",
           marginBottom: "30px",
           color: "#2c3e50",
           fontSize: "28px",
           fontWeight: "600"
         }}>Đặt Lịch Dịch Vụ</h2>
-        
+
         {!bookingConfirmed ? (
           <>
             {/* Form đặt lịch */}
             <div style={{ marginBottom: "30px" }}>
               <div style={{ marginBottom: "25px" }}>
-                <label style={{ 
-                  display: "block", 
-                  fontWeight: "500", 
+                <label style={{
+                  display: "block",
+                  fontWeight: "500",
                   marginBottom: "10px",
                   color: "#34495e"
                 }}>Chọn dịch vụ:</label>
@@ -301,21 +403,21 @@ const BookingPage = () => {
 
               {/* Calendar section with improved styling */}
               {selectedService && (
-                <div style={{ 
+                <div style={{
                   marginBottom: "25px",
                   backgroundColor: "#f8f9fa",
                   padding: "20px",
                   borderRadius: "10px"
                 }}>
-                  <label style={{ 
-                    display: "block", 
-                    fontWeight: "500", 
+                  <label style={{
+                    display: "block",
+                    fontWeight: "500",
                     marginBottom: "15px",
                     color: "#34495e"
                   }}>Chọn ngày và giờ:</label>
-                  <div style={{ 
-                    display: "flex", 
-                    justifyContent: "space-between", 
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
                     alignItems: "center"
                   }}>
                     <button
@@ -396,9 +498,9 @@ const BookingPage = () => {
               {/* Staff selection with new styling */}
               {selectedTime && (
                 <div style={{ marginBottom: "25px" }}>
-                  <label style={{ 
-                    display: "block", 
-                    fontWeight: "500", 
+                  <label style={{
+                    display: "block",
+                    fontWeight: "500",
                     marginBottom: "10px",
                     color: "#34495e"
                   }}>Chọn nhân viên:</label>
@@ -425,9 +527,9 @@ const BookingPage = () => {
 
               {/* Customer info section */}
               <div style={{ marginBottom: "25px" }}>
-                <label style={{ 
-                  display: "block", 
-                  fontWeight: "500", 
+                <label style={{
+                  display: "block",
+                  fontWeight: "500",
                   marginBottom: "10px",
                   color: "#34495e"
                 }}>Tên khách hàng:</label>
@@ -447,9 +549,9 @@ const BookingPage = () => {
               </div>
 
               <div style={{ marginBottom: "30px" }}>
-                <label style={{ 
-                  display: "block", 
-                  fontWeight: "500", 
+                <label style={{
+                  display: "block",
+                  fontWeight: "500",
                   marginBottom: "10px",
                   color: "#34495e"
                 }}>Số điện thoại:</label>
@@ -492,26 +594,26 @@ const BookingPage = () => {
 
               {/* Booked appointments section */}
               {currentUser && (
-                <div style={{ 
-                  marginTop: "40px", 
-                  borderTop: "2px solid #eee", 
+                <div style={{
+                  marginTop: "40px",
+                  borderTop: "2px solid #eee",
                   paddingTop: "30px"
                 }}>
-                  <h3 style={{ 
-                    textAlign: "center", 
+                  <h3 style={{
+                    textAlign: "center",
                     marginBottom: "25px",
                     color: "#2c3e50",
                     fontSize: "22px"
                   }}>Lịch đã đặt của bạn</h3>
                   {getCurrentUserBookings().length === 0 ? (
-                    <p style={{ 
+                    <p style={{
                       textAlign: "center",
                       color: "#7f8c8d"
                     }}>Bạn chưa có lịch đặt nào</p>
                   ) : (
-                    <div style={{ 
-                      display: "flex", 
-                      flexDirection: "column", 
+                    <div style={{
+                      display: "flex",
+                      flexDirection: "column",
                       gap: "15px"
                     }}>
                       {getCurrentUserBookings().map((booking) => (
@@ -522,10 +624,7 @@ const BookingPage = () => {
                             border: "1px solid #e1e8ed",
                             borderRadius: "10px",
                             backgroundColor: "#f8f9fa",
-                            transition: "transform 0.2s ease",
-                            ':hover': {
-                              transform: "translateY(-2px)"
-                            }
+                            transition: "transform 0.2s ease"
                           }}
                         >
                           <p style={{ marginBottom: "8px" }}><strong>Dịch vụ:</strong> {booking.service}</p>
@@ -533,22 +632,60 @@ const BookingPage = () => {
                           <p style={{ marginBottom: "8px" }}><strong>Giờ:</strong> {booking.time}</p>
                           <p style={{ marginBottom: "8px" }}><strong>Nhân viên:</strong> {booking.staff}</p>
                           <p style={{ marginBottom: "12px" }}><strong>Trạng thái:</strong> {booking.status}</p>
-                          <button
-                            onClick={() => handleDeleteBooking(booking)}
-                            style={{
-                              padding: "10px 20px",
-                              border: "none",
-                              borderRadius: "6px",
-                              backgroundColor: "#e74c3c",
-                              color: "white",
-                              cursor: "pointer",
-                              transition: "background 0.3s ease",
-                              fontSize: "14px",
-                              fontWeight: "500"
-                            }}
-                          >
-                            Hủy lịch
-                          </button>
+
+                          {checkBookingTime(booking.date, booking.time) ? (
+                            <>
+                              <button
+                                onClick={() => handleDeleteBooking(booking)}
+                                style={{
+                                  padding: "10px 20px",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  backgroundColor: "#3498db",
+                                  color: "white",
+                                  cursor: "pointer",
+                                  transition: "background 0.3s ease",
+                                  fontSize: "14px",
+                                  fontWeight: "500"
+                                }}
+                              >
+                                Dời lịch
+                              </button>
+                              <p style={{
+                                marginTop: "10px",
+                                fontSize: "12px",
+                                color: "#3498db"
+                              }}>
+                                Có thể dời lịch (còn trên 24 giờ)
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleDeleteBooking(booking)}
+                                style={{
+                                  padding: "10px 20px",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  backgroundColor: "#e74c3c",
+                                  color: "white",
+                                  cursor: "pointer",
+                                  transition: "background 0.3s ease",
+                                  fontSize: "14px",
+                                  fontWeight: "500"
+                                }}
+                              >
+                                Hủy lịch
+                              </button>
+                              <p style={{
+                                marginTop: "10px",
+                                fontSize: "12px",
+                                color: "#e74c3c"
+                              }}>
+                                Chỉ có thể hủy lịch (còn dưới 24 giờ)
+                              </p>
+                            </>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -559,13 +696,13 @@ const BookingPage = () => {
           </>
         ) : (
           // Confirmation and payment section
-          <div style={{ 
+          <div style={{
             padding: "30px",
             backgroundColor: "#f8f9fa",
             borderRadius: "12px"
           }}>
-            <h3 style={{ 
-              textAlign: "center", 
+            <h3 style={{
+              textAlign: "center",
               marginBottom: "25px",
               color: "#2c3e50",
               fontSize: "24px"
@@ -578,70 +715,92 @@ const BookingPage = () => {
               <p style={{ marginBottom: "12px" }}><strong>Tên khách hàng:</strong> {name}</p>
               <p style={{ marginBottom: "12px" }}><strong>Số điện thoại:</strong> {phone}</p>
             </div>
-            
+
             {/* QR Code section */}
-            {qrCode && (
+            {isRescheduling ? (
               <div style={{ textAlign: "center" }}>
-                <img 
-                  src={qrCode} 
-                  alt="QR Code" 
-                  style={{ 
-                    width: "200px", 
-                    height: "200px",
-                    marginBottom: "20px"
-                  }} 
-                />
-                {isLoading ? (
-                  <p>Đang xử lý thanh toán...</p>
-                ) : paymentStatus === "success" ? (
-                  <p style={{ 
-                    color: "#27ae60", 
-                    marginTop: "15px",
-                    fontSize: "18px",
-                    fontWeight: "500"
-                  }}>Thanh toán thành công!</p>
-                ) : paymentStatus === "failed" ? (
-                  <div>
-                    <p style={{ 
-                      color: "#e74c3c", 
+                <button
+                  onClick={handleDirectBooking}
+                  disabled={isLoading}
+                  style={{
+                    padding: "14px 30px",
+                    border: "none",
+                    borderRadius: "8px",
+                    background: "#2ecc71",
+                    color: "white",
+                    cursor: isLoading ? "not-allowed" : "pointer",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    opacity: isLoading ? 0.7 : 1
+                  }}
+                >
+                  {isLoading ? "Đang xử lý..." : "Xác nhận đặt lịch"}
+                </button>
+              </div>
+            ) : (
+              qrCode && (
+                <div style={{ textAlign: "center" }}>
+                  <img
+                    src={qrCode}
+                    alt="QR Code"
+                    style={{
+                      width: "200px",
+                      height: "200px",
+                      marginBottom: "20px"
+                    }}
+                  />
+                  {isLoading ? (
+                    <p>Đang xử lý thanh toán...</p>
+                  ) : paymentStatus === "success" ? (
+                    <p style={{
+                      color: "#27ae60",
                       marginTop: "15px",
-                      marginBottom: "15px"
-                    }}>Thanh toán thất bại</p>
+                      fontSize: "18px",
+                      fontWeight: "500"
+                    }}>Thanh toán thành công!</p>
+                  ) : paymentStatus === "failed" ? (
+                    <div>
+                      <p style={{
+                        color: "#e74c3c",
+                        marginTop: "15px",
+                        marginBottom: "15px"
+                      }}>Thanh toán thất bại</p>
+                      <button
+                        onClick={handleQRScanned}
+                        style={{
+                          padding: "12px 25px",
+                          border: "none",
+                          borderRadius: "6px",
+                          background: "#3498db",
+                          color: "white",
+                          cursor: "pointer",
+                          fontSize: "16px"
+                        }}
+                      >
+                        Thử lại
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       onClick={handleQRScanned}
                       style={{
-                        padding: "12px 25px",
+                        padding: "14px 30px",
                         border: "none",
-                        borderRadius: "6px",
-                        background: "#3498db",
+                        borderRadius: "8px",
+                        background: "#2ecc71",
                         color: "white",
                         cursor: "pointer",
-                        fontSize: "16px"
+                        fontSize: "16px",
+                        fontWeight: "500"
                       }}
                     >
-                      Thử lại
+                      Quét mã QR để thanh toán
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleQRScanned}
-                    style={{
-                      padding: "14px 30px",
-                      border: "none",
-                      borderRadius: "8px",
-                      background: "#2ecc71",
-                      color: "white",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                      fontWeight: "500"
-                    }}
-                  >
-                    Quét mã QR để thanh toán
-                  </button>
-                )}
-              </div>
+                  )}
+                </div>
+              )
             )}
-            
+
             {/* Cancel button */}
             <div style={{ textAlign: "center", marginTop: "30px" }}>
               <button
