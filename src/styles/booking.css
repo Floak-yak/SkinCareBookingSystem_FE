@@ -1,338 +1,294 @@
-.booking-page {
-    padding: 80px 20px;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .booking-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  
-  .booking-header h1 {
-    color: #2c3e50;
-    margin-bottom: 1rem;
-  }
-  
-  .booking-container {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  }
-  
-  .service-summary {
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .summary-details {
-    margin-top: 15px;
-  }
-  
-  .summary-details p {
-    margin: 8px 0;
-    color: #34495e;
-  }
-  
-  .booking-form {
-    display: grid;
-    gap: 20px;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .form-group label {
-    color: #2c3e50;
-    font-weight: 500;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-  }
-  
-  .form-group textarea {
-    resize: vertical;
-  }
-  
-  .submit-btn {
-    background: #e74c3c;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-  }
-  
-  /* Hiệu ứng gradient chạy */
-  .submit-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 200%;
-    height: 100%;
-    background: linear-gradient(
-      to right,
-      #e74c3c,
-      #c0392b,
-      #e74c3c,
-      #c0392b
-    );
-    z-index: -1;
-    transition: all 0.8s ease;
-    animation: gradientSlide 3s linear infinite;
-  }
-  
-  .submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-  }
-  
-  @keyframes gradientSlide {
-    0% {
-      transform: translateX(-50%);
-    }
-    100% {
-      transform: translateX(0%);
-    }
-  }
-  
-  /* Thêm hiệu ứng ripple khi click */
-  .submit-btn::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.6s ease, height 0.6s ease;
-  }
-  
-  .submit-btn:active::after {
-    width: 200px;
-    height: 200px;
-  }
-  
-  /* Thêm hiệu ứng hover state */
-  .submit-btn:hover::before {
-    animation-play-state: paused;
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .submit-btn {
-      font-size: 1rem;
-      padding: 10px;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .booking-page {
-      padding: 60px 15px;
-    }
-    
-    .booking-container {
-      padding: 20px;
-    }
-  }
-  
-  .booking-success {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: #f8f9fa;
-  }
-  
-  .success-content {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    text-align: center;
-    max-width: 600px;
-    width: 100%;
-  }
-  
-  .customer-info,
-  .appointment-info {
-    margin-bottom: 25px;
-    text-align: left;
-  }
-  
-  .customer-info h3,
-  .appointment-info h3 {
-    color: #2c3e50;
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #e74c3c;
-  }
-  
-  .confirmation-details {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 10px;
-    margin: 15px 0;
-  }
-  
-  .confirmation-details p {
-    margin: 12px 0;
-    color: #34495e;
-    line-height: 1.6;
-  }
-  
-  .note-section {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px dashed #ddd;
-  }
-  
-  .note-content {
-    font-style: italic;
-    color: #7f8c8d;
-    padding: 10px;
-    background: white;
-    border-radius: 5px;
-  }
-  
-  .contact-info {
-    background: #fff8f8;
-    padding: 15px;
-    border-radius: 10px;
-    margin: 20px 0;
-    border: 1px solid #ffe0e0;
-  }
-  
-  .contact-info p {
-    display: flex;
-    align-items: center;
-    margin: 10px 0;
-    color: #e74c3c;
-    font-size: 0.95rem;
-  }
-  
-  .info-icon {
-    margin-right: 10px;
-    font-style: normal;
-  }
-  
-  .success-footer {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-  }
-  
-  .thank-you {
-    color: #27ae60;
-    font-weight: 500;
-    margin-bottom: 20px;
-  }
-  
-  .action-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-  }
-  
-  .back-home-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #2c3e50;
-    color: white;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 25px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.2);
-  }
-  
-  .back-home-btn:hover {
-    background: #34495e;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.3);
-  }
-  
-  .home-icon {
-    font-style: normal;
-    font-size: 1.2rem;
-  }
-  
-  .redirect-message {
-    color: #95a5a6;
-    font-size: 0.9rem;
-    font-style: italic;
-  }
-  
-  /* Animation */
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .customer-info,
-  .appointment-info,
-  .contact-info {
-    animation: slideIn 0.5s ease-out forwards;
-  }
-  
-  .customer-info {
-    animation-delay: 0.2s;
-  }
-  
-  .appointment-info {
-    animation-delay: 0.4s;
-  }
-  
-  .contact-info {
-    animation-delay: 0.6s;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .success-content {
-      padding: 20px;
-    }
-  
-    .confirmation-details,
-    .contact-info {
-      padding: 15px;
-    }
-  
-    .customer-info h3,
-    .appointment-info h3 {
-      font-size: 1.1rem;
-    }
-  } 
+/* Main container styles */
+.booking-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Page title */
+.booking-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #2c3e50;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+/* Form section styles */
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: #34495e;
+}
+
+.form-select,
+.form-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #f8f9fa;
+  transition: border-color 0.3s ease;
+}
+
+/* Calendar section */
+.calendar-section {
+  margin-bottom: 25px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.calendar-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-button {
+  padding: 10px 15px;
+  border: none;
+  background: #3498db;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.calendar-container {
+  flex: 1;
+  margin: 0 10px;
+  overflow-x: auto;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.calendar-header {
+  background: #f8f9fa;
+}
+
+.calendar-header-cell,
+.calendar-cell {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.calendar-time {
+  font-weight: bold;
+}
+
+.time-slot-button {
+  padding: 10px;
+  border: 1px solid #28a745;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.time-slot-button-available {
+  background: #fff;
+  color: #28a745;
+}
+
+.time-slot-button-selected {
+  background: #28a745;
+  color: #fff;
+}
+
+.time-slot-button-booked {
+  background: #ddd;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Submit button */
+.submit-button-container {
+  text-align: center;
+}
+
+.submit-button {
+  padding: 14px 30px;
+  border: none;
+  border-radius: 8px;
+  background: #2ecc71;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Booked appointments section */
+.booked-section {
+  margin-top: 40px;
+  border-top: 2px solid #eee;
+  padding-top: 30px;
+}
+
+.booked-title {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #2c3e50;
+  font-size: 22px;
+}
+
+.no-bookings {
+  text-align: center;
+  color: #7f8c8d;
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.booking-card {
+  padding: 20px;
+  border: 1px solid #e1e8ed;
+  border-radius: 10px;
+  background-color: #f8f9fa;
+  transition: transform 0.2s ease;
+}
+
+.booking-detail {
+  margin-bottom: 8px;
+}
+
+.reschedule-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: #3498db;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cancel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: #e74c3c;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.booking-message {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.reschedule-message {
+  color: #3498db;
+}
+
+.cancel-message {
+  color: #e74c3c;
+}
+
+/* Confirmation section */
+.confirmation-container {
+  padding: 30px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+}
+
+.confirmation-title {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #2c3e50;
+  font-size: 24px;
+}
+
+.booking-info {
+  margin-bottom: 30px;
+}
+
+.booking-info-item {
+  margin-bottom: 12px;
+}
+
+/* QR code section */
+.qr-container {
+  text-align: center;
+}
+
+.qr-code {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 20px;
+}
+
+.payment-success {
+  color: #27ae60;
+  margin-top: 15px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.payment-failed {
+  color: #e74c3c;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.try-again-button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 6px;
+  background: #3498db;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.qr-button {
+  padding: 14px 30px;
+  border: none;
+  border-radius: 8px;
+  background: #2ecc71;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.cancel-container {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.cancel-final-button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 6px;
+  background: #e74c3c;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
