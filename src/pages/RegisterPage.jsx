@@ -2,45 +2,34 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Form, Input, Button, DatePicker, message } from "antd";
 import "../styles/registerPage.css";
-import useFetch from "../hooks/useFetch";
+import apiClient from "../api/apiClient";
 
 const RegisterPage = () => {
-  const { data: users, setData: setUsers } = useFetch("/data/users.json", "users");
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = (values) => {
+  const handleRegister = async (values) => {
     setLoading(true);
+
+    // 🛠 Debug: Kiểm tra dữ liệu trước khi gửi
+    console.log("📤 Dữ liệu gửi lên:", values);
+
     try {
-      // Kiểm tra xem email đã tồn tại hay chưa
-      const emailExists = users.some(user => user.Email === values.email);
-      if (emailExists) {
-        message.error("Email đã được sử dụng. Vui lòng chọn email khác!");
-        setLoading(false);
-        return;
-      }
+      const response = await apiClient.post("/User/Register", {
+        fullName: values.fullName,
+        yearOfBirth: values.dob ? values.dob.format("YYYY-MM-DD") : null, // 🟢 Fix: Đổi sang format YYYY-MM-DD
+        email: values.email,
+        password: values.password,
+        phoneNumber: values.phone,
+      });
 
-      // Tạo user mới
-      const newUser = {
-        id: Date.now(),
-        FullName: values.fullName,
-        Email: values.email,
-        Password: values.password,
-        PhoneNumber: values.phone,
-        Role: "Customer", 
-        DoB: values.dob.format("YYYY-MM-DD"),
-      };
-
-      // Cập nhật danh sách người dùng mà không ghi đè dữ liệu cũ
-      const updatedUsers = [...users, newUser];
-      setUsers(updatedUsers);
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
-
-      message.success("Đăng ký thành công! Hãy đăng nhập.");
-      navigate("/login");
+      console.log("✅ Phản hồi API:", response.data);
+      message.success("Đăng ký thành công!");
+      setTimeout(() => navigate("/login"), 1000);
     } catch (error) {
-      message.error("Lỗi khi đăng ký!");
+      console.error("❌ Lỗi API:", error.response?.data);
+      message.error(error.response?.data?.message || "Đăng ký thất bại!");
     } finally {
       setLoading(false);
     }
@@ -73,7 +62,9 @@ const RegisterPage = () => {
           <Form.Item
             label="Số điện thoại"
             name="phone"
-            rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+            ]}
           >
             <Input placeholder="Số điện thoại" />
           </Form.Item>
@@ -83,7 +74,11 @@ const RegisterPage = () => {
             name="dob"
             rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
           >
-            <DatePicker format="DD/MM/YYYY" placeholder="Chọn ngày sinh" style={{ width: "100%" }}/>
+            <DatePicker
+              format="DD/MM/YYYY"
+              placeholder="Chọn ngày sinh"
+              style={{ width: "100%" }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -95,7 +90,12 @@ const RegisterPage = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} className="register-button">
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              className="register-button"
+            >
               Đăng Ký
             </Button>
           </Form.Item>
