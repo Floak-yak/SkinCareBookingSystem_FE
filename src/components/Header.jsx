@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { Dropdown, Button, message, Badge } from "antd";
+import { Dropdown, Button, message, Badge, Avatar } from "antd";
 import {
   UserOutlined,
   LogoutOutlined,
@@ -30,7 +30,7 @@ const Header = () => {
       key: "profile",
       label: (
         <span>
-          <UserOutlined /> {user?.FullName || "Người dùng"}
+          <UserOutlined /> {user?.fullName || "Người dùng"}
         </span>
       ),
     },
@@ -38,7 +38,7 @@ const Header = () => {
       key: "role",
       label: (
         <span>
-          <IdcardOutlined /> Vai trò: {user?.Role || "Chưa xác định"}
+          <IdcardOutlined /> Vai trò: {user?.role || "Chưa xác định"}
         </span>
       ),
     },
@@ -46,12 +46,12 @@ const Header = () => {
       key: "email",
       label: (
         <span>
-          <MailOutlined /> {user?.Email || "Chưa có email"}
+          <MailOutlined /> {user?.email || "Chưa có email"}
         </span>
       ),
     },
     { type: "divider" },
-    user?.Role === "Staff" && {
+    user?.role === "Staff" && {
       key: "approve",
       label: (
         <Link to="/staff/approve-blogs" className="staff-approve-btn">
@@ -74,6 +74,8 @@ const Header = () => {
       <Link to="/" className="logo">
         SkinCare Booking
       </Link>
+
+      {/* 🟢 MENU CHÍNH */}
       <nav className={`nav ${menuOpen ? "open" : ""}`}>
         <Link to="/">Trang chủ</Link>
         <Link to="/services">Dịch vụ</Link>
@@ -83,17 +85,21 @@ const Header = () => {
         <Link to="/about">Về chúng tôi</Link>
       </nav>
 
+      {/* 🛒 CART & USER */}
       <div className="cart-auth">
         <Link to="/cart" className="cart-link">
           <Badge count={totalItems} showZero={false} offset={[0, 0]}>
             <ShoppingCartOutlined style={{ fontSize: "25px", color: "white" }} />
           </Badge>
         </Link>
+
+        {/* 🔵 AVATAR USER */}
         <div className="auth">
           {user ? (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <Button type="text" icon={<UserOutlined />}>
-                {user?.FullName || "Người dùng"}
+              <Button type="text" className="user-info">
+                <Avatar src={user.avatar} icon={<UserOutlined />} />
+                <span className="user-name">{user?.fullName || "Người dùng"}</span>
               </Button>
             </Dropdown>
           ) : (
@@ -109,6 +115,7 @@ const Header = () => {
         </div>
       </div>
 
+      {/* 🔻 TOGGLE MENU */}
       <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
         <MenuOutlined />
       </button>
