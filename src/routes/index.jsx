@@ -15,6 +15,7 @@ import ProductPage from "../pages/ProductPage";
 import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
 import ForgotPassword from "../pages/ForgotPassword";
+import AboutUs from "../pages/AboutUs";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -45,6 +46,7 @@ const AppRoutes = () => {
       <Route path="/products" element={<ProductPage />} />
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/about" element={<AboutUs />} />
     </Routes>
   );
 };

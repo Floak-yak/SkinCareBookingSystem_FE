@@ -15,10 +15,7 @@ const App = () => {
         <Router>
           <Header />
           <main className="main-content">
-            <Routes>
-              <Route path="/" element={<AppRoutes />} />
-              <Route path="/about" element={<AboutUs />} />
-            </Routes>
+           <AppRoutes />
           </main>
           <Footer />
         </Router>
