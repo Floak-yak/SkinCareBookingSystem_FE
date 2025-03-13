@@ -1,8 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Form, Input, Button, DatePicker, message } from "antd";
+import userApi from "../api/userApi"; // Dùng userApi
 import "../styles/registerPage.css";
-import apiClient from "../api/apiClient";
 
 const RegisterPage = () => {
   const [form] = Form.useForm();
@@ -11,25 +11,23 @@ const RegisterPage = () => {
 
   const handleRegister = async (values) => {
     setLoading(true);
-
-    // 🛠 Debug: Kiểm tra dữ liệu trước khi gửi
-    console.log("📤 Dữ liệu gửi lên:", values);
-
     try {
-      const response = await apiClient.post("/User/Register", {
-        fullName: values.fullName,
-        yearOfBirth: values.dob ? values.dob.format("YYYY-MM-DD") : null, // 🟢 Fix: Đổi sang format YYYY-MM-DD
-        email: values.email,
-        password: values.password,
-        phoneNumber: values.phone,
-      });
+      // Gọi userApi.register
+      const yearOfBirth = values.dob ? values.dob.format("YYYY-MM-DD") : null;
+      const res = await userApi.register(
+        values.fullName,
+        yearOfBirth,
+        values.email,
+        values.password,
+        values.phone
+      );
 
-      console.log("✅ Phản hồi API:", response.data);
       message.success("Đăng ký thành công!");
+      console.log("Phản hồi API:", res.data);
       setTimeout(() => navigate("/login"), 1000);
     } catch (error) {
-      console.error("❌ Lỗi API:", error.response?.data);
-      message.error(error.response?.data?.message || "Đăng ký thất bại!");
+      console.error("Lỗi API:", error.response?.data);
+      message.error(error.response?.data || "Đăng ký thất bại!");
     } finally {
       setLoading(false);
     }
@@ -53,7 +51,7 @@ const RegisterPage = () => {
             name="email"
             rules={[
               { required: true, message: "Vui lòng nhập email!" },
-              { type: "email", message: "Email không hợp lệ!" },
+              { type: "email", message: "Email không hợp lệ!" }
             ]}
           >
             <Input placeholder="Email" />
@@ -62,9 +60,7 @@ const RegisterPage = () => {
           <Form.Item
             label="Số điện thoại"
             name="phone"
-            rules={[
-              { required: true, message: "Vui lòng nhập số điện thoại!" },
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }]}
           >
             <Input placeholder="Số điện thoại" />
           </Form.Item>
