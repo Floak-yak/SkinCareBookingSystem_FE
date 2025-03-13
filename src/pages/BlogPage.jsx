@@ -1,38 +1,64 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import useFetch from "../hooks/useFetch";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { Input, Select, Button } from "antd";
 import useAuth from "../hooks/useAuth";
+import apiClient from "../api/apiClient";
 import "../styles/blogPage.css";
 
 const { Option } = Select;
 
 const BlogPage = () => {
-  // Giả sử file blogs.json được đặt tại /data/blogs.json
-  const { data: blogs, loading, error } = useFetch("/data/blogs.json", "blogs");
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const { user: currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
 
-  // Dùng useNavigate để chuyển trang
   const navigate = useNavigate();
 
-  // Lọc bài viết (đã duyệt + tiêu đề + danh mục)
-  const filteredBlogs = blogs?.filter((blog) => {
-    const isApproved = blog.isApproved;
-    const matchesTitle = blog.title
+  // 🟢 Gọi API ngay tại component
+  useEffect(() => {
+    let isMounted = true;
+
+    apiClient
+      .get("/Post/GetPosts") // Gọi API GET /api/Post/GetPosts
+      .then((res) => {
+        if (isMounted) {
+          setPosts(res.data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(err.message);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // 🟡 Lọc bài viết
+  const filteredPosts = posts?.filter((post) => {
+    // Giả sử postStatus = 1 => Approved
+    const isApproved = post.postStatus === 1;
+    const matchesTitle = post.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
+    // Giả sử category có thuộc tính name
     const matchesCategory = filterCategory
-      ? blog.category === filterCategory
+      ? post.category?.name === filterCategory
       : true;
     return isApproved && matchesTitle && matchesCategory;
   });
 
   if (loading) return <p>Đang tải bài viết...</p>;
-  if (error) return <p>Có lỗi xảy ra khi tải bài viết.</p>;
+  if (error) return <p>Có lỗi xảy ra khi tải bài viết: {error}</p>;
 
-  // Khi click card => chuyển sang chi tiết
   const handleCardClick = (id) => {
     navigate(`/blogs/${id}`);
   };
@@ -53,7 +79,7 @@ const BlogPage = () => {
             placeholder="Chọn danh mục"
             onChange={(value) => setFilterCategory(value)}
             className="blog-category-select"
-            defaultValue={""}
+            defaultValue=""
           >
             <Option value="">Tất cả</Option>
             <Option value="Chăm sóc da">Chăm sóc da</Option>
@@ -63,9 +89,9 @@ const BlogPage = () => {
           {currentUser && (
             <div className="create-blog-btn-group">
               <Button type="primary" className="create-blog-btn">
-                <a href="/blogs/create" style={{ color: "#fff" }}>
+                <Link to="/blogs/create" style={{ color: "#fff" }}>
                   Đăng Bài Viết
-                </a>
+                </Link>
               </Button>
             </div>
           )}
@@ -73,22 +99,28 @@ const BlogPage = () => {
       </div>
 
       <div className="blog-grid">
-        {filteredBlogs.map((blog) => (
-          <div
-            key={blog.id}
-            className="blog-card"
-            onClick={() => handleCardClick(blog.id)}
-          >
-            <img alt={blog.title} src={blog.image} className="blog-card-image" />
-            <div className="blog-card-content">
-              <h3>{blog.title}</h3>
-              <p>
-                {`Đăng bởi ${blog.author} - ${new Date(blog.date).toLocaleDateString()}`}
-              </p>
-              {/* Bỏ Link "Xem chi tiết" để toàn card có thể click */}
+        {filteredPosts.map((post) => {
+          // Lấy link ảnh
+          const imageUrl = post.image?.description || "/no-image.jpg";
+          // Tên tác giả
+          const authorName = post.user?.fullName || "Ẩn danh";
+          // Ngày đăng
+          const date = new Date(post.datePost).toLocaleDateString("vi-VN");
+
+          return (
+            <div
+              key={post.id}
+              className="blog-card"
+              onClick={() => handleCardClick(post.id)}
+            >
+              <img alt={post.title} src={imageUrl} className="blog-card-image" />
+              <div className="blog-card-content">
+                <h3>{post.title}</h3>
+                <p>{`Đăng bởi ${authorName} - ${date}`}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

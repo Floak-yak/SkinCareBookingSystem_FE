@@ -1,32 +1,59 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Form, Input, Button, message } from "antd";
-import "../styles/loginPage.css";
 import useAuth from "../hooks/useAuth";
-import useFetch from "../hooks/useFetch";
+import userApi from "../api/userApi"; // Thay vì gọi thẳng apiClient
+import { jwtDecode } from "jwt-decode";
+import "../styles/loginPage.css";
 
 const LoginPage = () => {
   const { login } = useAuth();
-  const { data: users } = useFetch("/data/users.json", "users");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (values) => {
+  const handleLogin = async (values) => {
     setLoading(true);
+    try {
+      // GỌI userApi.login thay vì apiClient.post
+      const response = await userApi.login(values.email, values.password);
 
-    const foundUser = users.find(
-      (user) => user.Email === values.email && user.Password === values.password
-    );
+      const token = response.data; // BE trả về token
 
-    if (foundUser) {
-      login(foundUser);
-      message.success(`Chào mừng, ${foundUser.FullName}!`);
+      if (!token) {
+        message.error("Phản hồi từ server không hợp lệ!");
+        return;
+      }
+
+      // Decode token => user info
+      const decoded = jwtDecode(token);
+      console.log("Decoded Token:", decoded);
+
+      // Tùy claim name, email, role,...
+      const userData = {
+        token,
+        fullName:
+          decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+        email:
+          decoded[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ],
+        role: decoded[
+          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ],
+      };
+
+      // Gọi login từ useAuth => lưu localStorage, setUser
+      login(userData);
+
+      message.success(`Chào mừng, ${userData.fullName}!`);
       setTimeout(() => navigate("/"), 500);
-    } else {
-      message.error("Sai email hoặc mật khẩu!");
+    } catch (error) {
+      console.error("Login error:", error);
+      const errorMsg = error.response?.data || "Sai email hoặc mật khẩu!";
+      message.error(errorMsg);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
