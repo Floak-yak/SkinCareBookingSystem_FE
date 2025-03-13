@@ -33,7 +33,7 @@ const AppRoutes = () => {
         path="/login"
         element={user ? <Navigate to="/" /> : <LoginPage />}
       />
-      <Route path="/forgot-password" element={<ForgotPassword />} /> 
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/blogs" element={<BlogPage />} />
       <Route path="/blogs/:id" element={<BlogDetail />} />

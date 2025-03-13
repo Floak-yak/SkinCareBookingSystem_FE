@@ -18,6 +18,7 @@
   text-align: center;
   border-bottom: 2px solid #f9b37a;
   padding-bottom: 10px;
+  font-family: serif;
 }
 
 /* Style cho danh sách giỏ hàng */
@@ -26,7 +27,8 @@
   padding: 15px 10px;
   display: flex;
   align-items: center;
-  cursor: pointer; /* Giúp item trông clickable khi nhấn để xem chi tiết */
+  cursor: pointer;
+  /* Giúp item trông clickable khi nhấn để xem chi tiết */
 }
 
 .ant-list-item:last-child {
@@ -62,7 +64,7 @@
   gap: 10px;
 }
 
-.ant-list-item .ant-list-item-action > li > span {
+.ant-list-item .ant-list-item-action>li>span {
   display: inline-block;
   width: 30px;
   text-align: center;
@@ -95,18 +97,22 @@
   .cart-container {
     padding: 20px;
   }
+
   .ant-list-item {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .ant-list-item-meta-avatar img {
     margin-right: 0;
     margin-bottom: 10px;
   }
+
   .cart-item-actions {
     width: 100%;
     justify-content: flex-end;
   }
+
   .cart-footer {
     flex-direction: column;
     align-items: flex-start;

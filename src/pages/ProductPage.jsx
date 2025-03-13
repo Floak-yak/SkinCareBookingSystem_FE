@@ -9,7 +9,7 @@ const { Option } = Select;
 
 const ProductPage = () => {
   const navigate = useNavigate();
-  const { data: products, loading, error } = useFetch("/data/products.json");
+  const { data: products, loading, error } = useFetch("/Product/GetProducts");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Hiển thị/ẩn thanh kéo giá
