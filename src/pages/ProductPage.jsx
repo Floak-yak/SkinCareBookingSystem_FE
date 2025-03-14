@@ -1,78 +1,79 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useFetch from "../hooks/useFetch";
-import { Input, Select, Card, Button, Slider } from "antd";
+import { Input, Select, Card, Button, Slider, message } from "antd";
 import CartContext from "../context/CartContext";
+import productApi from "../api/productApi";
 import "../styles/product.css";
 
 const { Option } = Select;
 
 const ProductPage = () => {
   const navigate = useNavigate();
-  const { data: products, loading, error } = useFetch("/Product/GetProducts");
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Hiển thị/ẩn thanh kéo giá
   const [showPriceSlider, setShowPriceSlider] = useState(false);
-  // Khoảng giá (khi showPriceSlider = true)
   const [priceRange, setPriceRange] = useState([0, 1000000]);
-
-  // Lọc theo loại (mặc định = "", nghĩa là "Tất cả")
   const [filterCategory, setFilterCategory] = useState("");
-
-  // Sắp xếp giá (asc, desc, none)
-  const [sortMode, setSortMode] = useState("none");
-
+  const [sortMode, setSortMode] = useState("asc");
   const { dispatch } = useContext(CartContext);
 
-  // Lấy danh mục duy nhất
-  const categories = products
-    ? [...new Set(products.map((p) => p.category))]
-    : [];
+  // Lấy danh sách sản phẩm từ API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        let response;
+        if (sortMode === "asc") {
+          response = await productApi.getSortedByPriceAsc();
+        } else if (sortMode === "desc") {
+          response = await productApi.getSortedByPriceDesc();
+        }
+        setProducts(response.data);
+      } catch (err) {
+        setError("Có lỗi xảy ra khi tải dữ liệu sản phẩm.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [sortMode]);
 
-  // 1. Lọc theo tên + khoảng giá + loại
+  // Lấy danh mục duy nhất
+  const categories = products ? [...new Set(products.map((p) => p.categoryId))] : [];
+
+  // 1. Lọc sản phẩm theo tên + khoảng giá + loại
   let filteredProducts = products?.filter((product) => {
-    const matchesName = product.name
+    const matchesName = product.productName
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesPrice =
       !showPriceSlider ||
       (product.price >= priceRange[0] && product.price <= priceRange[1]);
-    const matchesCategory = filterCategory
-      ? product.category === filterCategory
-      : true;
-
+    const matchesCategory = filterCategory ? product.categoryId === filterCategory : true;
     return matchesName && matchesPrice && matchesCategory;
   });
 
-  // 2. Sắp xếp theo giá (asc, desc)
-  if (sortMode === "asc") {
-    filteredProducts = filteredProducts?.sort((a, b) => a.price - b.price);
-  } else if (sortMode === "desc") {
-    filteredProducts = filteredProducts?.sort((a, b) => b.price - a.price);
-  }
-
-  // Xử lý thêm vào giỏ hàng (ngăn click card)
+  // Xử lý thêm vào giỏ hàng
   const handleAddToCart = (e, product) => {
-    e.stopPropagation(); // Ngăn onClick card
+    e.stopPropagation();
     dispatch({ type: "ADD_ITEM", payload: product });
   };
 
-  // Khi click toàn bộ card => chuyển sang chi tiết
+  // Chuyển sang trang chi tiết sản phẩm
   const handleCardClick = (id) => {
     navigate(`/products/${id}`);
   };
 
   if (loading) return <p>Đang tải sản phẩm...</p>;
-  if (error) return <p>Có lỗi xảy ra khi tải dữ liệu sản phẩm.</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="product-page">
       <h2>Danh sách sản phẩm</h2>
 
-      {/* Tất cả bộ lọc + tìm kiếm + sắp xếp trên 1 hàng */}
+      {/* Bộ lọc + tìm kiếm + sắp xếp */}
       <div className="product-filters-row">
-        {/* Tìm kiếm theo tên */}
         <Input
           placeholder="Tìm theo tên"
           value={searchTerm}
@@ -80,12 +81,10 @@ const ProductPage = () => {
           style={{ width: 200 }}
         />
 
-        {/* Nút "Chọn mức giá" */}
         <Button onClick={() => setShowPriceSlider(!showPriceSlider)}>
           {showPriceSlider ? "Ẩn chọn giá" : "Chọn mức giá"}
         </Button>
 
-        {/* Thanh kéo (Slider) - hiển thị khi showPriceSlider = true */}
         {showPriceSlider && (
           <div style={{ width: 220 }}>
             <Slider
@@ -101,7 +100,6 @@ const ProductPage = () => {
           </div>
         )}
 
-        {/* Lọc theo loại, mặc định = "" (Tất cả) */}
         <Select
           style={{ width: 150 }}
           value={filterCategory}
@@ -115,14 +113,12 @@ const ProductPage = () => {
           ))}
         </Select>
 
-        {/* Sắp xếp giá */}
         <Select
           placeholder="Sắp xếp giá"
           style={{ width: 150 }}
           onChange={(value) => setSortMode(value)}
-          defaultValue="none"
+          defaultValue="asc"
         >
-          <Option value="none">Mặc định</Option>
           <Option value="asc">Thấp đến Cao</Option>
           <Option value="desc">Cao đến Thấp</Option>
         </Select>
@@ -131,30 +127,23 @@ const ProductPage = () => {
       {/* Danh sách sản phẩm */}
       <div className="product-grid">
         {filteredProducts.map((product) => (
-          <div
-            key={product.id}
-            className="product-card"
-            onClick={() => handleCardClick(product.id)}
-          >
+          <div key={product.id} className="product-card" onClick={() => handleCardClick(product.id)}>
             <Card
               hoverable
               cover={
                 <img
-                  alt={product.name}
-                  src={product.image}
+                  alt={product.productName}
+                  src={`/images/${product.image?.description}`}
                   style={{ height: "200px", objectFit: "cover" }}
                 />
               }
             >
               <Card.Meta
-                title={product.name}
+                title={product.productName}
                 description={`${product.price.toLocaleString()} VND`}
               />
               <div className="product-actions">
-                <Button
-                  className="add-to-cart-btn"
-                  onClick={(e) => handleAddToCart(e, product)}
-                >
+                <Button className="add-to-cart-btn" onClick={(e) => handleAddToCart(e, product)}>
                   Thêm vào giỏ hàng
                 </Button>
               </div>

@@ -23,7 +23,8 @@ const userApi = {
 
   // Reset Password
   resetPassword: (email) => {
-    return apiClient.put("/User/ResetPassword", { email });
+    // return apiClient.put("/User/ResetPassword", { email });
+    return apiClient.put(`/User/ResetPassword?email=${email}`);
   },
 };
 
