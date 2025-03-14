@@ -1,8 +1,12 @@
-import 
-import axios from 'axios';
+import apiClient from "./apiClient";
 
-useEffect(() => {
-  axios.get(`https://api.example.com/services/${id}`)
-    .then(response => setServiceData(response.data))
-    .catch(error => console.error('Error fetching service data:', error));
-}, [id]);
+// Hàm lấy danh sách dịch vụ
+export const getServices = async () => {
+  try {
+    const response = await apiClient.get("/services");
+    return response.data; // Trả về dữ liệu để sử dụng
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách dịch vụ:", error);
+    throw error; // Ném lỗi để component có thể xử lý
+  }
+};
