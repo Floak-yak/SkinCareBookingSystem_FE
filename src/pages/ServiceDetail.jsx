@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Carousel } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import useAuth from '../hooks/useAuth';
 import '../styles/ServiceDetail.css';
 
 const ServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [serviceData, setServiceData] = useState(null);
   const carouselRef = React.useRef(null);
@@ -27,13 +29,17 @@ const ServiceDetail = () => {
   }
 
   const handleBooking = () => {
-    navigate('/booking', { 
-      state: {
-        serviceName: "Chăm Sóc Da Cơ Bản",
-        duration: "60 phút",
-        price: "499.000đ"
-      }
-    });
+    if (user) {
+      navigate('/booking', { 
+        state: {
+          serviceName: serviceData.name,
+          duration: serviceData.duration,
+          price: serviceData.price
+        }
+      });
+    } else {
+      navigate('/login?redirect=/booking');
+    }
   };
 
   const handleStepClick = (index) => {

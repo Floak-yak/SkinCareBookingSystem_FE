@@ -1,9 +1,24 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 import '../styles/services.css';
 
 function Services() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleBooking = (e) => {
+    e.stopPropagation();
+    if (user) {
+      navigate('/booking');
+    } else {
+      navigate('/login?redirect=/booking');
+    }
+  };
+
+  const handleCardClick = (serviceId) => {
+    navigate(`/service/${serviceId}`);
+  };
 
   const categorizedServices = [
     {
@@ -124,10 +139,6 @@ function Services() {
     }
   ];
 
-  const handleCardClick = (serviceId) => {
-    navigate(`/service/${serviceId}`);
-  };
-
   return (
     <div className="services-page">
       <div className="services-header">
@@ -145,7 +156,7 @@ function Services() {
                 <p className="service-description">{service.description}</p>
                 <p className="service-price">Giá: {service.price}</p>
                 <p className="service-duration">Thời gian: {service.duration}</p>
-                <button className="book-service-btn" onClick={(e) => { e.stopPropagation(); navigate(`/booking`); }}>Đặt lịch</button>
+                <button className="book-service-btn" onClick={handleBooking}>Đặt lịch</button>
                 <Link to={`/service/${service.id}`} className="view-details-btn" onClick={(e) => e.stopPropagation()}>Xem chi tiết</Link>
               </div>
             ))}
