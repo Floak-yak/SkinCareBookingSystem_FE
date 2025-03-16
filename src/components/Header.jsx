@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Dropdown, Button, message, Badge, Avatar } from "antd";
 import {
   UserOutlined,
@@ -19,10 +19,12 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cart } = useContext(CartContext);
   const totalItems = cart.items.reduce((acc, item) => acc + item.quantity, 0);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     message.success("Đã đăng xuất!");
+    navigate("/");
   };
 
   const userMenuItems = [

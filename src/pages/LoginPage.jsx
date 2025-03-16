@@ -57,7 +57,13 @@ const LoginPage = () => {
       login(userData);
 
       message.success(`Chào mừng, ${userData.fullName}!`);
-      setTimeout(() => navigate("/"), 500);
+      setTimeout(() => {
+        if (role === "Manager") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      }, 500);
     } catch (error) {
       const errorMsg =
         error.response?.data?.message ||
