@@ -90,9 +90,8 @@ const Header = () => {
     {
       key: "logout",
       label: (
-        <span onClick={handleLogout}>
-          <LogoutOutlined /> Đăng xuất
-        </span>
+        <Link to="/" onClick={handleLogout}>
+          <LogoutOutlined /> Đăng xuất</Link>
       ),
     },
   ].filter(Boolean);
