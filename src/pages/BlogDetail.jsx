@@ -9,7 +9,7 @@ const BlogDetail = () => {
   const { data: blogs, loading, error } = useFetch('/data/blogs.json', 'blogs');
 
   if (loading) return <p>Đang tải bài viết...</p>;
-  if (error) return <p>Có lỗi xảy ra khi tải bài viết.</p>;
+  // if (error) return <p>Có lỗi xảy ra khi tải bài viết.</p>;
 
   const blog = blogs.find(b => b.id === Number(id));
   if (!blog) return <p>Bài viết không tồn tại.</p>;

@@ -6,7 +6,7 @@ const userApi = {
   login: (email, password) => {
     return apiClient.post("/User/Login", {
       email,
-      password
+      password,
     });
   },
 
@@ -17,14 +17,23 @@ const userApi = {
       yearOfBirth,
       email,
       password,
-      phoneNumber
+      phoneNumber,
     });
   },
 
   // Reset Password
   resetPassword: (email) => {
-    return apiClient.put("/User/ResetPassword", { email });
+    return apiClient.put(`/User/ResetPassword?email=${email}`);
   },
+
+  getAll: () => apiClient.get("/User/GetUsers"),
+  getStaffs: () => apiClient.get("/User/GetStaffs"),
+  getSkinTherapists: () => apiClient.get("/User/GetSkinTherapists"),
+  getCustomers: () => apiClient.get("/User/GetCustomers"),
+  create: (data) => apiClient.post("/User/CreateAccount", data),
+  updateRole: (userId, role, categoryId = 0) =>
+    apiClient.put("/User", null, { params: { userId, role, categoryId } }),
+  delete: (userId) => apiClient.delete(`/User/Remove?userId=${userId}`),
 };
 
 export default userApi;
