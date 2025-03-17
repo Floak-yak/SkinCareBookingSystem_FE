@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Carousel } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import '../styles/ServiceDetail.css';
+import bookingApi from "../api/bookingApi"; // Import the booking API
 
 const ServiceDetail = () => {
   const { id } = useParams();
@@ -26,14 +27,19 @@ const ServiceDetail = () => {
     return <div>Loading...</div>;
   }
 
-  const handleBooking = () => {
-    navigate('/booking', { 
-      state: {
-        serviceName: "Chăm Sóc Da Cơ Bản",
-        duration: "60 phút",
-        price: "499.000đ"
-      }
-    });
+  const handleBooking = async () => {
+    try {
+      await bookingApi.bookService(id);
+      navigate('/booking', { 
+        state: {
+          serviceName: serviceData.serviceName,
+          duration: serviceData.duration,
+          price: serviceData.price
+        }
+      });
+    } catch (error) {
+      console.error("Lỗi khi đặt lịch:", error);
+    }
   };
 
   const handleStepClick = (index) => {
