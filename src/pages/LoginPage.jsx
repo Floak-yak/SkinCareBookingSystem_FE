@@ -44,10 +44,9 @@ const LoginPage = () => {
           "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ];
 
-      // Tạo object userData để set vào context
       const userData = {
         token, // JWT
-        userId, // từ response.data
+        userId, 
         fullName,
         email,
         role,
@@ -59,7 +58,7 @@ const LoginPage = () => {
       message.success(`Chào mừng, ${userData.fullName}!`);
       setTimeout(() => {
         if (role === "Manager") {
-          navigate("/admin");
+          navigate("/admin/user");
         } else {
           navigate("/");
         }

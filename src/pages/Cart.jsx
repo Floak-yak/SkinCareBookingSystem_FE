@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { List, Button, message } from "antd";
+import { List, Button, message, Modal, QRCode } from "antd";
 import CartContext from "../context/CartContext";
 import useAuth from "../hooks/useAuth";
 import productApi from "../api/productApi";
@@ -9,14 +9,19 @@ import "../styles/cart.css";
 const Cart = () => {
   const navigate = useNavigate();
   const { cart, dispatch } = useContext(CartContext);
-  const { user } = useAuth(); 
+  const { user } = useAuth();
+  const [checkoutURL, setCheckoutURL] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
   console.log("User từ useAuth:", user);
 
   // Giảm số lượng
   const handleDecrease = (e, id, currentQty) => {
     e.stopPropagation();
     if (currentQty > 1) {
-      dispatch({ type: "UPDATE_ITEM", payload: { id, quantity: currentQty - 1 } });
+      dispatch({
+        type: "UPDATE_ITEM",
+        payload: { id, quantity: currentQty - 1 },
+      });
     } else {
       dispatch({ type: "REMOVE_ITEM", payload: { id } });
     }
@@ -25,7 +30,10 @@ const Cart = () => {
   // Tăng số lượng
   const handleIncrease = (e, id, currentQty) => {
     e.stopPropagation();
-    dispatch({ type: "UPDATE_ITEM", payload: { id, quantity: currentQty + 1 } });
+    dispatch({
+      type: "UPDATE_ITEM",
+      payload: { id, quantity: currentQty + 1 },
+    });
   };
 
   // Xóa sản phẩm
@@ -51,28 +59,38 @@ const Cart = () => {
       message.error("Bạn cần đăng nhập trước khi thanh toán!");
       return;
     }
-  
+
     const checkoutProductInformation = cart.items.map((item) => ({
       id: item.id,
       amount: item.quantity,
     }));
-  
+
     const checkoutData = {
-      userId: user.userId, // 🟢 Lấy userId từ useAuth()
+      userId: user.userId,
       checkoutProductInformation,
     };
-  
+
     console.log("Checkout Data gửi lên:", checkoutData); // Debug dữ liệu gửi lên BE
-  
+
     try {
       const res = await productApi.checkOut(checkoutData);
       console.log("✅ Thanh toán thành công:", res.data);
-  
-      message.success("Thanh toán thành công!");
-      dispatch({ type: "CLEAR_CART" });
-      navigate("/thank-you");
-    } catch (err) {
-      console.error("❌ Lỗi thanh toán:", err.response?.data || err.message);
+      console.log("🔎 Toàn bộ response:", JSON.stringify(res.data, null, 2));
+
+      const url = res.data?.checkoutUrl;
+      if (url) {
+        setCheckoutURL(url);
+        setIsModalVisible(true);
+        window.open(url, "_blank");
+        console.log("URL thanh toán:", url);
+      } else {
+        message.error("Lỗi khi nhận URL thanh toán!");
+      }
+    } catch (error) {
+      console.error(
+        "❌ Lỗi khi thanh toán:",
+        error.response?.data || error.message
+      );
       message.error("Thanh toán thất bại!");
     }
   };
@@ -92,15 +110,48 @@ const Cart = () => {
               <List.Item
                 onClick={() => handleItemClick(item.id)}
                 actions={[
-                  <Button onClick={(e) => handleDecrease(e, item.id, item.quantity)}>-</Button>,
-                  <span style={{ width: 30, textAlign: "center" }}>{item.quantity}</span>,
-                  <Button onClick={(e) => handleIncrease(e, item.id, item.quantity)}>+</Button>,
-                  <Button danger onClick={(e) => handleRemove(e, item.id)}>Xóa</Button>,
+                  <Button
+                    onClick={(e) => handleDecrease(e, item.id, item.quantity)}
+                  >
+                    -
+                  </Button>,
+                  <span style={{ width: 30, textAlign: "center" }}>
+                    {item.quantity}
+                  </span>,
+                  <Button
+                    onClick={(e) => handleIncrease(e, item.id, item.quantity)}
+                  >
+                    +
+                  </Button>,
+                  <Button danger onClick={(e) => handleRemove(e, item.id)}>
+                    Xóa
+                  </Button>,
                 ]}
               >
                 <List.Item.Meta
-                  avatar={<img src={item.image} alt={item.name} />}
-                  title={item.name}
+                  avatar={
+                    <img
+                      src={
+                        item.image && item.image.bytes
+                          ? `data:image/${item.image.fileExtension.replace(
+                              ".",
+                              ""
+                            )};base64,${item.image.bytes}`
+                          : "/images/default-placeholder.png" // Ảnh mặc định nếu không có
+                      }
+                      alt={item.name}
+                      onError={(e) =>
+                        (e.target.src = "/images/default-placeholder.png")
+                      }
+                      style={{
+                        width: 100,
+                        height: 100,
+                        objectFit: "cover",
+                        borderRadius: 5,
+                      }}
+                    />
+                  }
+                  title={<strong>{item.productName || "Không có tên"}</strong>} // 🟢 Hiển thị tên sản phẩm
                   description={`${item.price.toLocaleString()} VND`}
                 />
               </List.Item>
