@@ -1,33 +1,21 @@
 import apiClient from "./apiClient";
 
 const productApi = {
-  // Lấy danh sách sản phẩm mặc định (giá từ thấp đến cao)
-  getAllProducts: () => apiClient.get("/Product/SearchAsc"),
-
-  // Tìm kiếm sản phẩm theo tên
+  getAll: () => apiClient.get("/Product/SearchAsc"),
+  delete: (productId) =>
+    apiClient.delete(`/Product/RemoveProduct?productId=${productId}`),
+  create: (data) => apiClient.post("/Product/AddProduct", data),
+  update: (productId, data) =>
+    apiClient.put(`/Product/UpdateProduct?productId=${productId}`, data),
   searchByName: (name) =>
     apiClient.get(`/Product/IncludeName?name=${encodeURIComponent(name)}`),
-
-  // Tìm kiếm theo khoảng giá
   searchByPriceRange: (min, max) =>
     apiClient.get(`/Product/MinMaxPrice?minPrice=${min}&maxPrice=${max}`),
-
-  // Lấy sản phẩm theo danh mục
   searchByCategory: (categoryId) =>
     apiClient.get(`/Product/CategoryId?CategoryId=${categoryId}`),
-
-  // Sắp xếp giá tăng dần
   getSortedByPriceAsc: () => apiClient.get("/Product/SearchAsc"),
-
-  // Sắp xếp giá giảm dần
   getSortedByPriceDesc: () => apiClient.get("/Product/SearchDesc"),
-
-  // Xóa sản phẩm
-  removeProduct: (productId) =>
-    apiClient.delete(`/Product/RemoveProduct?productId=${productId}`),
-
-  // Thêm sản phẩm (hỗ trợ thêm nhiều sản phẩm)
-  addProducts: (products) => apiClient.post("/Product/AddProduct", products),
+  checkOut: (checkoutData) => apiClient.post("/Product", checkoutData),
 };
 
 export default productApi;

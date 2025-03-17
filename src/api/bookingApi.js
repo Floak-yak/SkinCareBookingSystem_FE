@@ -26,4 +26,4 @@ const bookingApi = {
     }),
 };
 
-export default bookingApi; 
+export default bookingApi;
