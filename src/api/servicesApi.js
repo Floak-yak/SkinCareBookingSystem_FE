@@ -2,7 +2,7 @@ import apiClient from "./apiClient";
 
 const servicesApi = {
   // Lấy danh sách tất cả dịch vụ
-  getAllServices: () => apiClient.get("/SkincareServices/GetServices?page=1&pageSize=10"),
+  getAllServices: () => apiClient.get("/SkincareServices/GetServices?page=1&pageSize=12"),
 
   // Lấy chi tiết dịch vụ theo ID
   getServiceById: (id) => apiClient.get(`/ServicesDetail/GetByService/${id}`), // ✅ API chuẩn
