@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Form, Input, Button, message } from "antd";
 import useAuth from "../hooks/useAuth";
-import userApi from "../api/userApi"; // Thay vì gọi thẳng apiClient
+import apiClient from "../api/apiClient";
 import { jwtDecode } from "jwt-decode";
 import "../styles/loginPage.css";
 
@@ -14,42 +14,60 @@ const LoginPage = () => {
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      // GỌI userApi.login thay vì apiClient.post
-      const response = await userApi.login(values.email, values.password);
+      const response = await apiClient.post("/User/Login", {
+        email: values.email,
+        password: values.password,
+      });
 
-      const token = response.data; // BE trả về token
-
+      // => FE lấy token, userId
+      const { token, userId } = response.data;
       if (!token) {
         message.error("Phản hồi từ server không hợp lệ!");
         return;
       }
 
-      // Decode token => user info
-      const decoded = jwtDecode(token);
-      console.log("Decoded Token:", decoded);
+      // Decode token để lấy thông tin user
+      const decodedToken = jwtDecode(token);
+      console.log("Decoded Token:", decodedToken);
 
-      // Tùy claim name, email, role,...
-      const userData = {
-        token,
-        fullName:
-          decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
-        email:
-          decoded[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-          ],
-        role: decoded[
+      // Tuỳ các claim mà bạn đã set
+      const fullName =
+        decodedToken[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+        ];
+      const email =
+        decodedToken[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+        ];
+      const role =
+        decodedToken[
           "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-        ],
+        ];
+
+      // Tạo object userData để set vào context
+      const userData = {
+        token, // JWT
+        userId, // từ response.data
+        fullName,
+        email,
+        role,
       };
 
-      // Gọi login từ useAuth => lưu localStorage, setUser
+      // Gọi hàm login trong AuthContext => lưu localStorage, setUser
       login(userData);
 
       message.success(`Chào mừng, ${userData.fullName}!`);
-      setTimeout(() => navigate("/"), 500);
+      setTimeout(() => {
+        if (role === "Manager") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      }, 500);
     } catch (error) {
-      console.error("Login error:", error);
-      const errorMsg = error.response?.data || "Sai email hoặc mật khẩu!";
+      const errorMsg =
+        error.response?.data?.message ||
+        "Sai email hoặc mật khẩu! Vui lòng thử lại.";
       message.error(errorMsg);
     } finally {
       setLoading(false);

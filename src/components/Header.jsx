@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Dropdown, Button, message, Badge, Avatar } from "antd";
 import {
   UserOutlined,
@@ -19,12 +19,18 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cart } = useContext(CartContext);
   const totalItems = cart.items.reduce((acc, item) => acc + item.quantity, 0);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     message.success("Đã đăng xuất!");
+    navigate("/");
   };
 
+  // Lấy role
+  const role = user?.role;
+
+  // =================== MENU USER DROPDOWN ====================
   const userMenuItems = [
     {
       key: "profile",
@@ -38,7 +44,7 @@ const Header = () => {
       key: "role",
       label: (
         <span>
-          <IdcardOutlined /> Vai trò: {user?.role || "Chưa xác định"}
+          <IdcardOutlined /> Vai trò: {role || "Chưa xác định"}
         </span>
       ),
     },
@@ -51,7 +57,9 @@ const Header = () => {
       ),
     },
     { type: "divider" },
-    user?.role === "Staff" && {
+
+    // Chỉ hiển thị "Duyệt bài" nếu role = Staff
+    role === "Staff" && {
       key: "approve",
       label: (
         <Link to="/staff/approve-blogs" className="staff-approve-btn">
@@ -59,6 +67,26 @@ const Header = () => {
         </Link>
       ),
     },
+
+    // Chỉ hiển thị "Trang Admin" nếu role = Manager
+    role === "Manager" && {
+      key: "adminPage",
+      label: (
+        <Link to="/admin" className="admin-btn">
+          <CheckCircleOutlined /> Trang Admin
+        </Link>
+      ),
+    },
+    role === "Customer" && {
+      key: "orderHistory",
+      label: (
+        <Link to="/orderHistory" className="order-history-btn">
+          <CheckCircleOutlined /> Lịch sử đặt hàng
+        </Link>
+      ),
+    },
+
+    { type: "divider" },
     {
       key: "logout",
       label: (
@@ -69,6 +97,39 @@ const Header = () => {
     },
   ].filter(Boolean);
 
+  // =================== MENU CHÍNH (TUỲ ROLE) ====================
+  const renderNavLinks = () => {
+    if (role === "Manager") {
+      return (
+        <>
+          {/* Quản trị */}
+          <Link to="/admin/user">Quản lý tài khoản</Link>
+          <Link to="/admin/product">Quản lý sản phẩm</Link>
+          <Link to="/admin/categories">Quản lý danh mục</Link>
+        </>
+      );
+    } else if (role === "Staff") {
+      return (
+        <>
+          {/* Approve Blogs */}
+          <Link to="/staff/approve-blogs">Duyệt bài</Link>
+        </>
+      );
+    } else {
+      // Role = "Customer" hoặc chưa login
+      return (
+        <>
+          <Link to="/">Trang chủ</Link>
+          <Link to="/services">Dịch vụ</Link>
+          <Link to="/products">Sản phẩm</Link>
+          <Link to="/blogs">Blogs</Link>
+          <Link to="/contact">Liên hệ</Link>
+          <Link to="/about">Về chúng tôi</Link>
+        </>
+      );
+    }
+  };
+
   return (
     <header className="header">
       <Link to="/" className="logo">
@@ -76,22 +137,20 @@ const Header = () => {
       </Link>
 
       {/* 🟢 MENU CHÍNH */}
-      <nav className={`nav ${menuOpen ? "open" : ""}`}>
-        <Link to="/">Trang chủ</Link>
-        <Link to="/services">Dịch vụ</Link>
-        <Link to="/products">Sản phẩm</Link>
-        <Link to="/blogs">Blogs</Link>
-        <Link to="/contact">Liên hệ</Link>
-        <Link to="/about">Về chúng tôi</Link>
-      </nav>
+      <nav className={`nav ${menuOpen ? "open" : ""}`}>{renderNavLinks()}</nav>
 
       {/* 🛒 CART & USER */}
+
       <div className="cart-auth">
-        <Link to="/cart" className="cart-link">
-          <Badge count={totalItems} showZero={false} offset={[0, 0]}>
-            <ShoppingCartOutlined style={{ fontSize: "25px", color: "white" }} />
-          </Badge>
-        </Link>
+        {(role === "Customer" || !role) && (
+          <Link to="/cart" className="cart-link">
+            <Badge count={totalItems} showZero={false} offset={[0, 0]}>
+              <ShoppingCartOutlined
+                style={{ fontSize: "25px", color: "white" }}
+              />
+            </Badge>
+          </Link>
+        )}
 
         {/* 🔵 AVATAR USER */}
         <div className="auth">
@@ -99,7 +158,9 @@ const Header = () => {
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <Button type="text" className="user-info">
                 <Avatar src={user.avatar} icon={<UserOutlined />} />
-                <span className="user-name">{user?.fullName || "Người dùng"}</span>
+                <span className="user-name">
+                  {user?.fullName || "Người dùng"}
+                </span>
               </Button>
             </Dropdown>
           ) : (

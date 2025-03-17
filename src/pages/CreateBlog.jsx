@@ -10,7 +10,7 @@ import "../styles/createBlog.css";
 
 const { Option } = Select;
 
-// Map tên danh mục -> ID
+// Map tên danh mục -> ID (theo quy ước của BE)
 const categoryMap = {
   "Chăm sóc da": 1,
   "Sản phẩm skincare": 2,
@@ -23,21 +23,20 @@ const CreateBlog = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-  const [content, setContent] = useState(""); // Nội dung bài viết
+  const [content, setContent] = useState(""); // Nội dung bài viết (HTML)
   const [imageBase64, setImageBase64] = useState(null); // Ảnh đại diện
 
-  // Quill ref
+  // Ref cho ReactQuill
   const quillRef = useRef(null);
 
   useEffect(() => {
-    // Nếu chưa đăng nhập, chuyển về /login
     if (!user) {
       message.error("Bạn cần đăng nhập để viết bài!");
       navigate("/login");
     }
   }, [user, navigate]);
 
-  // Upload ảnh đại diện (preview tại FE)
+  // Hàm upload ảnh đại diện (preview FE)
   const handleImageUpload = (file) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -45,7 +44,7 @@ const CreateBlog = () => {
     return false; // Ngăn upload mặc định của antd
   };
 
-  // Custom image handler cho Quill
+  // Custom image handler cho ReactQuill (cho phép chèn ảnh vào nội dung)
   const handleQuillImage = () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -61,14 +60,13 @@ const CreateBlog = () => {
           const base64 = reader.result;
           const quillEditor = quillRef.current.getEditor();
           const range = quillEditor.getSelection();
-          // Chèn ảnh base64 vào nội dung Quill
           quillEditor.insertEmbed(range.index, "image", base64, "user");
         };
       }
     };
   };
 
-  // Cấu hình toolbar của Quill
+  // Cấu hình toolbar của ReactQuill với custom image handler
   const quillModules = useMemo(
     () => ({
       toolbar: {
@@ -87,7 +85,7 @@ const CreateBlog = () => {
     []
   );
 
-  // Xử lý submit form => Gọi API /Post/Create
+  // Khi submit form, gọi API tạo bài viết (CreatePost)
   const handleSubmit = async (values) => {
     if (!user) {
       message.error("Bạn cần đăng nhập để đăng bài!");
@@ -100,34 +98,29 @@ const CreateBlog = () => {
     setLoading(true);
 
     try {
-      // Map tên danh mục -> ID
+      // Lấy category ID từ giá trị chọn (nếu không có, mặc định là 1)
       const catId = categoryMap[values.category] || 1;
-
-      // Ảnh đại diện: nếu user không chọn => gửi chuỗi rỗng
-      // Còn nếu user đã chọn => gửi chính base64
-      const postImageLink = imageBase64 || "";
+      // Nếu người dùng không chọn ảnh, sử dụng ảnh mặc định
+      const postImageLink = imageBase64 || "https://via.placeholder.com/300";
 
       // Tạo body request theo cấu trúc BE (CreatePostWithContentsRequest)
       const body = {
-        userId: user.id,
+        userId: user.id||user.userId,
         title: values.title,
         contents: [
           {
-            contentOfPost: content,   // toàn bộ HTML Quill
-            contentType: 0,          // 0 = text, tuỳ backend
+            contentOfPost: content,
+            contentType: 0,
             position: 1,
-            // Nếu bạn muốn gắn thêm ảnh cho content
-            // imageLink: imageBase64 || "",
-            // tạm để trống cho content, tuỳ ý:
             imageLink: "",
             postId: 0,
           },
         ],
         categoryId: catId,
-        imageLink: postImageLink, // ảnh đại diện cho Post
+        imageLink: postImageLink,
       };
 
-      // Gọi API => /Post/Create (qua apiClient)
+      // Gọi API: POST /Post/Create
       const res = await apiClient.post("/Post/Create", body);
       console.log("Create post response:", res.data);
 
@@ -139,17 +132,10 @@ const CreateBlog = () => {
       navigate("/blogs");
     } catch (error) {
       console.error("Lỗi khi gọi API tạo bài:", error);
-      if (error.response) {
-        console.log("HTTP Status:", error.response.status);
-        console.log("Response Headers:", error.response.headers);
-        console.log("Response Data:", error.response.data);
-      }
-
       let errorMsg = "Lỗi khi tạo bài viết. Hãy thử lại!";
       if (error.response?.data) {
         const serverData = error.response.data;
         if (typeof serverData === "object") {
-          // Tìm 1 trường message cụ thể hay title trả về từ server
           errorMsg = serverData.title || JSON.stringify(serverData);
         } else {
           errorMsg = serverData;
@@ -195,7 +181,6 @@ const CreateBlog = () => {
           </Select>
         </Form.Item>
 
-        {/* Ảnh đại diện */}
         <Form.Item label="Ảnh đại diện">
           <Upload
             showUploadList={false}

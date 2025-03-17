@@ -1,33 +1,37 @@
-import React, { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import CartContext from '../context/CartContext';
-import { List, Button } from 'antd';
+import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { List, Button, message } from "antd";
+import CartContext from "../context/CartContext";
+import useAuth from "../hooks/useAuth";
+import productApi from "../api/productApi";
 import "../styles/cart.css";
 
 const Cart = () => {
   const navigate = useNavigate();
   const { cart, dispatch } = useContext(CartContext);
+  const { user } = useAuth(); 
+  console.log("User từ useAuth:", user);
 
-  // Giảm số lượng. Nếu số lượng = 1, xóa sản phẩm
+  // Giảm số lượng
   const handleDecrease = (e, id, currentQty) => {
-    e.stopPropagation(); // Ngăn onClick item
+    e.stopPropagation();
     if (currentQty > 1) {
-      dispatch({ type: 'UPDATE_ITEM', payload: { id, quantity: currentQty - 1 } });
+      dispatch({ type: "UPDATE_ITEM", payload: { id, quantity: currentQty - 1 } });
     } else {
-      dispatch({ type: 'REMOVE_ITEM', payload: { id } });
+      dispatch({ type: "REMOVE_ITEM", payload: { id } });
     }
   };
 
   // Tăng số lượng
   const handleIncrease = (e, id, currentQty) => {
-    e.stopPropagation(); // Ngăn onClick item
-    dispatch({ type: 'UPDATE_ITEM', payload: { id, quantity: currentQty + 1 } });
+    e.stopPropagation();
+    dispatch({ type: "UPDATE_ITEM", payload: { id, quantity: currentQty + 1 } });
   };
 
   // Xóa sản phẩm
   const handleRemove = (e, id) => {
-    e.stopPropagation(); // Ngăn onClick item
-    dispatch({ type: 'REMOVE_ITEM', payload: { id } });
+    e.stopPropagation();
+    dispatch({ type: "REMOVE_ITEM", payload: { id } });
   };
 
   // Khi click vào sản phẩm => xem chi tiết
@@ -41,10 +45,36 @@ const Cart = () => {
     0
   );
 
-  // Xử lý khi bấm nút "Thanh toán"
-  const handleCheckout = () => {
-    // Tùy theo logic của bạn: chuyển trang, gọi API, ...
-    console.log("Thanh toán giỏ hàng:", cart.items);
+  // 🟢 Xử lý khi bấm nút "Thanh toán"
+  const handleCheckout = async () => {
+    if (!user || !user.userId) {
+      message.error("Bạn cần đăng nhập trước khi thanh toán!");
+      return;
+    }
+  
+    const checkoutProductInformation = cart.items.map((item) => ({
+      id: item.id,
+      amount: item.quantity,
+    }));
+  
+    const checkoutData = {
+      userId: user.userId, // 🟢 Lấy userId từ useAuth()
+      checkoutProductInformation,
+    };
+  
+    console.log("Checkout Data gửi lên:", checkoutData); // Debug dữ liệu gửi lên BE
+  
+    try {
+      const res = await productApi.checkOut(checkoutData);
+      console.log("✅ Thanh toán thành công:", res.data);
+  
+      message.success("Thanh toán thành công!");
+      dispatch({ type: "CLEAR_CART" });
+      navigate("/thank-you");
+    } catch (err) {
+      console.error("❌ Lỗi thanh toán:", err.response?.data || err.message);
+      message.error("Thanh toán thất bại!");
+    }
   };
 
   return (
@@ -60,11 +90,10 @@ const Cart = () => {
             dataSource={cart.items}
             renderItem={(item) => (
               <List.Item
-                // Khi click item => chuyển trang chi tiết
                 onClick={() => handleItemClick(item.id)}
                 actions={[
                   <Button onClick={(e) => handleDecrease(e, item.id, item.quantity)}>-</Button>,
-                  <span style={{ width: 30, textAlign: 'center' }}>{item.quantity}</span>,
+                  <span style={{ width: 30, textAlign: "center" }}>{item.quantity}</span>,
                   <Button onClick={(e) => handleIncrease(e, item.id, item.quantity)}>+</Button>,
                   <Button danger onClick={(e) => handleRemove(e, item.id)}>Xóa</Button>,
                 ]}
@@ -78,7 +107,6 @@ const Cart = () => {
             )}
           />
 
-          {/* Hiển thị tổng số tiền và nút thanh toán */}
           <div className="cart-footer">
             <div className="cart-total">
               <span>Tổng tiền: </span>
