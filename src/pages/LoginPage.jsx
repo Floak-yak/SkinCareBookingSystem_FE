@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Form, Input, Button, message } from "antd";
 import useAuth from "../hooks/useAuth";
 import apiClient from "../api/apiClient";
@@ -10,6 +10,8 @@ const LoginPage = () => {
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/";
 
   const handleLogin = async (values) => {
     setLoading(true);
@@ -33,21 +35,20 @@ const LoginPage = () => {
       // Tuỳ các claim mà bạn đã set
       const fullName =
         decodedToken[
-          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
         ];
       const email =
         decodedToken[
-          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
         ];
       const role =
         decodedToken[
-          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ];
 
-      // Tạo object userData để set vào context
       const userData = {
         token, // JWT
-        userId, // từ response.data
+        userId, 
         fullName,
         email,
         role,
@@ -57,13 +58,17 @@ const LoginPage = () => {
       login(userData);
 
       message.success(`Chào mừng, ${userData.fullName}!`);
+
+      //setTimeout(() => navigate(redirectPath), 500);
+
       setTimeout(() => {
         if (role === "Manager") {
-          navigate("/admin");
+          navigate("/admin/user");
         } else {
           navigate("/");
         }
       }, 500);
+
     } catch (error) {
       const errorMsg =
         error.response?.data?.message ||

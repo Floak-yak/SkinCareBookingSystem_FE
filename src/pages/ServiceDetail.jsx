@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Carousel } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import useAuth from '../hooks/useAuth';
 import '../styles/ServiceDetail.css';
-import bookingApi from "../api/bookingApi"; // Import the booking API
 
 const ServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [serviceData, setServiceData] = useState(null);
   const carouselRef = React.useRef(null);
@@ -27,18 +28,17 @@ const ServiceDetail = () => {
     return <div>Loading...</div>;
   }
 
-  const handleBooking = async () => {
-    try {
-      await bookingApi.bookService(id);
+  const handleBooking = () => {
+    if (user) {
       navigate('/booking', { 
         state: {
-          serviceName: serviceData.serviceName,
+          serviceName: serviceData.name,
           duration: serviceData.duration,
           price: serviceData.price
         }
       });
-    } catch (error) {
-      console.error("Lỗi khi đặt lịch:", error);
+    } else {
+      navigate('/login?redirect=/booking');
     }
   };
 
@@ -92,7 +92,7 @@ const ServiceDetail = () => {
             key={index} 
             className={`progress-step ${index === currentStep ? 'active' : ''} 
               ${index < currentStep ? 'completed' : ''}`}
-            onClick={() => handleStepClick(index)}
+              onClick={() => handleStepClick(index)}
           >
             <div className="step-number">{index + 1}</div>
             <div className="step-label">

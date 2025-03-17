@@ -1,4 +1,3 @@
-// src/components/ImageManager.jsx
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
@@ -26,17 +25,22 @@ const ImageManager = ({ visible, onClose, onSelectImage }) => {
     }
   };
 
-  const handleUpload = async ({ file }) => {
+  const handleUpload = async (file) => {
     try {
+      console.log("Đang upload file:", file);
+
       const res = await imageApi.upload(file);
+      console.log("Res từ API:", res.data);
+
       if (res.data?.id) {
         message.success("Upload ảnh thành công!");
         fetchImages();
-      } else {
-        message.error("Upload ảnh thất bại!");
-      }
+      } 
     } catch (error) {
-      message.error("Upload ảnh thất bại!");
+      console.error(
+        "Lỗi khi upload ảnh:",
+        error.response?.data || error.message
+      );
     }
     return false;
   };
