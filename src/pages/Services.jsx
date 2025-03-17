@@ -7,7 +7,7 @@ function Services() {
 
   const categorizedServices = [
     {
-      category: 'Chăm Sóc Da Cơ Bản',
+      category: 'Chăm Sóc Da Tổng Hợp',
       services: [
         {
           id: 1,
