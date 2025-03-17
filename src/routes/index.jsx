@@ -16,7 +16,9 @@ import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
 import ForgotPassword from "../pages/ForgotPassword";
 import AboutUs from "../pages/AboutUs";
-import AdminPage from "../pages/AdminPage";
+import ManageProductsPage from "../pages/admin/ManageProductsPage";
+import ManageUsersPage from "../pages/admin/ManageUsersPage";
+import ManageCategoriesPage from "../pages/admin/ManageCategoryPage";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -48,7 +50,10 @@ const AppRoutes = () => {
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/about" element={<AboutUs />} />
-      <Route path="/admin" element={<AdminPage />} />
+      {/* admin page */}
+      <Route path="/admin/product" element={<ManageProductsPage />} />
+      <Route path="/admin/user" element={<ManageUsersPage />} />
+      <Route path="/admin/categories" element={<ManageCategoriesPage />} />
     </Routes>
   );
 };
