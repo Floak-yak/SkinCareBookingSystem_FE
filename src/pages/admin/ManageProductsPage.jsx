@@ -105,7 +105,7 @@ const ManageProductsPage = () => {
   const handleUpdateProduct = async (values) => {
     try {
       const payload = {
-        id: editingProduct.id,
+        productId: editingProduct.id, 
         productName: values.productName,
         price: values.price,
         categoryId: values.categoryId,

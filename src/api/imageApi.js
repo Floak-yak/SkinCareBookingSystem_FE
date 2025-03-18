@@ -9,7 +9,6 @@ const imageApi = {
 
     return apiClient.post("/Image/UploadImage", formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });

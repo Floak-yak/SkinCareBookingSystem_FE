@@ -9,6 +9,7 @@ import {
   MenuOutlined,
   CheckCircleOutlined,
   ShoppingCartOutlined,
+  ProfileOutlined,
 } from "@ant-design/icons";
 import "../styles/header.css";
 import useAuth from "../hooks/useAuth";
@@ -56,6 +57,14 @@ const Header = () => {
         </span>
       ),
     },
+    {
+      key: "updateProfile",
+      label: (
+        <Link to="/update-profile" className="update-profile-btn">
+          <ProfileOutlined /> Chỉnh sửa thông tin
+        </Link>
+      ),
+    },
     { type: "divider" },
 
     // Chỉ hiển thị "Duyệt bài" nếu role = Staff
@@ -80,7 +89,7 @@ const Header = () => {
     role === "Customer" && {
       key: "orderHistory",
       label: (
-        <Link to="/orderHistory" className="order-history-btn">
+        <Link to="/order-history" className="order-history-btn">
           <CheckCircleOutlined /> Lịch sử đặt hàng
         </Link>
       ),
