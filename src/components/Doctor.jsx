@@ -1,39 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/Doctor.css';
-
-const doctors = [
-    {
-        name: "Nguyễn Văn A",
-        comment: "Đến với chúng tôi, làn da của bạn sẽ trở nên hoàn hảo từ sâu bên trong.",
-        image: "https://th.bing.com/th/id/OIP.VjnDTh-qKV24EOxPOiKJvAHaLH?w=115&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7"
-    },
-    {
-        name: "Nguyễn Văn B",
-        comment: "Đẹp hơn mỗi ngày với những liệu trình chuyên sâu từ spa của chúng tôi.",
-        image: "https://th.bing.com/th/id/OIP.DJDuwT98kRr_E8xKrq1HwgHaLI?w=115&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7"
-    },
-    {
-        name: "Nguyễn Văn C",
-        comment: "Hãy để chúng tôi chăm sóc bạn, để bạn có thể chăm sóc thế giới.",
-        image: "https://th.bing.com/th/id/OIP.XLyQ5Pp5Io9SzR6LmF1yLAHaKo?w=137&h=197&c=7&r=0&o=5&dpr=1.3&pid=1.7"
-    },
-    {
-        name: "Nguyễn Văn D",
-        comment: "Chúng tôi không chỉ mang đến dịch vụ, mà còn là sự tận tâm.",
-        image: "https://th.bing.com/th/id/OIP.Um8ILeEU-gjZ0xHU0pzSnQAAAA?pid=ImgDet&w=184&h=244&c=7&dpr=1.3"
-    },
-];
+import doctorApi from '../api/doctorApi';
 
 const DoctorProfiles = () => {
+    const [doctors, setDoctors] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch both doctors and images in parallel
+                const [doctorsResponse, imagesResponse] = await Promise.all([
+                    doctorApi.getAllDoctors(),
+                    doctorApi.getAllImages()
+                ]);
+
+                // Create a map of images by id for faster lookup
+                const imagesMap = imagesResponse.data.reduce((acc, img) => {
+                    acc[img.id] = img;
+                    return acc;
+                }, {});
+
+                // Map doctors with their corresponding images
+                const doctorsWithImages = doctorsResponse.data.map(doctor => ({
+                    ...doctor,
+                    imageData: imagesMap[doctor.id] || null
+                }));
+
+                setDoctors(doctorsWithImages);
+                setLoading(false);
+            } catch (err) {
+                setError('Không thể tải thông tin bác sĩ');
+                setLoading(false);
+                console.error('Error fetching data:', err);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    if (loading) return <div>Đang tải...</div>;
+    if (error) return <div>{error}</div>;
+
     return (
         <div className="container">
             <h2 className="title">Chuyên Viên Đồng Hành</h2>
             <div className="profiles">
-                {doctors.map((doctor, index) => (
-                    <div key={index} className="card">
-                        <img src={doctor.image} alt={doctor.name} className="image" />
-                        <h3 className="name">{doctor.name}</h3>
-                        <p className="comment">{doctor.comment}</p>
+                {doctors.map((doctor) => (
+                    <div key={doctor.id} className="card">
+                        <img
+                            src={doctor.imageData?.bytes ? `data:image/${doctor.imageData.fileExtension.replace('.', '')};base64,${doctor.imageData.bytes}` : 'https://img.freepik.com/premium-photo/photo-smiling-female-doctor-gray-background_849827-101.jpg'}
+                            alt={doctor.fullName}
+                            className="image"
+                            onError={(e) => {
+                                console.log('Image load error for doctor:', doctor.fullName);
+                                e.target.src = 'https://img.freepik.com/premium-photo/photo-smiling-female-doctor-gray-background_849827-101.jpg';
+                            }}
+                        />
+                        <h3 className="name">{doctor.fullName}</h3>
+                        <p className="comment">{doctor.description || 'Chuyên gia với nhiều năm kinh nghiệm trong lĩnh vực chăm sóc da.'}</p>
                     </div>
                 ))}
             </div>

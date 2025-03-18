@@ -1,6 +1,8 @@
 import apiClient from "./apiClient";
 
 const categoryApi = {
+    // Lấy danh sách categories
+    getAllCategories: () => apiClient.get("/Category/GetCategories"),
   getAll: () => apiClient.get("/Category/GetCategories"),
   getById: (categoryId) => apiClient.get(`/Category/GetCategoryById?categoryId=${categoryId}`),
   create: (categoryName) => 
