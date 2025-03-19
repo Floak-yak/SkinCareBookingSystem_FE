@@ -10,7 +10,7 @@ import {
   InputNumber,
 } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
-import servicesDetailApi from "../../api/servicedetailApi";
+import serviceDetailApi from "../../api/servicesDetailApi";
 import ImageManager from "../../components/ImageManager";
 
 const ManageServiceDetailsPage = () => {
@@ -45,7 +45,7 @@ const ManageServiceDetailsPage = () => {
   // Lấy danh sách ServiceDetail
   const fetchServiceDetails = async () => {
     try {
-      const res = await servicesDetailApi.getDetailsByServiceId(serviceId);
+      const res = await serviceDetailApi.getDetailsByServiceId(serviceId);
       // Kiểm tra cấu trúc trả về
       // Ở đây ta giả định res.data.data là mảng
       setDetails(res.data.data || []);
@@ -70,7 +70,7 @@ const ManageServiceDetailsPage = () => {
         ...values,
         serviceId: Number(serviceId),
       };
-      await servicesDetailApi.createDetail(payload);
+      await serviceDetailApi.createDetail(payload);
       message.success("Tạo chi tiết dịch vụ thành công!");
       setIsCreateModalVisible(false);
       createForm.resetFields();
@@ -108,7 +108,7 @@ const ManageServiceDetailsPage = () => {
         ...values,
         serviceId: Number(serviceId),
       };
-      await servicesDetailApi.updateDetail(editingDetail.id, payload);
+      await serviceDetailApi.updateDetail(editingDetail.id, payload);
       message.success("Cập nhật chi tiết dịch vụ thành công!");
       setIsEditModalVisible(false);
       editForm.resetFields();
@@ -125,7 +125,7 @@ const ManageServiceDetailsPage = () => {
   // =======================
   const handleDelete = async (id) => {
     try {
-      await servicesDetailApi.deleteDetail(id);
+      await serviceDetailApi.deleteDetail(id);
       message.success("Xóa thành công!");
       fetchServiceDetails();
     } catch (error) {

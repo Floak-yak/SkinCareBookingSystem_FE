@@ -1,6 +1,6 @@
 import apiClient from "./apiClient";
 
-const servicedetailApi = {
+const serviceDetailApi = {
   // Lấy chi tiết của một dịch vụ theo serviceId
   getByServiceId: (serviceId) =>
     apiClient.get(`/ServicesDetail/GetByService/${serviceId}`),
@@ -20,4 +20,4 @@ const servicedetailApi = {
     apiClient.delete(`/ServicesDetail/Delete?id=${detailId}`),
 };
 
-export default servicedetailApi;
+export default serviceDetailApi;
