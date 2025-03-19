@@ -12,7 +12,6 @@ const Cart = () => {
   const { user } = useAuth();
   const [checkoutURL, setCheckoutURL] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
-  console.log("User từ useAuth:", user);
 
   // Giảm số lượng
   const handleDecrease = (e, id, currentQty) => {
@@ -68,6 +67,8 @@ const Cart = () => {
     const checkoutData = {
       userId: user.userId,
       checkoutProductInformation,
+      returnUrl:`http://localhost:3000/success.html`, // URL trả về sau khi thanh toán
+      cancelUrl: `http://localhost:3000/cancel.html`, // URL khi người dùng hủy thanh toán
     };
 
     console.log("Checkout Data gửi lên:", checkoutData); // Debug dữ liệu gửi lên BE

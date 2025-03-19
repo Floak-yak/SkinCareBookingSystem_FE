@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Spin } from "antd"; // 🟢 Dùng Ant Design cho loading spinner
+import { Link, useNavigate } from "react-router-dom";
+import { Spin } from "antd"; 
 import servicesApi from "../api/servicesApi";
 import "../styles/services.css";
-
+import useAuth from "../hooks/useAuth";
 
 const Services = () => {
   const navigate = useNavigate();
@@ -12,9 +12,9 @@ const Services = () => {
   const handleBooking = (e) => {
     e.stopPropagation();
     if (user) {
-      navigate('/booking');
+      navigate("/booking");
     } else {
-      navigate('/login?redirect=/booking');
+      navigate("/login?redirect=/booking");
     }
   };
 
@@ -24,7 +24,6 @@ const Services = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
 
   /**
    * Hàm tiện ích lấy URL ảnh từ service:
@@ -36,7 +35,6 @@ const Services = () => {
     if (service.imageBase64) {
       return `data:image/png;base64,${service.imageBase64}`;
     }
-  ];
 
     if (service.image) {
       return service.image;
@@ -136,24 +134,6 @@ const Services = () => {
           );
         })}
       </div>
-      {categorizedServices.map((category) => (
-        <div key={category.category} className="service-category">
-          <h2 className="category-title">{category.category}</h2>
-          <div className="services-container">
-            {category.services.map(service => (
-              <div key={service.id} className="service-item" onClick={() => handleCardClick(service.id)}>
-                <img src={service.image} alt={service.name} className="service-image" />
-                <h3>{service.name}</h3>
-                <p className="service-description">{service.description}</p>
-                <p className="service-price">Giá: {service.price}</p>
-                <p className="service-duration">Thời gian: {service.duration}</p>
-                <button className="book-service-btn" onClick={handleBooking}>Đặt lịch</button>
-                <Link to={`/service/${service.id}`} className="view-details-btn" onClick={(e) => e.stopPropagation()}>Xem chi tiết</Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
     </div>
   );
 };

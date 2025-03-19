@@ -12,7 +12,7 @@ import {
 } from "antd";
 import productApi from "../../api/productApi";
 import categoryApi from "../../api/categoryApi";
-import ImageManager from "./ImageManager";
+import ImageManager from "../../components/ImageManager";
 
 const { Option } = Select;
 
@@ -105,7 +105,7 @@ const ManageProductsPage = () => {
   const handleUpdateProduct = async (values) => {
     try {
       const payload = {
-        id: editingProduct.id,
+        productId: editingProduct.id, 
         productName: values.productName,
         price: values.price,
         categoryId: values.categoryId,

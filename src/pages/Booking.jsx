@@ -3,7 +3,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/booking.css";
 import bookingApi from '../api/bookingApi';
-import serviceApi from '../api/serviceApi';
+import serviceApi from '../api/servicesApi';
 import doctorApi from '../api/doctorApi';
 import categoryApi from '../api/categoryApi';
 import { QRCodeSVG } from 'qrcode.react';

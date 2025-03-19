@@ -19,6 +19,8 @@ import AboutUs from "../pages/AboutUs";
 import ManageProductsPage from "../pages/admin/ManageProductsPage";
 import ManageUsersPage from "../pages/admin/ManageUsersPage";
 import ManageCategoriesPage from "../pages/admin/ManageCategoryPage";
+import ManageSkincareServicesPage from "../pages/admin/ManageSkincareServicesPage";
+import ManageServiceDetailsPage from "../pages/admin/ManageServiceDetailsPage";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -54,6 +56,14 @@ const AppRoutes = () => {
       <Route path="/admin/product" element={<ManageProductsPage />} />
       <Route path="/admin/user" element={<ManageUsersPage />} />
       <Route path="/admin/categories" element={<ManageCategoriesPage />} />
+      <Route
+        path="/admin/manage-services"
+        element={<ManageSkincareServicesPage />}
+      />
+      <Route
+        path="/admin/manage-service-details/:serviceId"
+        element={<ManageServiceDetailsPage />}
+      />
     </Routes>
   );
 };
