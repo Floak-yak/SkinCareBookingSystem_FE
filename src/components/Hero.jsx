@@ -1,17 +1,29 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 import '../styles/Hero.css';
 
 const Hero = () => {
-    return (
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
+    const handleBookingClick = () => {
+        if (user) {
+            navigate('/booking');
+        } else {
+            navigate('/login?redirect=/booking');
+        }
+    };
+
+    return (
         <section className="hero">
             <div className="hero-overlay" />
             <div className="hero-content">
                 <h1>Thiên đường thư giãn của bạn</h1>
                 <p>Trải nghiệm dịch vụ spa cao cấp với công nghệ hàng đầu từ Châu Âu</p>
-                <a href="/" className="cta-button">
+                <button onClick={handleBookingClick} className="cta-button">
                     Đặt lịch ngay
-                </a>
+                </button>
             </div>
         </section>
     );

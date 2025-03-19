@@ -110,5 +110,53 @@
     "category": "Dụng cụ skincare",
     "description": "Bộ cọ trang điểm đa năng với lông cọ mịn, không gây kích ứng, dễ tán phấn và kem nền.",
     "image": "/images/a.png"
-  }
+  },
+  {
+    "id": 15,
+    "name": "Toner Hoa Hồng",
+    "price": 180000,
+    "category": "Chăm sóc da",
+    "description": "Toner hoa hồng dịu nhẹ, cân bằng độ pH cho da, se khít lỗ chân lông.",
+    "image": "https://images.unsplash.com/photo-1611884921475-37a048e69da5?auto=format&w=400&h=400"
+  },
+  {
+    "id": 16,
+    "name": "Kem Dưỡng Ban Ngày SPF30",
+    "price": 320000,
+    "category": "Chăm sóc da",
+    "description": "Kem dưỡng ban ngày tích hợp SPF30, bảo vệ da trước tia UV và cấp ẩm suốt cả ngày.",
+    "image": "https://images.unsplash.com/photo-1603386320596-d9b216b89d6c?auto=format&w=400&h=400"
+  },
+  {
+    "id": 17,
+    "name": "Mặt Nạ Giấy Dưỡng Ẩm",
+    "price": 25000,
+    "category": "Chăm sóc da",
+    "description": "Mặt nạ giấy cấp ẩm nhanh, giúp da căng mịn và tươi sáng tức thì.",
+    "image": "https://images.unsplash.com/photo-1589987609172-66f81ca0273c?auto=format&w=400&h=400"
+  },
+  {
+    "id": 18,
+    "name": "Son Dưỡng Có Màu",
+    "price": 120000,
+    "category": "Trang điểm",
+    "description": "Son dưỡng giúp môi mềm mượt, có màu nhẹ tự nhiên, phù hợp dùng hàng ngày.",
+    "image": "https://images.unsplash.com/photo-1598206697283-9c1f8d2a54ed?auto=format&w=400&h=400"
+  },
+  {
+    "id": 19,
+    "name": "Bọt Rửa Mặt Trà Xanh",
+    "price": 190000,
+    "category": "Chăm sóc da",
+    "description": "Bọt rửa mặt chiết xuất trà xanh, làm sạch sâu lỗ chân lông và kiềm dầu hiệu quả.",
+    "image": "https://images.unsplash.com/photo-1609981355018-d7557307bd3f?auto=format&w=400&h=400"
+  },
+  {
+    "id": 20,
+    "name": "Máy Rửa Mặt Siêu Âm Mini",
+    "price": 550000,
+    "category": "Dụng cụ skincare",
+    "description": "Máy rửa mặt công nghệ siêu âm, tẩy sạch tế bào chết và bụi bẩn sâu, thiết kế nhỏ gọn.",
+    "image": "https://images.unsplash.com/photo-1595900592771-5f3bd9c0456c?auto=format&w=400&h=400"
+  }  
 ]

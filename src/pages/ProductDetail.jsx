@@ -1,55 +1,103 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, Card, Rate, Tabs } from "antd";
-import useFetch from "../hooks/useFetch";
+import { Button, Card, Rate, Tabs, message } from "antd";
 import CartContext from "../context/CartContext";
+import productApi from "../api/productApi";
 import "../styles/productDetail.css";
 
 const { TabPane } = Tabs;
 
 const ProductDetail = () => {
-  // Ví dụ rating tĩnh (có thể thay bằng state hoặc dữ liệu thật)
-  const [rating] = useState(4.5); // 4.5/5
+  const [product, setProduct] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Giả lập rating & review
+  const [rating] = useState(4.5);
   const [numReviews] = useState(120);
-  
+
+  // Giả định route là /products/:id/:name
+  // Hoặc nếu chỉ dùng /products/:id thì bỏ biến name
+  const { id, name } = useParams();
   const navigate = useNavigate();
-  const { id } = useParams();
-  const { data: products, loading, error } = useFetch("/data/products.json");
   const { dispatch } = useContext(CartContext);
 
-  if (loading) return <p>Đang tải sản phẩm...</p>;
-  if (error) return <p>Có lỗi xảy ra khi tải sản phẩm.</p>;
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // 🟢 Gọi API getById thay vì searchByName
+        const productRes = await productApi.getById(id);
+        const currentProduct = productRes.data;
 
-  const product = products.find((p) => p.id === Number(id));
+        if (!currentProduct) {
+          setError("Sản phẩm không tồn tại.");
+          return;
+        }
+
+        setProduct(currentProduct);
+
+        // Lấy danh sách sản phẩm liên quan cùng category
+        if (currentProduct?.categoryId) {
+          const relatedRes = await productApi.searchByCategory(
+            currentProduct.categoryId
+          );
+          let relatedList = relatedRes.data || [];
+          // Loại bỏ sản phẩm hiện tại khỏi danh sách liên quan
+          relatedList = relatedList.filter((p) => String(p.id) !== id);
+          setRelated(relatedList);
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải chi tiết sản phẩm:", err);
+        setError("Không thể tải sản phẩm.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  // Xử lý các trạng thái loading / error / không có sản phẩm
+  if (loading) return <p>Đang tải sản phẩm...</p>;
+  if (error) return <p>{error}</p>;
   if (!product) return <p>Sản phẩm không tồn tại.</p>;
 
-  // Lấy các sản phẩm liên quan cùng category, loại trừ sản phẩm hiện tại
-  const relatedProducts = products.filter(
-    (p) => p.category === product.category && p.id !== product.id
-  );
-
+  // Thêm vào giỏ hàng
   const handleAddToCart = () => {
     dispatch({ type: "ADD_ITEM", payload: product });
+    message.success(`Đã thêm "${product.productName}" vào giỏ hàng!`);
   };
 
-  // Xử lý khi click vào sản phẩm liên quan
-  const handleRelatedClick = (rid) => {
-    navigate(`/products/${rid}`);
+  // Khi click sản phẩm liên quan
+  const handleRelatedClick = (rid, rname) => {
+    navigate(`/products/${rid}/${encodeURIComponent(rname)}`);
   };
 
   return (
     <div className="product-detail-page">
       <div className="product-detail-main">
-        {/* Cột bên trái: Ảnh sản phẩm */}
+        {/* Ảnh sản phẩm */}
         <div className="product-detail-image">
-          <img src={product.image} alt={product.name} />
+          <img
+            src={
+              product?.image?.bytes
+                ? `data:image/${(product.image.fileExtension || ".png").replace(
+                    ".",
+                    ""
+                  )};base64,${product.image.bytes}`
+                : "/images/default-placeholder.png"
+            }
+            alt={product?.productName || "No name"}
+          />
         </div>
-        {/* Cột bên phải: Thông tin sản phẩm */}
-        <div className="product-detail-info">
-          <h1>{product.name}</h1>
-          <p className="product-price">{product.price.toLocaleString()} VND</p>
 
-          {/* Đánh giá */}
+        {/* Thông tin sản phẩm */}
+        <div className="product-detail-info">
+          <h1>{product.productName}</h1>
+          <p className="product-price">{product.price?.toLocaleString()} VND</p>
+
           <div className="product-rating">
             <Rate disabled defaultValue={Math.round(rating)} />
             <span className="rating-text">
@@ -57,7 +105,6 @@ const ProductDetail = () => {
             </span>
           </div>
 
-          {/* Nút thêm giỏ hàng */}
           <Button
             type="primary"
             onClick={handleAddToCart}
@@ -66,19 +113,20 @@ const ProductDetail = () => {
             Thêm vào giỏ hàng
           </Button>
 
-          {/* Tabs: Mô tả, Đánh giá, Chính sách */}
+          {/* Tabs mô tả, đánh giá, chính sách */}
           <Tabs defaultActiveKey="1" className="product-tabs">
             <TabPane tab="Mô tả" key="1">
-              <p className="product-description">{product.description}</p>
+              <p className="product-description">
+                {product.description || "Chưa có mô tả."}
+              </p>
             </TabPane>
             <TabPane tab="Đánh giá" key="2">
-              <p>
-                Hiển thị các đánh giá của người dùng hoặc form đánh giá ở đây.
-              </p>
+              <p>Hiển thị các đánh giá của người dùng ở đây.</p>
             </TabPane>
             <TabPane tab="Chính sách" key="3">
               <p>
-                <strong>Giao hàng:</strong> Miễn phí vận chuyển cho đơn &gt; 500k.
+                <strong>Giao hàng:</strong> Miễn phí vận chuyển cho đơn &gt;
+                500k.
               </p>
               <p>
                 <strong>Đổi trả:</strong> Trong vòng 7 ngày nếu có lỗi nhà sản
@@ -93,25 +141,35 @@ const ProductDetail = () => {
       <div className="related-products">
         <h2>Sản phẩm liên quan</h2>
         <div className="related-products-container">
-          {relatedProducts.map((rp) => (
+          {related.map((rp) => (
             <div
               key={rp.id}
               className="related-product-card"
-              onClick={() => handleRelatedClick(rp.id)}
+              onClick={() => handleRelatedClick(rp.id, rp.productName)}
             >
               <Card
                 hoverable
                 cover={
                   <img
-                    alt={rp.name}
-                    src={rp.image}
+                    alt={rp.productName}
+                    src={
+                      rp.image && rp.image.bytes
+                        ? `data:image/${rp.image.fileExtension.replace(
+                            ".",
+                            ""
+                          )};base64,${rp.image.bytes}`
+                        : "/images/default-placeholder.png"
+                    }
+                    onError={(e) =>
+                      (e.target.src = "/images/default-placeholder.png")
+                    }
                     style={{ height: "200px", objectFit: "cover" }}
                   />
                 }
               >
                 <Card.Meta
-                  title={rp.name}
-                  description={`${rp.price.toLocaleString()} VND`}
+                  title={rp.productName}
+                  description={`${rp.price?.toLocaleString()} VND`}
                 />
               </Card>
             </div>

@@ -15,6 +15,14 @@ import ProductPage from "../pages/ProductPage";
 import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
 import ForgotPassword from "../pages/ForgotPassword";
+import AboutUs from "../pages/AboutUs";
+import ManageProductsPage from "../pages/admin/ManageProductsPage";
+import ManageUsersPage from "../pages/admin/ManageUsersPage";
+import ManageCategoriesPage from "../pages/admin/ManageCategoryPage";
+import ManageSkincareServicesPage from "../pages/admin/ManageSkincareServicesPage";
+import ManageServiceDetailsPage from "../pages/admin/ManageServiceDetailsPage";
+import ManagerOrders from "../pages/admin/ManagerOrders";
+import OrderHistory from "../pages/OrderHistory";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -32,7 +40,7 @@ const AppRoutes = () => {
         path="/login"
         element={user ? <Navigate to="/" /> : <LoginPage />}
       />
-      <Route path="/forgot-password" element={<ForgotPassword />} /> 
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/blogs" element={<BlogPage />} />
       <Route path="/blogs/:id" element={<BlogDetail />} />
@@ -45,6 +53,22 @@ const AppRoutes = () => {
       <Route path="/products" element={<ProductPage />} />
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/about" element={<AboutUs />} />
+      <Route path="/order-history" element={<OrderHistory />} />
+        
+      {/* admin page */}
+      <Route path="/admin/product" element={<ManageProductsPage />} />
+      <Route path="/admin/user" element={<ManageUsersPage />} />
+      <Route path="/admin/categories" element={<ManageCategoriesPage />} />
+      <Route path="/admin/manager-orders" element={<ManagerOrders />} />
+      <Route
+        path="/admin/manage-services"
+        element={<ManageSkincareServicesPage />}
+      />
+      <Route
+        path="/admin/manage-service-details/:serviceId"
+        element={<ManageServiceDetailsPage />}
+      />
     </Routes>
   );
 };

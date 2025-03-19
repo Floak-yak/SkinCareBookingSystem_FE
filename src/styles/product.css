@@ -4,7 +4,8 @@
     max-width: 1200px;
     margin: 0 auto;
     background-color: #fff;
-    font-family: "Roboto", sans-serif;
+    /* font-family: "Roboto", sans-serif; */
+    font-family: serif;
 }
 
 .product-page h2 {
@@ -18,12 +19,12 @@
 
 .product-filters-row {
     display: flex;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: center; 
-    gap: 20px; 
+    justify-content: center;
+    gap: 20px;
     margin-bottom: 30px;
-  }
+}
 
 .product-grid {
     display: flex;
@@ -72,6 +73,7 @@
     font-weight: bold;
     color: #333;
     margin: 10px 0 5px;
+    font-family: serif;
 }
 
 .product-card .ant-card-meta-description {
@@ -90,21 +92,24 @@
 }
 
 .add-to-cart-btn {
-  background: #e67e22; /* Cam mặc định */
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  font-size: 1rem;
-  margin-bottom: 10px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+    background: #e67e22;
+    /* Cam mặc định */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: serif;
 }
 
 .add-to-cart-btn:hover {
-  background: #c0392b !important; /* Đỏ khi hover */
-  color: white !important;
+    background: #c0392b !important;
+    /* Đỏ khi hover */
+    color: white !important;
 }
 
 .product-category-title {
@@ -140,6 +145,7 @@
     .product-card {
         width: calc(50% - 20px);
     }
+
     .product-filters {
         flex-direction: column;
         gap: 10px;

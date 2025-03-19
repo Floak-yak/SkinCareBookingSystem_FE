@@ -1,0 +1,77 @@
+.manager-orders-container {
+    padding: 24px;
+    min-height: 100vh;
+    background: #f3f4f6; 
+  }
+  
+  .manager-orders-heading {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .manager-orders-table {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+    border-collapse: collapse;
+  }
+  
+  .manager-orders-table thead {
+    background-color: #e5e7eb;
+  }
+  
+  .manager-orders-table th {
+    padding: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: left;
+    color: #111827;
+  }
+  
+  .manager-orders-table tbody tr {
+    transition: background 0.3s ease;
+  }
+  
+  .manager-orders-table tbody tr:hover {
+    background-color: #f9fafb;
+  }
+  
+  .manager-orders-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .status-pending {
+    color: #d97706; 
+    font-weight: bold;
+  }
+  
+  .status-success {
+    color: #059669; 
+    font-weight: bold;
+  }
+  
+  .status-cancelled {
+    color: #dc2626; 
+    font-weight: bold;
+  }
+  
+  .manager-orders-products {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f9fafb;
+    border-radius: 6px;
+  }
+  
+  .manager-orders-products ul {
+    padding-left: 20px;
+  }
+  
+  .manager-orders-products li {
+    margin-bottom: 5px;
+  }
+  

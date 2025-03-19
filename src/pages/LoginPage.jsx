@@ -1,32 +1,82 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Form, Input, Button, message } from "antd";
-import "../styles/loginPage.css";
 import useAuth from "../hooks/useAuth";
-import useFetch from "../hooks/useFetch";
+import apiClient from "../api/apiClient";
+import { jwtDecode } from "jwt-decode";
+import "../styles/loginPage.css";
 
 const LoginPage = () => {
   const { login } = useAuth();
-  const { data: users } = useFetch("/data/users.json", "users");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/";
 
-  const handleLogin = (values) => {
+  const handleLogin = async (values) => {
     setLoading(true);
+    try {
+      const response = await apiClient.post("/User/Login", {
+        email: values.email,
+        password: values.password,
+      });
 
-    const foundUser = users.find(
-      (user) => user.Email === values.email && user.Password === values.password
-    );
+      // => FE lấy token, userId
+      const { token, userId } = response.data;
+      if (!token) {
+        message.error("Phản hồi từ server không hợp lệ!");
+        return;
+      }
 
-    if (foundUser) {
-      login(foundUser);
-      message.success(`Chào mừng, ${foundUser.FullName}!`);
-      setTimeout(() => navigate("/"), 500);
-    } else {
-      message.error("Sai email hoặc mật khẩu!");
+      // Decode token để lấy thông tin user
+      const decodedToken = jwtDecode(token);
+      console.log("Decoded Token:", decodedToken);
+
+      // Tuỳ các claim mà bạn đã set
+      const fullName =
+        decodedToken[
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+        ];
+      const email =
+        decodedToken[
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+        ];
+      const role =
+        decodedToken[
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ];
+
+      const userData = {
+        token, // JWT
+        userId, 
+        fullName,
+        email,
+        role,
+      };
+
+      // Gọi hàm login trong AuthContext => lưu localStorage, setUser
+      login(userData);
+
+      message.success(`Chào mừng, ${userData.fullName}!`);
+
+      //setTimeout(() => navigate(redirectPath), 500);
+
+      setTimeout(() => {
+        if (role === "Manager") {
+          navigate("/admin/user");
+        } else {
+          navigate("/");
+        }
+      }, 500);
+
+    } catch (error) {
+      const errorMsg =
+        error.response?.data?.message ||
+        "Sai email hoặc mật khẩu! Vui lòng thử lại.";
+      message.error(errorMsg);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
