@@ -2,6 +2,7 @@ import apiClient from "./apiClient";
 
 const productApi = {
   getAll: () => apiClient.get("/Product/SearchAsc"),
+  getById: (productId) => apiClient.get(`/Product/GetById?productId=${productId}`),
   delete: (productId) =>
     apiClient.delete(`/Product/RemoveProduct?productId=${productId}`),
   create: (data) => apiClient.post("/Product/AddProduct", data),

@@ -11,7 +11,7 @@ import {
 } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
 import servicesDetailApi from "../../api/servicesDetailApi";
-import imageApi from "../../api/imageApi"; // Nếu BE chỉ trả imageId, ta dùng hàm getImageById
+import imageApi from "../../api/imageApi";
 import ImageManager from "../../components/ImageManager";
 
 const ManageServiceDetailsPage = () => {
@@ -48,7 +48,6 @@ const ManageServiceDetailsPage = () => {
       const res = await servicesDetailApi.getDetailsByServiceId(serviceId);
       const rawDetails = res.data.data || [];
 
-      // "Chữa cháy": Nếu detail chưa có field image, chỉ có imageId => gọi imageApi.getImageById
       const detailsWithImages = await Promise.all(
         rawDetails.map(async (detail) => {
           if (!detail.image && detail.imageId) {
@@ -69,9 +68,7 @@ const ManageServiceDetailsPage = () => {
     }
   };
 
-  // =======================
   // Tạo ServiceDetail
-  // =======================
   const openCreateModal = () => {
     setIsCreateModalVisible(true);
     createForm.resetFields();
@@ -80,7 +77,6 @@ const ManageServiceDetailsPage = () => {
 
   const handleCreateDetail = async (values) => {
     try {
-      // Thêm serviceId vào payload
       const payload = {
         ...values,
         serviceId: Number(serviceId),
@@ -99,9 +95,7 @@ const ManageServiceDetailsPage = () => {
     }
   };
 
-  // =======================
   // Sửa ServiceDetail
-  // =======================
   const openEditModal = (detail) => {
     setEditingDetail(detail);
     editForm.setFieldsValue({
@@ -112,7 +106,6 @@ const ManageServiceDetailsPage = () => {
     });
 
     if (detail.image) {
-      // BE đã trả detail.image => hiển thị preview
       setEditPreview(detail.image);
     } else {
       setEditPreview(null);
@@ -140,9 +133,7 @@ const ManageServiceDetailsPage = () => {
     }
   };
 
-  // =======================
   // Xóa ServiceDetail
-  // =======================
   const handleDelete = async (id) => {
     try {
       await servicesDetailApi.deleteDetail(id);
@@ -154,9 +145,7 @@ const ManageServiceDetailsPage = () => {
     }
   };
 
-  // =======================
   // ImageManager
-  // =======================
   const openImageManager = (target) => {
     setImageManagerTarget(target);
     setIsImageManagerVisible(true);
@@ -179,9 +168,6 @@ const ManageServiceDetailsPage = () => {
     navigate("/admin/manage-services");
   };
 
-  // =======================
-  // Cột bảng
-  // =======================
   const columns = [
     { title: "Tiêu đề", dataIndex: "title", key: "title" },
     { title: "Mô tả", dataIndex: "description", key: "description" },
@@ -228,28 +214,31 @@ const ManageServiceDetailsPage = () => {
   ];
 
   return (
-    <div>
-      <h2>Quản Lý Chi Tiết Dịch Vụ (ServiceId: {serviceId})</h2>
-      <Button
-        type="primary"
-        onClick={openCreateModal}
-        style={{ marginBottom: 16 }}
-      >
-        Thêm Chi Tiết
-      </Button>
-      <Button onClick={handleBackToServices} style={{ marginLeft: 8 }}>
-        Quay Lại Danh Sách Dịch Vụ
-      </Button>
+    <div className="manage-service-details-container">
+      <h2 className="manage-service-details-heading">
+        Quản Lý Chi Tiết Dịch Vụ (ID: {serviceId})
+      </h2>
 
-      <Table
-        dataSource={details}
-        columns={columns}
-        rowKey="id"
-        style={{ marginTop: 16 }}
-      />
+      <div className="manage-service-details-actions">
+        <Button
+          type="primary"
+          onClick={openCreateModal}
+          className="manage-service-details-add-button"
+        >
+          Thêm Chi Tiết
+        </Button>
+        <Button onClick={handleBackToServices}>
+          Quay Lại Danh Sách Dịch Vụ
+        </Button>
+      </div>
 
-      {/* Modal Tạo ServiceDetail */}
+      <div className="manage-service-details-table">
+        <Table dataSource={details} columns={columns} rowKey="id" />
+      </div>
+
+      {/* Modal Tạo */}
       <Modal
+        className="manage-service-details-modal"
         title="Tạo chi tiết dịch vụ"
         visible={isCreateModalVisible}
         onCancel={() => {
@@ -258,7 +247,12 @@ const ManageServiceDetailsPage = () => {
         }}
         footer={null}
       >
-        <Form layout="vertical" form={createForm} onFinish={handleCreateDetail}>
+        <Form
+          layout="vertical"
+          form={createForm}
+          onFinish={handleCreateDetail}
+          className="manage-service-details-form"
+        >
           <Form.Item
             label="Tiêu đề"
             name="title"
@@ -323,6 +317,7 @@ const ManageServiceDetailsPage = () => {
 
       {/* Modal Sửa ServiceDetail */}
       <Modal
+        className="manage-service-details-modal"
         title="Chỉnh sửa chi tiết dịch vụ"
         visible={isEditModalVisible}
         onCancel={() => {
@@ -331,7 +326,12 @@ const ManageServiceDetailsPage = () => {
         }}
         footer={null}
       >
-        <Form layout="vertical" form={editForm} onFinish={handleUpdateDetail}>
+        <Form
+          layout="vertical"
+          form={editForm}
+          onFinish={handleUpdateDetail}
+          className="manage-service-details-form"
+        >
           <Form.Item
             label="Tiêu đề"
             name="title"

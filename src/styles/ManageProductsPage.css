@@ -1,0 +1,97 @@
+.manage-products-container {
+    padding: 24px;
+    min-height: 100vh;
+    background: #f3f4f6; 
+  }
+  
+  .manage-products-heading {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #1f2937; 
+  }
+  
+  .manage-products-add-button {
+    margin-bottom: 16px;
+    border-radius: 6px;
+  }
+  
+  .manage-products-table {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+  }
+  
+  .manage-products-table .ant-table-thead > tr > th {
+    background-color: #e5e7eb; 
+    color: #111827;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .manage-products-table .ant-table-tbody > tr:hover > td {
+    background: #f9fafb; 
+  }
+  
+  .manage-products-modal .ant-modal-content {
+    border-radius: 8px;
+  }
+  
+  .manage-products-modal .ant-modal-header {
+    border-radius: 8px 8px 0 0;
+    background-color: #1f2937; 
+    color: #fff;
+  }
+  
+  .manage-products-modal .ant-modal-title {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+  
+  .manage-products-modal .ant-modal-body {
+    padding: 24px;
+  }
+  
+  .manage-products-form .ant-form-item-label > label {
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .manage-products-form .ant-btn-primary {
+    border-radius: 6px;
+    background-color: #2563eb; 
+    border: none;
+  }
+  
+  .manage-products-form .ant-btn-primary:hover,
+  .manage-products-form .ant-btn-primary:focus {
+    background-color: #1d4ed8;
+  }
+  
+  .manage-products-form .ant-select-selector,
+  .manage-products-form .ant-input,
+  .manage-products-form .ant-input-number,
+  .manage-products-form .ant-picker {
+    border-radius: 6px;
+  }
+  
+  .ant-popconfirm .ant-btn-danger {
+    border-radius: 6px;
+  }
+  
+  .manage-products-table .ant-btn-link {
+    color: #2563eb;
+  }
+  
+  .product-preview-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 8px;
+  }
+  
+  

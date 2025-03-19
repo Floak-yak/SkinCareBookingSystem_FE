@@ -8,13 +8,14 @@ import {
   InputNumber,
   message,
   Popconfirm,
-  Select
+  Select,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import servicesApi from "../../api/servicesApi";
 import categoryApi from "../../api/categoryApi";
 import imageApi from "../../api/imageApi";
 import ImageManager from "../../components/ImageManager";
+import "../../styles/ManageServicesPage.css";
 
 const { Option } = Select;
 
@@ -105,7 +106,7 @@ const ManageServicesPage = () => {
       categoryId: service.categoryId,
       price: service.price,
       workTime: service.workTime,
-      imageId: service.imageId
+      imageId: service.imageId,
     });
 
     setIsModalVisible(true);
@@ -138,23 +139,17 @@ const ManageServicesPage = () => {
       formData.append("imageId", values.imageId || 0);
 
       if (isEditing && currentService) {
-        // Cập nhật
-        // Ở đây BE có endpoint PUT => tùy BE có cho multipart PUT hay không
-        // Giả sử ta vẫn gửi JSON => servicesApi.updateService(...) cũ
-        // Hoặc BE cũng yêu cầu form-data => ta cần 1 endpoint update (multipart)
-        // Tạm để logic cũ: JSON. Hoặc thay = formData nếu BE cũng form-data
         await servicesApi.updateService(currentService.id, {
           serviceName: values.serviceName,
           serviceDescription: values.serviceDescription,
           categoryId: values.categoryId,
           price: values.price,
           workTime: values.workTime,
-          imageId: values.imageId || 0
+          imageId: values.imageId || 0,
         });
         message.success("Cập nhật dịch vụ thành công!");
       } else {
-        // Thêm mới => multipart
-        console.log("FormData keys:", [...formData.keys()]); // Debug
+        console.log("FormData keys:", [...formData.keys()]);
         await servicesApi.createService(formData);
         message.success("Thêm dịch vụ thành công!");
       }
@@ -194,23 +189,23 @@ const ManageServicesPage = () => {
     {
       title: "Tên Dịch Vụ",
       dataIndex: "serviceName",
-      key: "serviceName"
+      key: "serviceName",
     },
     {
       title: "Mô Tả",
       dataIndex: "serviceDescription",
-      key: "serviceDescription"
+      key: "serviceDescription",
     },
     {
       title: "Giá",
       dataIndex: "price",
       key: "price",
-      render: (price) => `${price?.toLocaleString()} VND`
+      render: (price) => `${price?.toLocaleString()} VND`,
     },
     {
       title: "Thời Gian (phút)",
       dataIndex: "workTime",
-      key: "workTime"
+      key: "workTime",
     },
     {
       title: "Hình Ảnh",
@@ -225,7 +220,7 @@ const ManageServicesPage = () => {
             style={{ width: 60, height: 60, objectFit: "cover" }}
           />
         );
-      }
+      },
     },
     {
       title: "Hành Động",
@@ -247,27 +242,35 @@ const ManageServicesPage = () => {
             Quản lý chi tiết
           </Button>
         </>
-      )
-    }
+      ),
+    },
   ];
 
   return (
-    <div>
-      <h2>Quản Lý Dịch Vụ Skincare</h2>
-      <Button type="primary" onClick={handleAdd} style={{ marginBottom: 16 }}>
+    <div className="manage-services-container">
+      <h2 className="manage-services-heading">Quản Lý Dịch Vụ Skincare</h2>
+      <Button
+        type="primary"
+        onClick={handleAdd}
+        className="manage-services-add-button"
+      >
         Thêm Dịch Vụ
       </Button>
 
-      <Table dataSource={services} columns={columns} rowKey="id" />
+      {/* Bọc bảng trong một div để áp style */}
+      <div className="manage-services-table">
+        <Table dataSource={services} columns={columns} rowKey="id" />
+      </div>
 
       {/* Modal Thêm/Sửa */}
       <Modal
+        className="manage-services-modal"
         title={isEditing ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ mới"}
         visible={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" className="manage-services-form">
           <Form.Item
             label="Tên Dịch Vụ"
             name="serviceName"
@@ -308,9 +311,17 @@ const ManageServicesPage = () => {
             {selectedImage && (
               <div style={{ marginTop: 8 }}>
                 <img
-                  src={`data:image/${selectedImage.fileExtension?.replace(".", "")};base64,${selectedImage.bytes}`}
+                  src={`data:image/${selectedImage.fileExtension?.replace(
+                    ".",
+                    ""
+                  )};base64,${selectedImage.bytes}`}
                   alt="preview"
-                  style={{ width: 80, height: 80, objectFit: "cover", marginRight: 8 }}
+                  style={{
+                    width: 80,
+                    height: 80,
+                    objectFit: "cover",
+                    marginRight: 8,
+                  }}
                 />
                 <span>
                   {selectedImage.description || `Ảnh ID: ${selectedImage.id}`}

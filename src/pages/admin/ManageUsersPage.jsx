@@ -12,6 +12,7 @@ import {
 } from "antd";
 import userApi from "../../api/userApi";
 import categoryApi from "../../api/categoryApi";
+import "../../styles/ManageUsersPage.css";
 
 const { Option } = Select;
 
@@ -236,26 +237,34 @@ const ManageUsersPage = () => {
   ];
 
   return (
-    <div>
-      <h2>Quản lý tài khoản</h2>
+    <div className="manage-users-container">
+      <h2 className="manage-users-heading">Quản lý tài khoản</h2>
       <Button
         type="primary"
         onClick={() => setIsModalVisible(true)}
-        style={{ marginBottom: 16 }}
+        className="manage-users-create-button"
       >
         Tạo tài khoản
       </Button>
 
-      <Table dataSource={users} columns={columns} rowKey="id" />
+      <div className="manage-users-table">
+        <Table dataSource={users} columns={columns} rowKey="id" />
+      </div>
 
       {/* Modal Tạo Tài Khoản */}
       <Modal
+        className="manage-users-modal"
         title="Tạo tài khoản"
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
-        <Form layout="vertical" form={form} onFinish={handleCreateUser}>
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={handleCreateUser}
+          className="manage-users-form"
+        >
           <Form.Item
             label="Họ và Tên"
             name="fullName"
@@ -331,6 +340,7 @@ const ManageUsersPage = () => {
 
       {/* Modal chọn/chỉnh sửa danh mục cho SkinTherapist */}
       <Modal
+        className="manage-users-modal"
         title="Chọn danh mục cho SkinTherapist"
         visible={isCategoryModalVisible}
         onOk={handleCategoryModalOk}

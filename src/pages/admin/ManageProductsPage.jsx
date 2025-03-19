@@ -14,6 +14,7 @@ import productApi from "../../api/productApi";
 import categoryApi from "../../api/categoryApi";
 import imageApi from "../../api/imageApi";
 import ImageManager from "../../components/ImageManager";
+import "../../styles/ManageProductsPage.css";
 
 const { Option } = Select;
 
@@ -44,7 +45,7 @@ const ManageProductsPage = () => {
   // Lấy danh mục
   const fetchCategories = async () => {
     try {
-      const res = await categoryApi.getAll(); 
+      const res = await categoryApi.getAll();
       setCategories(res.data.data || []);
     } catch (error) {
       message.error("Lỗi khi tải danh mục!");
@@ -241,21 +242,24 @@ const ManageProductsPage = () => {
   ];
 
   return (
-    <div>
-      <h2>Quản lý sản phẩm</h2>
+    <div className="manage-products-container">
+      <h2 className="manage-products-heading">Quản lý sản phẩm</h2>
 
       <Button
         type="primary"
         onClick={() => setIsCreateModalVisible(true)}
-        style={{ marginBottom: 16 }}
+        className="manage-products-add-button"
       >
         Thêm sản phẩm
       </Button>
 
-      <Table dataSource={products} columns={columns} rowKey="id" />
+      <div className="manage-products-table">
+        <Table dataSource={products} columns={columns} rowKey="id" />
+      </div>
 
       {/* Modal Tạo sản phẩm */}
       <Modal
+        className="manage-products-modal"
         title="Thêm sản phẩm"
         visible={isCreateModalVisible}
         onCancel={() => {
@@ -264,7 +268,12 @@ const ManageProductsPage = () => {
         }}
         footer={null}
       >
-        <Form layout="vertical" form={createForm} onFinish={handleCreateProduct}>
+        <Form
+          layout="vertical"
+          form={createForm}
+          onFinish={handleCreateProduct}
+          className="manage-products-form"
+        >
           <Form.Item
             label="Tên sản phẩm"
             name="productName"
@@ -321,6 +330,7 @@ const ManageProductsPage = () => {
 
       {/* Modal Cập nhật sản phẩm */}
       <Modal
+        className="manage-products-modal"
         title="Cập nhật sản phẩm"
         visible={isEditModalVisible}
         onCancel={() => {
@@ -329,7 +339,12 @@ const ManageProductsPage = () => {
         }}
         footer={null}
       >
-        <Form layout="vertical" form={editForm} onFinish={handleUpdateProduct}>
+        <Form
+          layout="vertical"
+          form={editForm}
+          onFinish={handleUpdateProduct}
+          className="manage-products-form"
+        >
           <Form.Item
             label="Tên sản phẩm"
             name="productName"
@@ -365,7 +380,10 @@ const ManageProductsPage = () => {
             {editPreview && (
               <div style={{ marginTop: 8 }}>
                 <img
-                  src={`data:image/${editPreview.fileExtension.replace(".", "")};base64,${editPreview.bytes}`}
+                  src={`data:image/${editPreview.fileExtension.replace(
+                    ".",
+                    ""
+                  )};base64,${editPreview.bytes}`}
                   alt="preview"
                   style={{ width: 100, height: 100, objectFit: "cover" }}
                 />

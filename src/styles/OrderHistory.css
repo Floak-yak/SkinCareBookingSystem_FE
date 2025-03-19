@@ -1,0 +1,61 @@
+.order-history-container {
+    padding: 24px;
+    min-height: 100vh;
+    background: #f3f4f6; 
+  }
+  
+  .order-history-heading {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #1f2937; 
+  }
+  
+  .order-history-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .order-history-item {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+    margin-bottom: 16px;
+    border-left: 5px solid #2563eb;
+  }
+  
+  .order-history-item strong {
+    color: #374151; 
+  }
+  
+  .status-pending {
+    color: #d97706;
+    font-weight: bold;
+  }
+  
+  .status-success {
+    color: #059669; 
+    font-weight: bold;
+  }
+  
+  .status-cancelled {
+    color: #dc2626; 
+    font-weight: bold;
+  }
+  
+  .order-products {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f9fafb;
+    border-radius: 6px;
+  }
+  
+  .order-products ul {
+    padding-left: 20px;
+  }
+  
+  .order-products li {
+    margin-bottom: 5px;
+    font-weight: 500;
+  }  
