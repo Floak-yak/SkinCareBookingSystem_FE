@@ -12,7 +12,6 @@ const Cart = () => {
   const { user } = useAuth();
   const [checkoutURL, setCheckoutURL] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [messageApi, contextHolder] = message.useMessage();
 
   // Giảm số lượng
   const handleDecrease = (e, id, currentQty) => {

@@ -12,7 +12,7 @@ import {
 } from "antd";
 import productApi from "../../api/productApi";
 import categoryApi from "../../api/categoryApi";
-import ImageManager from "./ImageManager";
+import ImageManager from "../../components/ImageManager";
 
 const { Option } = Select;
 

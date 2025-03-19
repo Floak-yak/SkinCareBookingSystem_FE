@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import imageApi from "../../api/imageApi";
+import imageApi from "../api/imageApi";
 
 const ImageManager = ({ visible, onClose, onSelectImage }) => {
   const [images, setImages] = useState([]);

@@ -113,6 +113,7 @@ const Header = () => {
           {/* Quản trị */}
           <Link to="/admin/user">Quản lý tài khoản</Link>
           <Link to="/admin/product">Quản lý sản phẩm</Link>
+          <Link to="/admin/manage-services">Quản lý dịch vụ</Link>
           <Link to="/admin/categories">Quản lý danh mục</Link>
         </>
       );
