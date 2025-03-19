@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Table, Select, message, Popconfirm, Button, Modal, Form, Input, DatePicker } from "antd";
+import {
+  Table,
+  Select,
+  message,
+  Popconfirm,
+  Button,
+  Modal,
+  Form,
+  Input,
+  DatePicker,
+} from "antd";
 import userApi from "../../api/userApi";
 import categoryApi from "../../api/categoryApi";
 
@@ -33,8 +43,8 @@ const ManageUsersPage = () => {
   const fetchUsers = async () => {
     try {
       const [resAll, resSkin] = await Promise.all([
-        userApi.getAll(),           // Trả về { id, fullName, role, ... }
-        userApi.getSkinTherapists() // Trả về { id, fullName, role=3, categoryId, ... }
+        userApi.getAll(),
+        userApi.getSkinTherapists(),
       ]);
 
       const allUsers = resAll.data || [];
@@ -42,12 +52,9 @@ const ManageUsersPage = () => {
 
       // Merge categoryId từ skinUsers vào allUsers
       skinUsers.forEach((skin) => {
-        // Tìm user tương ứng trong allUsers
         const found = allUsers.find((u) => u.id === skin.id);
         if (found) {
-          found.categoryId = skin.categoryId; 
-          // Nếu BE trả thêm field categoryName, bạn có thể gán:
-          // found.categoryName = skin.categoryName;
+          found.categoryId = skin.categoryId;
         }
       });
 
@@ -67,20 +74,20 @@ const ManageUsersPage = () => {
     }
   };
 
-  // ======================
   // Khi thay đổi vai trò
-  // ======================
   const handleRoleChange = async (user, newRole) => {
-    // Nếu chuyển thành SkinTherapist (3) mà user chưa có categoryId
     if (newRole === 3 && (!user.categoryId || user.categoryId === 0)) {
       setSelectedUser(user);
-      setSelectedCategory(null); // Chưa biết user chọn danh mục nào
+      setSelectedCategory(null);
       setIsCategoryModalVisible(true);
       return;
     }
-    // Các trường hợp khác: cập nhật role luôn
     try {
-      await userApi.updateRole(user.id, newRole, newRole === 3 ? user.categoryId : undefined);
+      await userApi.updateRole(
+        user.id,
+        newRole,
+        newRole === 3 ? user.categoryId : undefined
+      );
       message.success("Cập nhật vai trò thành công!");
       fetchUsers();
     } catch (error) {
@@ -88,14 +95,14 @@ const ManageUsersPage = () => {
     }
   };
 
-  // Khi click vào tên danh mục => sửa danh mục
+  // Sửa danh mục
   const handleEditCategory = (user) => {
     setSelectedUser(user);
-    setSelectedCategory(user.categoryId); // Lấy category hiện tại
+    setSelectedCategory(user.categoryId);
     setIsCategoryModalVisible(true);
   };
 
-  // Xử lý chọn danh mục trong modal
+  // Chọn danh mục
   const handleCategorySelect = (value) => {
     setSelectedCategory(value);
   };
@@ -118,16 +125,13 @@ const ManageUsersPage = () => {
     }
   };
 
-  // Cancel ở modal danh mục
   const handleCategoryModalCancel = () => {
     setIsCategoryModalVisible(false);
     setSelectedUser(null);
     setSelectedCategory(null);
   };
 
-  // ======================
   // Tạo tài khoản
-  // ======================
   const handleCreateUser = async (values) => {
     try {
       const payload = {
@@ -147,7 +151,6 @@ const ManageUsersPage = () => {
       setIsModalVisible(false);
       form.resetFields();
 
-      // Hiển thị mật khẩu nếu có
       if (generatedPassword) {
         Modal.info({
           title: "Mật khẩu của nhân viên vừa tạo",
@@ -180,7 +183,10 @@ const ManageUsersPage = () => {
       dataIndex: "role",
       key: "role",
       render: (role, record) => (
-        <Select defaultValue={role} onChange={(value) => handleRoleChange(record, value)}>
+        <Select
+          defaultValue={role}
+          onChange={(value) => handleRoleChange(record, value)}
+        >
           <Option value={1}>Manager</Option>
           <Option value={2}>Staff</Option>
           <Option value={3}>SkinTherapist</Option>
@@ -192,9 +198,10 @@ const ManageUsersPage = () => {
       title: "Danh mục",
       key: "categoryName",
       render: (_, record) => {
-        // Chỉ hiển thị danh mục nếu role = 3
         if (record.role === 3) {
-          const cat = categories.find((c) => String(c.id) === String(record.categoryId));
+          const cat = categories.find(
+            (c) => String(c.id) === String(record.categoryId)
+          );
           return (
             <span
               onClick={() => handleEditCategory(record)}
@@ -208,10 +215,20 @@ const ManageUsersPage = () => {
       },
     },
     {
+      // Cột mới hiển thị trạng thái tài khoản (isDeleted)
+      title: "Trạng thái",
+      dataIndex: "isDeleted",
+      key: "isDeleted",
+      render: (isDeleted) => (isDeleted ? "Đã vô hiệu hóa" : "Hoạt động"),
+    },
+    {
       title: "Hành động",
       key: "actions",
       render: (_, record) => (
-        <Popconfirm title="Xóa tài khoản này?" onConfirm={() => userApi.delete(record.id)}>
+        <Popconfirm
+          title="Xóa tài khoản này?"
+          onConfirm={() => userApi.delete(record.id)}
+        >
           <Button danger>Xóa</Button>
         </Popconfirm>
       ),
@@ -250,7 +267,9 @@ const ManageUsersPage = () => {
           <Form.Item
             label="Email"
             name="email"
-            rules={[{ required: true, type: "email", message: "Email không hợp lệ!" }]}
+            rules={[
+              { required: true, type: "email", message: "Email không hợp lệ!" },
+            ]}
           >
             <Input />
           </Form.Item>
@@ -258,7 +277,9 @@ const ManageUsersPage = () => {
           <Form.Item
             label="Số điện thoại"
             name="phoneNumber"
-            rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+            ]}
           >
             <Input />
           </Form.Item>
@@ -284,7 +305,6 @@ const ManageUsersPage = () => {
             </Select>
           </Form.Item>
 
-          {/* Chỉ hiển thị chọn danh mục nếu vai trò = 3 */}
           {selectedRole === 3 && (
             <Form.Item
               label="Danh mục"
