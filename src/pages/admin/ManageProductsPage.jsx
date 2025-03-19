@@ -12,6 +12,7 @@ import {
 } from "antd";
 import productApi from "../../api/productApi";
 import categoryApi from "../../api/categoryApi";
+import imageApi from "../../api/imageApi";
 import ImageManager from "../../components/ImageManager";
 
 const { Option } = Select;
@@ -19,45 +20,66 @@ const { Option } = Select;
 const ManageProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+
+  // Modal tạo
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [createForm] = Form.useForm();
   const [createPreview, setCreatePreview] = useState(null);
+
+  // Modal sửa
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editForm] = Form.useForm();
-  // 🆕 State lưu ảnh preview khi sửa
   const [editPreview, setEditPreview] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // State cho ImageManager
+  // Modal ImageManager
   const [isImageManagerVisible, setIsImageManagerVisible] = useState(false);
-  const [imageManagerTarget, setImageManagerTarget] = useState(null);
-  // "create" or "edit" -> biết form nào đang gọi ImageManager
+  const [imageManagerTarget, setImageManagerTarget] = useState(null); // "create" or "edit"
 
   useEffect(() => {
-    fetchProducts();
     fetchCategories();
+    fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
-    try {
-      const res = await productApi.getAll();
-      setProducts(res.data || []);
-    } catch (error) {
-      message.error("Lỗi khi tải danh sách sản phẩm!");
-    }
-  };
-
+  // Lấy danh mục
   const fetchCategories = async () => {
     try {
-      const res = await categoryApi.getAll();
+      const res = await categoryApi.getAll(); 
       setCategories(res.data.data || []);
     } catch (error) {
       message.error("Lỗi khi tải danh mục!");
     }
   };
 
+  // Lấy danh sách sản phẩm + join ảnh
+  const fetchProducts = async () => {
+    try {
+      const res = await productApi.getAll();
+      const rawProducts = res.data || [];
+
+      // “Join” ảnh nếu chỉ trả về imageId
+      const productsWithImages = await Promise.all(
+        rawProducts.map(async (p) => {
+          if (!p.image && p.imageId) {
+            try {
+              const imgRes = await imageApi.getImageById(p.imageId);
+              p.image = imgRes.data;
+            } catch (err) {
+              console.error("Lỗi khi lấy ảnh:", err);
+            }
+          }
+          return p;
+        })
+      );
+
+      setProducts(productsWithImages);
+    } catch (error) {
+      message.error("Lỗi khi tải danh sách sản phẩm!");
+    }
+  };
+
   // =======================
-  // Tạo sản phẩm (Create)
+  // Tạo sản phẩm
   // =======================
   const handleCreateProduct = async (values) => {
     try {
@@ -67,15 +89,15 @@ const ManageProductsPage = () => {
           price: values.price,
           createdDate: new Date().toISOString(),
           categoryId: values.categoryId,
-          imageId: values.imageId || 0, // Gửi ID ảnh
+          imageId: values.imageId || 0,
         },
       ];
       await productApi.create(payload);
       message.success("Tạo sản phẩm thành công!");
-      fetchProducts();
       setIsCreateModalVisible(false);
       createForm.resetFields();
       setCreatePreview(null);
+      fetchProducts();
     } catch (error) {
       console.error("Lỗi khi tạo sản phẩm:", error);
       message.error("Tạo sản phẩm thất bại!");
@@ -83,7 +105,7 @@ const ManageProductsPage = () => {
   };
 
   // =======================
-  // Sửa sản phẩm (Update)
+  // Sửa sản phẩm
   // =======================
   const openEditModal = (product) => {
     setEditingProduct(product);
@@ -93,7 +115,7 @@ const ManageProductsPage = () => {
       categoryId: product.categoryId,
       imageId: product.image?.id || 0,
     });
-    // Nếu sp có image => set preview
+
     if (product.image) {
       setEditPreview(product.image);
     } else {
@@ -105,7 +127,7 @@ const ManageProductsPage = () => {
   const handleUpdateProduct = async (values) => {
     try {
       const payload = {
-        productId: editingProduct.id, 
+        productId: editingProduct.id,
         productName: values.productName,
         price: values.price,
         categoryId: values.categoryId,
@@ -113,10 +135,10 @@ const ManageProductsPage = () => {
       };
       await productApi.update(payload);
       message.success("Cập nhật sản phẩm thành công!");
-      fetchProducts();
       setIsEditModalVisible(false);
       editForm.resetFields();
       setEditPreview(null);
+      fetchProducts();
     } catch (error) {
       console.error("Lỗi khi cập nhật sản phẩm:", error);
       message.error("Cập nhật sản phẩm thất bại!");
@@ -124,7 +146,7 @@ const ManageProductsPage = () => {
   };
 
   // =======================
-  // Xóa sản phẩm (Delete)
+  // Xóa sản phẩm
   // =======================
   const handleDelete = async (id) => {
     try {
@@ -145,17 +167,15 @@ const ManageProductsPage = () => {
     setIsImageManagerVisible(true);
   };
 
-  // =======================
-  // Khi chọn ảnh -> Lưu cả object
-  // =======================
+  // Khi chọn ảnh -> set imageId + preview
   const handleSelectImage = (image) => {
     message.success(`Đã chọn ảnh ID: ${image.id}`);
     if (imageManagerTarget === "create") {
       createForm.setFieldsValue({ imageId: image.id });
-      setCreatePreview(image); // Lưu preview
+      setCreatePreview(image);
     } else if (imageManagerTarget === "edit") {
       editForm.setFieldsValue({ imageId: image.id });
-      setEditPreview(image); // Lưu preview
+      setEditPreview(image);
     }
     setIsImageManagerVisible(false);
   };
@@ -174,6 +194,16 @@ const ManageProductsPage = () => {
       dataIndex: "price",
       key: "price",
       render: (price) => `${price.toLocaleString()} VND`,
+    },
+    {
+      // Hiển thị tên danh mục
+      title: "Danh mục",
+      key: "categoryName",
+      render: (record) => {
+        // Tìm trong mảng categories
+        const foundCat = categories.find((c) => c.id === record.categoryId);
+        return foundCat ? foundCat.categoryName : "N/A";
+      },
     },
     {
       title: "Hình ảnh",
@@ -234,11 +264,7 @@ const ManageProductsPage = () => {
         }}
         footer={null}
       >
-        <Form
-          layout="vertical"
-          form={createForm}
-          onFinish={handleCreateProduct}
-        >
+        <Form layout="vertical" form={createForm} onFinish={handleCreateProduct}>
           <Form.Item
             label="Tên sản phẩm"
             name="productName"
@@ -269,10 +295,8 @@ const ManageProductsPage = () => {
             </Select>
           </Form.Item>
 
-          {/* Ảnh sản phẩm */}
           <Form.Item label="Ảnh sản phẩm" name="imageId">
             <Button onClick={() => openImageManager("create")}>Chọn ảnh</Button>
-            {/* Xem trước ảnh */}
             {createPreview && (
               <div style={{ marginTop: 8 }}>
                 <img
@@ -336,17 +360,12 @@ const ManageProductsPage = () => {
             </Select>
           </Form.Item>
 
-          {/* Ảnh sản phẩm */}
           <Form.Item label="Ảnh sản phẩm" name="imageId">
             <Button onClick={() => openImageManager("edit")}>Chọn ảnh</Button>
-            {/* Xem trước ảnh */}
             {editPreview && (
               <div style={{ marginTop: 8 }}>
                 <img
-                  src={`data:image/${editPreview.fileExtension.replace(
-                    ".",
-                    ""
-                  )};base64,${editPreview.bytes}`}
+                  src={`data:image/${editPreview.fileExtension.replace(".", "")};base64,${editPreview.bytes}`}
                   alt="preview"
                   style={{ width: 100, height: 100, objectFit: "cover" }}
                 />
@@ -367,6 +386,7 @@ const ManageProductsPage = () => {
         visible={isImageManagerVisible}
         onClose={() => setIsImageManagerVisible(false)}
         onSelectImage={handleSelectImage}
+        zIndex={2000}
       />
     </div>
   );

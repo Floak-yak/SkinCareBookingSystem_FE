@@ -8,28 +8,56 @@ const { Option } = Select;
 const ManageUsersPage = () => {
   const [users, setUsers] = useState([]);
   const [categories, setCategories] = useState([]);
+
+  // Modal tạo tài khoản
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
-  // Modal để chọn/chỉnh sửa danh mục khi role = SkinTherapist (3)
+  const [selectedRole, setSelectedRole] = useState(null);
+
+  // Modal chọn/chỉnh sửa danh mục (SkinTherapist)
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedRole, setSelectedRole] = useState(null);
 
   useEffect(() => {
     fetchCategories();
     fetchUsers();
   }, []);
 
+  // ======================
+  // Gọi song song 2 endpoint:
+  // 1) getAll() => toàn bộ user
+  // 2) getSkinTherapists() => user role=3 có categoryId
+  // Sau đó merge categoryId vào danh sách allUsers
+  // ======================
   const fetchUsers = async () => {
     try {
-      const res = await userApi.getAll();
-      setUsers(res.data || []);
+      const [resAll, resSkin] = await Promise.all([
+        userApi.getAll(),           // Trả về { id, fullName, role, ... }
+        userApi.getSkinTherapists() // Trả về { id, fullName, role=3, categoryId, ... }
+      ]);
+
+      const allUsers = resAll.data || [];
+      const skinUsers = resSkin.data || [];
+
+      // Merge categoryId từ skinUsers vào allUsers
+      skinUsers.forEach((skin) => {
+        // Tìm user tương ứng trong allUsers
+        const found = allUsers.find((u) => u.id === skin.id);
+        if (found) {
+          found.categoryId = skin.categoryId; 
+          // Nếu BE trả thêm field categoryName, bạn có thể gán:
+          // found.categoryName = skin.categoryName;
+        }
+      });
+
+      setUsers(allUsers);
     } catch (error) {
       message.error("Lỗi khi tải danh sách tài khoản!");
     }
   };
 
+  // Lấy danh sách category
   const fetchCategories = async () => {
     try {
       const res = await categoryApi.getAll();
@@ -39,17 +67,19 @@ const ManageUsersPage = () => {
     }
   };
 
-  // Khi thay đổi vai trò từ Select trong bảng
+  // ======================
+  // Khi thay đổi vai trò
+  // ======================
   const handleRoleChange = async (user, newRole) => {
-    // Nếu chuyển thành SkinTherapist (role 3) mà chưa có danh mục (hoặc categoryId = 0)
+    // Nếu chuyển thành SkinTherapist (3) mà user chưa có categoryId
     if (newRole === 3 && (!user.categoryId || user.categoryId === 0)) {
       setSelectedUser(user);
-      setSelectedRole(newRole);
+      setSelectedCategory(null); // Chưa biết user chọn danh mục nào
       setIsCategoryModalVisible(true);
       return;
     }
+    // Các trường hợp khác: cập nhật role luôn
     try {
-      // Với các trường hợp khác hoặc nếu đã có danh mục hợp lệ, cập nhật luôn
       await userApi.updateRole(user.id, newRole, newRole === 3 ? user.categoryId : undefined);
       message.success("Cập nhật vai trò thành công!");
       fetchUsers();
@@ -58,25 +88,25 @@ const ManageUsersPage = () => {
     }
   };
 
-  // Khi click vào tên danh mục trong bảng để chỉnh sửa danh mục
+  // Khi click vào tên danh mục => sửa danh mục
   const handleEditCategory = (user) => {
     setSelectedUser(user);
-    setSelectedRole(user.role);
-    setSelectedCategory(user.categoryId); // Pre-populate danh mục hiện tại
+    setSelectedCategory(user.categoryId); // Lấy category hiện tại
     setIsCategoryModalVisible(true);
   };
 
+  // Xử lý chọn danh mục trong modal
   const handleCategorySelect = (value) => {
     setSelectedCategory(value);
   };
 
+  // OK ở modal danh mục
   const handleCategoryModalOk = async () => {
     if (!selectedUser || !selectedCategory) {
       message.error("Vui lòng chọn danh mục!");
       return;
     }
     try {
-      // Cập nhật user với role = 3 và danh mục đã chọn
       await userApi.updateRole(selectedUser.id, 3, selectedCategory);
       message.success("Cập nhật vai trò và danh mục thành công!");
       setIsCategoryModalVisible(false);
@@ -88,12 +118,16 @@ const ManageUsersPage = () => {
     }
   };
 
+  // Cancel ở modal danh mục
   const handleCategoryModalCancel = () => {
     setIsCategoryModalVisible(false);
     setSelectedUser(null);
     setSelectedCategory(null);
   };
 
+  // ======================
+  // Tạo tài khoản
+  // ======================
   const handleCreateUser = async (values) => {
     try {
       const payload = {
@@ -104,22 +138,24 @@ const ManageUsersPage = () => {
         phoneNumber: values.phoneNumber,
         categoryId: values.categoryId || 0,
       };
-  
+
       const response = await userApi.create(payload);
-      // Giả sử response.data chứa trường password
       const generatedPassword = response.data?.password;
-  
+
       message.success("Tạo tài khoản thành công!");
       fetchUsers();
       setIsModalVisible(false);
       form.resetFields();
-  
+
+      // Hiển thị mật khẩu nếu có
       if (generatedPassword) {
         Modal.info({
           title: "Mật khẩu của nhân viên vừa tạo",
           content: (
             <div>
-              <p>Mật khẩu: <strong>{generatedPassword}</strong></p>
+              <p>
+                Mật khẩu: <strong>{generatedPassword}</strong>
+              </p>
               <p>Vui lòng ghi nhớ hoặc lưu lại để gửi cho nhân viên!</p>
             </div>
           ),
@@ -132,6 +168,9 @@ const ManageUsersPage = () => {
     }
   };
 
+  // ======================
+  // Cột bảng
+  // ======================
   const columns = [
     { title: "Họ tên", dataIndex: "fullName", key: "fullName" },
     { title: "Email", dataIndex: "email", key: "email" },
@@ -153,8 +192,8 @@ const ManageUsersPage = () => {
       title: "Danh mục",
       key: "categoryName",
       render: (_, record) => {
+        // Chỉ hiển thị danh mục nếu role = 3
         if (record.role === 3) {
-          // Ép kiểu để so sánh chắc chắn
           const cat = categories.find((c) => String(c.id) === String(record.categoryId));
           return (
             <span
@@ -182,16 +221,29 @@ const ManageUsersPage = () => {
   return (
     <div>
       <h2>Quản lý tài khoản</h2>
-      <Button type="primary" onClick={() => setIsModalVisible(true)} style={{ marginBottom: 16 }}>
+      <Button
+        type="primary"
+        onClick={() => setIsModalVisible(true)}
+        style={{ marginBottom: 16 }}
+      >
         Tạo tài khoản
       </Button>
 
       <Table dataSource={users} columns={columns} rowKey="id" />
 
       {/* Modal Tạo Tài Khoản */}
-      <Modal title="Tạo tài khoản" visible={isModalVisible} onCancel={() => setIsModalVisible(false)} footer={null}>
+      <Modal
+        title="Tạo tài khoản"
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
         <Form layout="vertical" form={form} onFinish={handleCreateUser}>
-          <Form.Item label="Họ và Tên" name="fullName" rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}>
+          <Form.Item
+            label="Họ và Tên"
+            name="fullName"
+            rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
+          >
             <Input />
           </Form.Item>
 
@@ -219,7 +271,11 @@ const ManageUsersPage = () => {
             <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item label="Vai trò" name="role" rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}>
+          <Form.Item
+            label="Vai trò"
+            name="role"
+            rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
+          >
             <Select onChange={(value) => setSelectedRole(value)}>
               <Option value={1}>Manager</Option>
               <Option value={2}>Staff</Option>
@@ -228,6 +284,7 @@ const ManageUsersPage = () => {
             </Select>
           </Form.Item>
 
+          {/* Chỉ hiển thị chọn danh mục nếu vai trò = 3 */}
           {selectedRole === 3 && (
             <Form.Item
               label="Danh mục"
@@ -277,4 +334,3 @@ const ManageUsersPage = () => {
 };
 
 export default ManageUsersPage;
-  

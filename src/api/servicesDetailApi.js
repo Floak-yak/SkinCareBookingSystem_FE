@@ -13,11 +13,11 @@ const serviceDetailApi = {
 
   // Cập nhật ServiceDetail
   updateDetail: (detailId, data) =>
-    apiClient.put(`/ServicesDetail/Update?id=${detailId}`, data),
+    apiClient.put(`/ServicesDetail/Update/${detailId}`, data),
 
   // Xóa ServiceDetail
   deleteDetail: (detailId) =>
-    apiClient.delete(`/ServicesDetail/Delete?id=${detailId}`),
+    apiClient.delete(`/ServicesDetail/Delete/${detailId}`),
 };
 
 export default serviceDetailApi;
