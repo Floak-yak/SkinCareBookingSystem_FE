@@ -1,0 +1,92 @@
+.manage-services-container {
+    padding: 24px;
+    min-height: 100vh;
+    background: #f3f4f6; 
+  }
+  
+  .manage-services-heading {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #1f2937; 
+  }
+  
+  .manage-services-add-button {
+    margin-bottom: 16px;
+    border-radius: 6px;
+  }
+  
+  .manage-services-table {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+  }
+  
+  .manage-services-table .ant-table-thead > tr > th {
+    background-color: #e5e7eb; 
+    color: #111827;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .manage-services-table .ant-table-tbody > tr:hover > td {
+    background: #f9fafb;
+  }
+  
+  .manage-services-modal .ant-modal-content {
+    border-radius: 8px;
+  }
+  
+  .manage-services-modal .ant-modal-header {
+    border-radius: 8px 8px 0 0;
+    background-color: #1f2937; 
+    color: #fff;
+  }
+  
+  .manage-services-modal .ant-modal-title {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+  
+  .manage-services-modal .ant-modal-body {
+    padding: 24px;
+  }
+  
+  .manage-services-form .ant-form-item-label > label {
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .manage-services-form .ant-input,
+  .manage-services-form .ant-input-number,
+  .manage-services-form .ant-select-selector,
+  .manage-services-form .ant-picker {
+    border-radius: 6px;
+  }
+  
+  .manage-services-form .ant-btn-primary {
+    border-radius: 6px;
+    background-color: #2563eb; 
+    border: none;
+  }
+  
+  .manage-services-form .ant-btn-primary:hover,
+  .manage-services-form .ant-btn-primary:focus {
+    background-color: #1d4ed8;
+  }
+  
+  .ant-popconfirm .ant-btn-danger {
+    border-radius: 6px;
+  }
+  
+  .service-preview-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+  

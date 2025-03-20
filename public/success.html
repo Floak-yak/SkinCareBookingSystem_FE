@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thanh toán thành công</title>
+  <!-- Tự động chuyển hướng về trang chủ sau 5 giây -->
+  <meta http-equiv="refresh" content="5;url=/" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: green;
+    }
+    p {
+      margin: 20px 0;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Thanh toán thành công!</h1>
+    <p>Cảm ơn bạn đã thanh toán. Đang chuyển về trang chủ...</p>
+    <p>
+      <a href="/" class="btn">Bấm vào đây nếu không chuyển tự động</a>
+    </p>
+  </div>
+  <script>
+    setTimeout(function () {
+      window.location.href = "/";
+    }, 5000);
+  </script>
+</body>
+</html>

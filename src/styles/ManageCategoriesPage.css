@@ -1,0 +1,80 @@
+.manage-categories-container {
+    padding: 24px;
+    min-height: 100vh;
+    background: #f3f4f6; 
+  }
+  
+  .manage-categories-heading {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #1f2937; 
+  }
+  
+  .manage-categories-add-button {
+    margin-bottom: 16px;
+    border-radius: 6px;
+  }
+  
+  .manage-categories-table {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+  }
+  
+  .manage-categories-table .ant-table-thead > tr > th {
+    background-color: #e5e7eb;
+    color: #111827;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .manage-categories-table .ant-table-tbody > tr:hover > td {
+    background: #f9fafb;
+  }
+  
+  .manage-categories-modal .ant-modal-content {
+    border-radius: 8px;
+  }
+  
+  .manage-categories-modal .ant-modal-header {
+    border-radius: 8px 8px 0 0;
+    background-color: #1f2937;
+    color: #fff;
+  }
+  
+  .manage-categories-modal .ant-modal-title {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+  
+  .manage-categories-modal .ant-modal-body {
+    padding: 24px;
+  }
+  
+  .manage-categories-form .ant-form-item-label > label {
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .manage-categories-form .ant-input {
+    border-radius: 6px;
+  }
+  
+  .manage-categories-form .ant-btn-primary {
+    border-radius: 6px;
+    background-color: #2563eb;
+    border: none;
+  }
+  
+  .manage-categories-form .ant-btn-primary:hover,
+  .manage-categories-form .ant-btn-primary:focus {
+    background-color: #1d4ed8;
+  }
+  
+  .ant-popconfirm .ant-btn-danger {
+    border-radius: 6px;
+  }
+  

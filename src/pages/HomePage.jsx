@@ -19,7 +19,6 @@ const HomePage = () => {
     const fetchServices = async () => {
       try {
         const response = await serviceApi.getAllServices1();
-        // console.log('Service API response:', response.data);
         setServices(response.data);
         setLoading(false);
       } catch (err) {

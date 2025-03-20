@@ -12,7 +12,6 @@ const Cart = () => {
   const { user } = useAuth();
   const [checkoutURL, setCheckoutURL] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
-  console.log("User từ useAuth:", user);
 
   // Giảm số lượng
   const handleDecrease = (e, id, currentQty) => {
@@ -53,35 +52,38 @@ const Cart = () => {
     0
   );
 
-  // 🟢 Xử lý khi bấm nút "Thanh toán"
+  //Thanh toán
   const handleCheckout = async () => {
     if (!user || !user.userId) {
       message.error("Bạn cần đăng nhập trước khi thanh toán!");
       return;
     }
-
+  
+    // Chuẩn bị dữ liệu sản phẩm cần thanh toán
     const checkoutProductInformation = cart.items.map((item) => ({
       id: item.id,
       amount: item.quantity,
     }));
-
+  
+    // Cập nhật returnUrl và cancelUrl dựa trên domain hiện tại của web
     const checkoutData = {
       userId: user.userId,
       checkoutProductInformation,
+      returnUrl: `${window.location.origin}/success.html`, // Redirect sau khi thanh toán thành công
+      cancelUrl: `${window.location.origin}/cancel.html`,   // Redirect khi người dùng hủy hoặc thanh toán thất bại
     };
-
+  
     console.log("Checkout Data gửi lên:", checkoutData); // Debug dữ liệu gửi lên BE
-
+  
     try {
       const res = await productApi.checkOut(checkoutData);
       console.log("✅ Thanh toán thành công:", res.data);
       console.log("🔎 Toàn bộ response:", JSON.stringify(res.data, null, 2));
-
+  
       const url = res.data?.checkoutUrl;
       if (url) {
-        setCheckoutURL(url);
-        setIsModalVisible(true);
-        window.open(url, "_blank");
+        // Chuyển hướng trang web sang URL của payOS
+        window.location.href = url;
         console.log("URL thanh toán:", url);
       } else {
         message.error("Lỗi khi nhận URL thanh toán!");

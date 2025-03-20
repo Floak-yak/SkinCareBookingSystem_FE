@@ -1,0 +1,97 @@
+.manage-users-container {
+    padding: 24px;
+    min-height: 100vh;
+    background: #f3f4f6; 
+  }
+  
+  .manage-users-heading {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .manage-users-create-button {
+    margin-bottom: 16px;
+    border-radius: 6px;
+  }
+  
+  .manage-users-table {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+  }
+  
+  .manage-users-table .ant-table-thead > tr > th {
+    background-color: #e5e7eb; 
+    color: #111827;            
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .manage-users-table .ant-table-tbody > tr > td {
+    vertical-align: middle;
+  }
+  
+  .manage-users-modal .ant-modal-content {
+    border-radius: 8px;
+  }
+  
+  .manage-users-modal .ant-modal-header {
+    border-radius: 8px 8px 0 0;
+    background-color: #1f2937; 
+    color: #fff;
+  }
+  
+  .manage-users-modal .ant-modal-title {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+  
+  .manage-users-modal .ant-modal-body {
+    padding: 24px;
+  }
+  
+  .manage-users-form .ant-form-item-label > label {
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .manage-users-form .ant-btn-primary {
+    border-radius: 6px;
+    background-color: #2563eb;
+    border: none;
+  }
+  
+  .manage-users-form .ant-btn-primary:hover,
+  .manage-users-form .ant-btn-primary:focus {
+    background-color: #1d4ed8; 
+  }
+  
+  .manage-users-form .ant-select-selector {
+    border-radius: 6px;
+  }
+  
+  .manage-users-form .ant-picker {
+    border-radius: 6px;
+  }
+  
+  .manage-users-table .ant-table-tbody > tr:hover > td {
+    background: #f9fafb; 
+  }
+  
+  .manage-users-table .edit-category-link {
+    cursor: pointer;
+    color: #2563eb;
+    text-decoration: underline;
+  }
+  .manage-users-table .edit-category-link:hover {
+    color: #1d4ed8;
+  }
+  
+  .ant-popconfirm .ant-btn-danger {
+    border-radius: 6px;
+  }
+  

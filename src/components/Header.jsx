@@ -9,6 +9,7 @@ import {
   MenuOutlined,
   CheckCircleOutlined,
   ShoppingCartOutlined,
+  ProfileOutlined,
 } from "@ant-design/icons";
 import "../styles/header.css";
 import useAuth from "../hooks/useAuth";
@@ -56,6 +57,14 @@ const Header = () => {
         </span>
       ),
     },
+    // {
+    //   key: "updateProfile",
+    //   label: (
+    //     <Link to="/update-profile" className="update-profile-btn">
+    //       <ProfileOutlined /> Chỉnh sửa thông tin
+    //     </Link>
+    //   ),
+    // },
     { type: "divider" },
 
     // Chỉ hiển thị "Duyệt bài" nếu role = Staff
@@ -80,7 +89,7 @@ const Header = () => {
     role === "Customer" && {
       key: "orderHistory",
       label: (
-        <Link to="/orderHistory" className="order-history-btn">
+        <Link to="/order-history" className="order-history-btn">
           <CheckCircleOutlined /> Lịch sử đặt hàng
         </Link>
       ),
@@ -104,7 +113,9 @@ const Header = () => {
           {/* Quản trị */}
           <Link to="/admin/user">Quản lý tài khoản</Link>
           <Link to="/admin/product">Quản lý sản phẩm</Link>
+          <Link to="/admin/manage-services">Quản lý dịch vụ</Link>
           <Link to="/admin/categories">Quản lý danh mục</Link>
+          <Link to="/admin/manager-orders">Quản lý đơn hàng</Link>
         </>
       );
     } else if (role === "Staff") {
@@ -121,7 +132,7 @@ const Header = () => {
           <Link to="/">Trang chủ</Link>
           <Link to="/services">Dịch vụ</Link>
           <Link to="/products">Sản phẩm</Link>
-          <Link to="/blogs">Blogs</Link>
+          {/* <Link to="/blogs">Blogs</Link> */}
           <Link to="/contact">Liên hệ</Link>
           <Link to="/about">Về chúng tôi</Link>
         </>
