@@ -47,7 +47,7 @@ const DoctorProfiles = () => {
         <div className="container">
             <h2 className="title">Chuyên Viên Đồng Hành</h2>
             <div className="profiles">
-                {doctors.map((doctor) => (
+                {doctors.slice(0, 4).map((doctor) => (
                     <div key={doctor.id} className="card">
                         <img
                             src={doctor.imageData?.bytes ? `data:image/${doctor.imageData.fileExtension.replace('.', '')};base64,${doctor.imageData.bytes}` : 'https://img.freepik.com/premium-photo/photo-smiling-female-doctor-gray-background_849827-101.jpg'}
