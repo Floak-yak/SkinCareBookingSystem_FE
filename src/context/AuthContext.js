@@ -19,9 +19,8 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // 🔥 Auto-logout khi token hết hạn
+  //Auto-logout khi token hết hạn
   useEffect(() => {
-    // Nếu user có token
     if (user?.token) {
       try {
         // Decode token để lấy thời gian hết hạn (exp)

@@ -92,7 +92,7 @@ const ServiceDetail = () => {
             key={index} 
             className={`progress-step ${index === currentStep ? 'active' : ''} 
               ${index < currentStep ? 'completed' : ''}`}
-            onClick={() => handleStepClick(index)}
+              onClick={() => handleStepClick(index)}
           >
             <div className="step-number">{index + 1}</div>
             <div className="step-label">
