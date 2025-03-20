@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/booking.css";
 import bookingApi from '../api/bookingApi';
-import serviceApi from '../api/serviceApi';
+import serviceApi from '../api/servicesApi';
 import doctorApi from '../api/doctorApi';
 import categoryApi from '../api/categoryApi';
 import { QRCodeSVG } from 'qrcode.react';
-import { Link } from "react-router-dom";
-import { usePayOS, PayOSConfig } from "payos-checkout";
 
 // Thời gian mặc định cho tất cả các dịch vụ
 const defaultTimes = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
@@ -50,6 +48,7 @@ const BookingPage = () => {
   const [staffList, setStaffList] = useState([]);
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [currentBookingId, setCurrentBookingId] = useState(null);
+  const [filteredStaffList, setFilteredStaffList] = useState([]);
 
 
   // Fetch services and staff when component mounts
@@ -127,6 +126,24 @@ const BookingPage = () => {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    if (selectedCategory) {
+      const fetchStaffByCategory = async () => {
+        try {
+          const response = await doctorApi.getDoctorByCategoryId(selectedCategory);
+          console.log('Staff response:', response.data);
+          setFilteredStaffList(response.data);
+        } catch (error) {
+          console.error('Error fetching staff:', error);
+          toast.error('Không thể tải danh sách nhân viên');
+          setFilteredStaffList([]); // Set empty array on error
+        }
+      };
+
+      fetchStaffByCategory();
+    }
+  }, [selectedCategory]);
+
   // Add this after the other useEffect hooks
   useEffect(() => {
     const fetchBookings = async () => {
@@ -142,14 +159,25 @@ const BookingPage = () => {
               const dateObj = new Date(booking.date);
               const formattedDate = dateObj.toISOString().split('T')[0];
 
+              // const dateTimeObj = booking.createdTime ? new Date(booking.createdTime) : null;
+              // const formattedTime = dateTimeObj
+              //   ? dateTimeObj.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+              //   : "Chưa có thông tin";
+              const dateTimeObj = booking.date ? new Date(booking.date) : null;
+              const formattedTime = dateTimeObj
+                ? dateTimeObj.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+                : "Chưa có thông tin";
+
               return {
                 id: booking.id,
                 userId: booking.user?.id,
                 serviceName: booking.serviceName,
                 date: formattedDate,
-                time: booking.bookingTime || "00:00",
-                skinTherapistId: booking.skinTherapistId,
-                skinTherapistName: staffList.find(s => s.id === booking.skinTherapistId)?.fullName || "Chưa xác định",
+                time: formattedTime,
+                skinTherapistName: booking.skintherapistName,
+                // skinTherapistId: booking.skinTherapistId,
+                // skinTherapistName: staffList.find(s => s.id === booking.skinTherapistId)?.fullName || "Chưa xác định",
+                categoryId: booking.categoryId,
                 customerName: booking.user?.fullName || "Chưa xác định",
                 email: booking.user?.email || "",
                 status: booking.status === 1 ? 'pending' : 'completed',
@@ -175,7 +203,8 @@ const BookingPage = () => {
     };
 
     fetchBookings();
-  }, [currentUser, staffList]);
+    // }, [currentUser, staffList]);
+  }, [currentUser]);
 
   const validatePhone = (phone) => {
     const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
@@ -252,8 +281,8 @@ const BookingPage = () => {
       // Gọi API tạo booking
       const response = await bookingApi.createBooking(bookingData);
 
-      if (response.data && response.data.checkoutUrl) {
-        setQrCode(response.data.checkoutUrl);
+      if (response.data && response.data.qrCode) {
+        setQrCode(response.data.qrCode);
         setBookingConfirmed(true);
         toast.success("Đặt lịch thành công! Vui lòng quét mã QR để thanh toán");
 
@@ -266,7 +295,8 @@ const BookingPage = () => {
           date: selectedDate,
           time: selectedTime,
           skinTherapistId: parseInt(selectedStaff),
-          skinTherapistName: staffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "",
+          // skinTherapistName: staffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "",
+          skinTherapistName: filteredStaffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "",
           customerName: currentUser.fullName,
           email: currentUser.email,
           status: 'pending'
@@ -286,6 +316,17 @@ const BookingPage = () => {
     }
   };
 
+  const handleServiceChange = (e) => {
+    const serviceId = e.target.value;
+    setSelectedService(serviceId);
+
+    // Lấy thông tin dịch vụ được chọn
+    const selectedServiceInfo = services.find(s => s.id === parseInt(serviceId));
+    if (selectedServiceInfo) {
+      setSelectedServiceData(selectedServiceInfo);
+    }
+  };
+
   const handleQRScanned = async () => {
     try {
       setIsLoading(true);
@@ -295,13 +336,7 @@ const BookingPage = () => {
 
       await new Promise(resolve => setTimeout(resolve, 3000));
 
-      setBookingConfirmed(false);
-      setQrCode("");
-      setSelectedService("");
-      setSelectedDate("");
-      setSelectedTime("");
-      setSelectedStaff("");
-      setPaymentStatus("pending");
+      resetBookingForm();
     } catch (error) {
       setPaymentStatus("failed");
       toast.error("Thanh toán thất bại. Vui lòng thử lại!");
@@ -310,17 +345,7 @@ const BookingPage = () => {
     }
   };
 
-  const handleCancel = () => {
-    const updatedAppointments = bookedAppointments.filter(
-      appointment => !(
-        appointment.date === selectedDate &&
-        appointment.time === selectedTime &&
-        appointment.staff === selectedStaff
-      )
-    );
-    setBookedAppointments(updatedAppointments);
-    localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
-
+  const resetBookingForm = () => {
     setBookingConfirmed(false);
     setQrCode("");
     setSelectedService("");
@@ -328,31 +353,74 @@ const BookingPage = () => {
     setSelectedTime("");
     setSelectedStaff("");
     setPaymentStatus("pending");
-    setIsRescheduling(false);
   };
 
-  const payOSConfig = {
-    RETURN_URL: "https://localhost:7101/api/Transaction/Cancel?4", // URL sau khi thanh toán xong
-    ELEMENT_ID: "payos-checkout", // ID của element để nhúng giao diện thanh toán
-    CHECKOUT_URL: qrCode, // URL API của PayOS
-    embedded: true, // Dùng giao diện nhúng
-    onSuccess: (event) => {
-      console.log("Thanh toán thành công:", event);
-      // TODO: Chuyển hướng người dùng đến trang xác nhận
-      window.location.href = "/confirmation";
-    },
-    onCancel: (event) => {
-      console.log("Người dùng đã hủy thanh toán:", event);
-      // TODO: Gọi API hủy booking nếu cần
-    },
-    onExit: (event) => {
-      console.log("Người dùng đóng popup thanh toán");
-    },
+  // const handleCancel = () => {
+  //   const updatedAppointments = bookedAppointments.filter(
+  //     appointment => !(
+  //       appointment.date === selectedDate &&
+  //       appointment.time === selectedTime &&
+  //       appointment.staff === selectedStaff
+  //     )
+  //   );
+  //   setBookedAppointments(updatedAppointments);
+  //   localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
+
+  //   setBookingConfirmed(false);
+  //   setQrCode("");
+  //   setSelectedService("");
+  //   setSelectedDate("");
+  //   setSelectedTime("");
+  //   setSelectedStaff("");
+  //   setPaymentStatus("pending");
+  //   setIsRescheduling(false);
+  // };
+  const handleCancel = async () => {
+    try {
+      if (!selectedDate || !selectedTime || !selectedStaff) {
+        toast.error("Vui lòng chọn lịch hẹn để hủy.");
+        return;
+      }
+
+      // Tìm lịch hẹn cần hủy
+      const bookingToCancel = bookedAppointments.find(
+        appointment =>
+          appointment.date === selectedDate &&
+          appointment.time === selectedTime &&
+          appointment.skinTherapistId === parseInt(selectedStaff)
+      );
+
+      if (!bookingToCancel) {
+        toast.error("Không tìm thấy lịch hẹn để hủy.");
+        return;
+      }
+
+      // Gọi API để hủy lịch trên server
+      await bookingApi.cancelBooking(bookingToCancel.id, currentUser.userId);
+
+      // Cập nhật danh sách lịch đặt trên UI
+      const updatedAppointments = bookedAppointments.filter(
+        appointment => appointment.id !== bookingToCancel.id
+      );
+      setBookedAppointments(updatedAppointments);
+      localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
+
+      // Reset giao diện
+      setBookingConfirmed(false);
+      setQrCode("");
+      setSelectedService("");
+      setSelectedDate("");
+      setSelectedTime("");
+      setSelectedStaff("");
+      setPaymentStatus("pending");
+      setIsRescheduling(false);
+
+      toast.success("Hủy lịch thành công!");
+    } catch (error) {
+      console.error("Lỗi khi hủy lịch:", error);
+      toast.error("Không thể hủy lịch. Vui lòng thử lại!");
+    }
   };
-
-  const { open, exit } = usePayOS(payOSConfig);
-
-  open();
 
 
   const handleSelectDateTime = (date, time) => {
@@ -381,18 +449,30 @@ const BookingPage = () => {
         setIsRescheduling(true);
         setSelectedService(booking.serviceId?.toString() || "");
         setSelectedStaff(booking.skinTherapistId?.toString() || "");
+        setSelectedCategory(booking.categoryId?.toString() || "");
 
+
+        // const categoryId = services.find(s => s.id === booking.serviceId)?.categoryId || null;
+        // if (categoryId) {
+        //   setSelectedCategory(categoryId); // Cập nhật category
+        //   const filteredStaff = staffList.filter(staff => staff.categoryId === categoryId);
+        //   setFilteredStaffList(filteredStaff);
+        // } else {
+        //   setFilteredStaffList([]); // Tránh lỗi nếu categoryId không tìm thấy
+        // }
+        // const filteredStaff = staffList.filter(staff => staff.categoryId === selectedCategory);
+        // setFilteredStaffList(filteredStaff);
         // Lưu ID booking cần update
         setCurrentBookingId(booking.id);
 
         // Hiển thị form đặt lịch để chọn thời gian mới
         setBookingConfirmed(false);
-
+        window.scrollTo(0, 0);
         toast.info("Vui lòng chọn thời gian mới cho lịch đặt của bạn");
       } else {
         // Xử lý hủy lịch
         if (window.confirm("Bạn có chắc chắn muốn hủy lịch này không?")) {
-          await bookingApi.cancelBooking(booking.id, currentUser.id);
+          await bookingApi.cancelBooking(booking.id, currentUser.userId);
 
           // Cập nhật state sau khi hủy
           const updatedAppointments = bookedAppointments.filter(
@@ -422,10 +502,14 @@ const BookingPage = () => {
 
       // Chuẩn bị dữ liệu cho API
       const updateData = {
+        // bookingId: currentBookingId,
+        // newDate: selectedDate,
+        // newTime: selectedTime,
+        // newSkinTherapistId: parseInt(selectedStaff)
         bookingId: currentBookingId,
-        newDate: selectedDate,
-        newTime: selectedTime,
-        newSkinTherapistId: parseInt(selectedStaff)
+        date: selectedDate,
+        time: selectedTime,
+        skinTherapistId: parseInt(selectedStaff)
       };
 
       console.log('Update data being sent:', updateData); // Log dữ liệu gửi đi
@@ -442,7 +526,8 @@ const BookingPage = () => {
             date: selectedDate,
             time: selectedTime,
             skinTherapistId: parseInt(selectedStaff),
-            skinTherapistName: staffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "Chưa xác định"
+            // skinTherapistName: staffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "Chưa xác định"
+            skinTherapistName: filteredStaffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "Chưa xác định"
           }
           : booking
       );
@@ -631,7 +716,8 @@ const BookingPage = () => {
                     className="form-select"
                   >
                     <option value="">Chọn bác sĩ</option>
-                    {staffList.map((staff) => (
+                    {/* {staffList.map((staff) => ( */}
+                    {filteredStaffList.map((staff) => (
                       <option key={staff.id} value={staff.id}>
                         {staff.fullName}
                       </option>
@@ -739,7 +825,9 @@ const BookingPage = () => {
               <p className="booking-info-item"><strong>Dịch vụ:</strong> {services.find(s => s.id === parseInt(selectedService))?.serviceName}</p>
               <p className="booking-info-item"><strong>Ngày:</strong> {new Date(selectedDate).toLocaleDateString("vi-VN")}</p>
               <p className="booking-info-item"><strong>Giờ:</strong> {selectedTime}</p>
-              <p className="booking-info-item"><strong>Bác sĩ:</strong> {staffList.find(s => s.id === parseInt(selectedStaff))?.fullName}</p>
+              {/* <p className="booking-info-item"><strong>Bác sĩ:</strong> {staffList.find(s => s.id === parseInt(selectedStaff))?.fullName}</p> */}
+              <p className="booking-info-item"><strong>Bác sĩ:</strong> {filteredStaffList.find(s => s.id === parseInt(selectedStaff))?.fullName}</p>
+              <p className="booking-info-item"><strong>Giá:</strong> {selectedServiceData?.price?.toLocaleString('vi-VN')}đ</p>
             </div>
 
             {/* QR Code section */}
@@ -756,9 +844,16 @@ const BookingPage = () => {
             ) : (
               qrCode && (
                 <div className="qr-container">
-                  <Link id="payos-checkout" to={qrCode} target="_blank" className="qr-code">
+                  {/* <Link id="payos-checkout" to={qrCode} target="_blank" className="qr-code">
                     <img src={qrCode} alt="QR Code" />
-                  </Link>
+                  </Link> */}
+                  <QRCodeSVG
+                    value={qrCode}
+                    size={256}
+                    level="H"
+                    includeMargin={true}
+                    className="qr-code"
+                  />
                   {isLoading ? (
                     <p>Đang xử lý thanh toán...</p>
                   ) : paymentStatus === "success" ? (

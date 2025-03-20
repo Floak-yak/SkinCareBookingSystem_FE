@@ -7,7 +7,7 @@ import "../styles/HomePage.css";
 import { FaQuoteLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import AboutUs from "../components/AboutUs";
 import SpaGallery from "../components/SpaGallery";
-import serviceApi from "../api/serviceApi";
+import serviceApi from "../api/servicesApi";
 
 const HomePage = () => {
   const scrollRef = useRef(null);
