@@ -5,7 +5,7 @@ const servicesApi = {
   getAllServices: () => apiClient.get("/SkincareServices/GetServices?page=1&pageSize=12"),
 
   // Lấy chi tiết dịch vụ theo ID
-  getServiceById: (id) => apiClient.get(`/ServicesDetail/GetByService/${id}`), // ✅ API chuẩn
+  getServiceById: (id) => apiClient.get(`/ServicesDetail/GetByService/${id}`), // API chuẩn
 
   // Tạo dịch vụ mới
   createService: (data) => apiClient.post("/SkincareServices/Create", data),
@@ -14,7 +14,10 @@ const servicesApi = {
   updateService: (id, data) => apiClient.put(`/SkincareServices/Update?id=${id}`, data),
 
   // Xóa dịch vụ theo ID
-  deleteService: (id) => apiClient.delete(`/SkincareServices/Delete?id=${id}`)
+  deleteService: (id) => apiClient.delete(`/SkincareServices/Delete?id=${id}`),
+
+  // Lấy ảnh theo ID
+  getImageById: (imageId) => apiClient.get(`/api/Image/GetImageById?imageId=${imageId}`)
 };
 
 export default servicesApi;
