@@ -26,6 +26,8 @@ const servicesApi = {
 
   // Xóa dịch vụ theo ID
   deleteService: (id) => apiClient.delete(`/SkincareServices/Delete?id=${id}`),
+  // Lấy ảnh theo ID
+  getImageById: (imageId) => apiClient.get(`/api/Image/GetImageById?imageId=${imageId}`)
 };
 
 export default servicesApi;

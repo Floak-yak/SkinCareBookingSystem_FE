@@ -33,6 +33,7 @@ const AppRoutes = () => {
       setUser(JSON.parse(storedUser));
     }
   }, []);
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -49,7 +50,7 @@ const AppRoutes = () => {
       <Route path="/services" element={<Services />} />
       <Route path="/booking" element={<Booking />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/service/:id" element={<ServiceDetail />} />
+      <Route path="/servicesDetail/:id" element={<ServiceDetail />} /> {/* Sửa lỗi route */}
       <Route path="/products" element={<ProductPage />} />
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
