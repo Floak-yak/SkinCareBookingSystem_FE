@@ -4,7 +4,8 @@
 
 # Ignore environment files
 .env
-
+/package-lock.json
+/package.json 
 # dependencies
 /node_modules
 /.pnp

@@ -55,6 +55,7 @@ const ImageManager = ({ visible, onClose, onSelectImage }) => {
       title="Quản lý ảnh"
       visible={visible}
       onCancel={onClose}
+      zIndex={2000}
       footer={null}
     >
       <Upload beforeUpload={handleUpload} showUploadList={false}>

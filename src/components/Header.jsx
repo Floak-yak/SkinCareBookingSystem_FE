@@ -57,14 +57,14 @@ const Header = () => {
         </span>
       ),
     },
-    {
-      key: "updateProfile",
-      label: (
-        <Link to="/update-profile" className="update-profile-btn">
-          <ProfileOutlined /> Chỉnh sửa thông tin
-        </Link>
-      ),
-    },
+    // {
+    //   key: "updateProfile",
+    //   label: (
+    //     <Link to="/update-profile" className="update-profile-btn">
+    //       <ProfileOutlined /> Chỉnh sửa thông tin
+    //     </Link>
+    //   ),
+    // },
     { type: "divider" },
 
     // Chỉ hiển thị "Duyệt bài" nếu role = Staff
@@ -115,6 +115,7 @@ const Header = () => {
           <Link to="/admin/product">Quản lý sản phẩm</Link>
           <Link to="/admin/manage-services">Quản lý dịch vụ</Link>
           <Link to="/admin/categories">Quản lý danh mục</Link>
+          <Link to="/admin/manager-orders">Quản lý đơn hàng</Link>
         </>
       );
     } else if (role === "Staff") {
@@ -131,7 +132,7 @@ const Header = () => {
           <Link to="/">Trang chủ</Link>
           <Link to="/services">Dịch vụ</Link>
           <Link to="/products">Sản phẩm</Link>
-          <Link to="/blogs">Blogs</Link>
+          {/* <Link to="/blogs">Blogs</Link> */}
           <Link to="/contact">Liên hệ</Link>
           <Link to="/about">Về chúng tôi</Link>
         </>

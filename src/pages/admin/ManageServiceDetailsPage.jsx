@@ -10,7 +10,8 @@ import {
   InputNumber,
 } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
-import serviceDetailApi from "../../api/servicesDetailApi";
+import servicesDetailApi from "../../api/servicesDetailApi";
+import imageApi from "../../api/imageApi";
 import ImageManager from "../../components/ImageManager";
 
 const ManageServiceDetailsPage = () => {
@@ -33,8 +34,7 @@ const ManageServiceDetailsPage = () => {
 
   // ImageManager
   const [isImageManagerVisible, setIsImageManagerVisible] = useState(false);
-  const [imageManagerTarget, setImageManagerTarget] = useState(null);
-  // "create" hoặc "edit" → biết form nào đang gọi ImageManager
+  const [imageManagerTarget, setImageManagerTarget] = useState(null); // "create" hoặc "edit"
 
   useEffect(() => {
     if (serviceId) {
@@ -45,18 +45,30 @@ const ManageServiceDetailsPage = () => {
   // Lấy danh sách ServiceDetail
   const fetchServiceDetails = async () => {
     try {
-      const res = await serviceDetailApi.getDetailsByServiceId(serviceId);
-      // Kiểm tra cấu trúc trả về
-      // Ở đây ta giả định res.data.data là mảng
-      setDetails(res.data.data || []);
+      const res = await servicesDetailApi.getDetailsByServiceId(serviceId);
+      const rawDetails = res.data.data || [];
+
+      const detailsWithImages = await Promise.all(
+        rawDetails.map(async (detail) => {
+          if (!detail.image && detail.imageId) {
+            try {
+              const imgRes = await imageApi.getImageById(detail.imageId);
+              detail.image = imgRes.data; // gán object ảnh
+            } catch (err) {
+              console.error("Lỗi khi lấy ảnh:", err);
+            }
+          }
+          return detail;
+        })
+      );
+
+      setDetails(detailsWithImages);
     } catch (error) {
       message.error("Lỗi khi tải danh sách ServiceDetail!");
     }
   };
 
-  // =======================
   // Tạo ServiceDetail
-  // =======================
   const openCreateModal = () => {
     setIsCreateModalVisible(true);
     createForm.resetFields();
@@ -65,12 +77,13 @@ const ManageServiceDetailsPage = () => {
 
   const handleCreateDetail = async (values) => {
     try {
-      // Thêm serviceId vào payload
       const payload = {
         ...values,
         serviceId: Number(serviceId),
       };
-      await serviceDetailApi.createDetail(payload);
+      console.log("Request tạo detail:", payload);
+
+      await servicesDetailApi.createDetail(payload);
       message.success("Tạo chi tiết dịch vụ thành công!");
       setIsCreateModalVisible(false);
       createForm.resetFields();
@@ -82,9 +95,7 @@ const ManageServiceDetailsPage = () => {
     }
   };
 
-  // =======================
   // Sửa ServiceDetail
-  // =======================
   const openEditModal = (detail) => {
     setEditingDetail(detail);
     editForm.setFieldsValue({
@@ -93,8 +104,8 @@ const ManageServiceDetailsPage = () => {
       duration: detail.duration,
       imageId: detail.imageId || 0,
     });
+
     if (detail.image) {
-      // Nếu BE trả thêm detail.image => hiển thị preview
       setEditPreview(detail.image);
     } else {
       setEditPreview(null);
@@ -108,7 +119,9 @@ const ManageServiceDetailsPage = () => {
         ...values,
         serviceId: Number(serviceId),
       };
-      await serviceDetailApi.updateDetail(editingDetail.id, payload);
+      console.log("Request cập nhật detail:", payload);
+
+      await servicesDetailApi.updateDetail(editingDetail.id, payload);
       message.success("Cập nhật chi tiết dịch vụ thành công!");
       setIsEditModalVisible(false);
       editForm.resetFields();
@@ -120,12 +133,10 @@ const ManageServiceDetailsPage = () => {
     }
   };
 
-  // =======================
   // Xóa ServiceDetail
-  // =======================
   const handleDelete = async (id) => {
     try {
-      await serviceDetailApi.deleteDetail(id);
+      await servicesDetailApi.deleteDetail(id);
       message.success("Xóa thành công!");
       fetchServiceDetails();
     } catch (error) {
@@ -134,11 +145,8 @@ const ManageServiceDetailsPage = () => {
     }
   };
 
-  // =======================
   // ImageManager
-  // =======================
   const openImageManager = (target) => {
-    // target = "create" hoặc "edit"
     setImageManagerTarget(target);
     setIsImageManagerVisible(true);
   };
@@ -146,7 +154,6 @@ const ManageServiceDetailsPage = () => {
   const handleSelectImage = (image) => {
     message.success(`Đã chọn ảnh ID: ${image.id}`);
     if (imageManagerTarget === "create") {
-      // Set vào createForm
       createForm.setFieldsValue({ imageId: image.id });
       setCreatePreview(image);
     } else if (imageManagerTarget === "edit") {
@@ -161,9 +168,7 @@ const ManageServiceDetailsPage = () => {
     navigate("/admin/manage-services");
   };
 
-  // Cột bảng
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id", width: 70 },
     { title: "Tiêu đề", dataIndex: "title", key: "title" },
     { title: "Mô tả", dataIndex: "description", key: "description" },
     {
@@ -172,21 +177,14 @@ const ManageServiceDetailsPage = () => {
       key: "duration",
     },
     {
-      title: "Ảnh",
-      dataIndex: "image",
+      title: "Hình Ảnh",
       key: "image",
-      render: (img, record) => {
-        if (!img) {
-          // fallback: hiển thị imageId
-          return record.imageId
-            ? `Ảnh ID: ${record.imageId}`
-            : "Không có ảnh";
-        }
-        // Nếu có img => hiển thị preview
-        const ext = img.fileExtension.replace(".", "");
+      render: (_, record) => {
+        if (!record.image) return "No image";
+        const ext = record.image.fileExtension?.replace(".", "") || "jpeg";
         return (
           <img
-            src={`data:image/${ext};base64,${img.bytes}`}
+            src={`data:image/${ext};base64,${record.image.bytes}`}
             alt="preview"
             style={{ width: 60, height: 60, objectFit: "cover" }}
           />
@@ -198,7 +196,10 @@ const ManageServiceDetailsPage = () => {
       key: "actions",
       render: (_, record) => (
         <>
-          <Button onClick={() => openEditModal(record)} style={{ marginRight: 8 }}>
+          <Button
+            onClick={() => openEditModal(record)}
+            style={{ marginRight: 8 }}
+          >
             Sửa
           </Button>
           <Popconfirm
@@ -213,24 +214,31 @@ const ManageServiceDetailsPage = () => {
   ];
 
   return (
-    <div>
-      <h2>Quản Lý Chi Tiết Dịch Vụ (ServiceId: {serviceId})</h2>
-      <Button type="primary" onClick={openCreateModal} style={{ marginBottom: 16 }}>
-        Thêm Chi Tiết
-      </Button>
-      <Button onClick={handleBackToServices} style={{ marginLeft: 8 }}>
-        Quay Lại Danh Sách Dịch Vụ
-      </Button>
+    <div className="manage-service-details-container">
+      <h2 className="manage-service-details-heading">
+        Quản Lý Chi Tiết Dịch Vụ (ID: {serviceId})
+      </h2>
 
-      <Table
-        dataSource={details}
-        columns={columns}
-        rowKey="id"
-        style={{ marginTop: 16 }}
-      />
+      <div className="manage-service-details-actions">
+        <Button
+          type="primary"
+          onClick={openCreateModal}
+          className="manage-service-details-add-button"
+        >
+          Thêm Chi Tiết
+        </Button>
+        <Button onClick={handleBackToServices}>
+          Quay Lại Danh Sách Dịch Vụ
+        </Button>
+      </div>
 
-      {/* Modal Tạo ServiceDetail */}
+      <div className="manage-service-details-table">
+        <Table dataSource={details} columns={columns} rowKey="id" />
+      </div>
+
+      {/* Modal Tạo */}
       <Modal
+        className="manage-service-details-modal"
         title="Tạo chi tiết dịch vụ"
         visible={isCreateModalVisible}
         onCancel={() => {
@@ -239,7 +247,12 @@ const ManageServiceDetailsPage = () => {
         }}
         footer={null}
       >
-        <Form layout="vertical" form={createForm} onFinish={handleCreateDetail}>
+        <Form
+          layout="vertical"
+          form={createForm}
+          onFinish={handleCreateDetail}
+          className="manage-service-details-form"
+        >
           <Form.Item
             label="Tiêu đề"
             name="title"
@@ -275,12 +288,17 @@ const ManageServiceDetailsPage = () => {
             {createPreview && (
               <div style={{ marginTop: 8 }}>
                 <img
-                  src={`data:image/${createPreview.fileExtension.replace(
+                  src={`data:image/${createPreview.fileExtension?.replace(
                     ".",
                     ""
                   )};base64,${createPreview.bytes}`}
                   alt="preview"
-                  style={{ width: 80, height: 80, objectFit: "cover", marginRight: 8 }}
+                  style={{
+                    width: 80,
+                    height: 80,
+                    objectFit: "cover",
+                    marginRight: 8,
+                  }}
                 />
                 <span>
                   {createPreview.description || `Ảnh ID: ${createPreview.id}`}
@@ -299,6 +317,7 @@ const ManageServiceDetailsPage = () => {
 
       {/* Modal Sửa ServiceDetail */}
       <Modal
+        className="manage-service-details-modal"
         title="Chỉnh sửa chi tiết dịch vụ"
         visible={isEditModalVisible}
         onCancel={() => {
@@ -307,7 +326,12 @@ const ManageServiceDetailsPage = () => {
         }}
         footer={null}
       >
-        <Form layout="vertical" form={editForm} onFinish={handleUpdateDetail}>
+        <Form
+          layout="vertical"
+          form={editForm}
+          onFinish={handleUpdateDetail}
+          className="manage-service-details-form"
+        >
           <Form.Item
             label="Tiêu đề"
             name="title"
@@ -342,11 +366,21 @@ const ManageServiceDetailsPage = () => {
             {editPreview && (
               <div style={{ marginTop: 8 }}>
                 <img
-                  src={`data:image/${editPreview.fileExtension.replace(".", "")};base64,${editPreview.bytes}`}
+                  src={`data:image/${editPreview.fileExtension?.replace(
+                    ".",
+                    ""
+                  )};base64,${editPreview.bytes}`}
                   alt="preview"
-                  style={{ width: 80, height: 80, objectFit: "cover", marginRight: 8 }}
+                  style={{
+                    width: 80,
+                    height: 80,
+                    objectFit: "cover",
+                    marginRight: 8,
+                  }}
                 />
-                <span>{editPreview.description || `Ảnh ID: ${editPreview.id}`}</span>
+                <span>
+                  {editPreview.description || `Ảnh ID: ${editPreview.id}`}
+                </span>
               </div>
             )}
           </div>
