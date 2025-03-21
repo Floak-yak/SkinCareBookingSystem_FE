@@ -8,6 +8,9 @@ import useAuth from "../hooks/useAuth";
 import apiClient from "../api/apiClient";
 import "../styles/createBlog.css";
 
+// (Tuỳ chọn) Thư viện convert HTML -> text để làm summary gọn gàng hơn
+import { convert } from "html-to-text";
+
 const { Option } = Select;
 
 // Map tên danh mục -> ID (theo quy ước của BE)
@@ -85,7 +88,7 @@ const CreateBlog = () => {
     []
   );
 
-  // Khi submit form, gọi API tạo bài viết (CreatePost)
+  // Hàm submit form -> gọi API tạo bài viết
   const handleSubmit = async (values) => {
     if (!user) {
       message.error("Bạn cần đăng nhập để đăng bài!");
@@ -100,27 +103,25 @@ const CreateBlog = () => {
     try {
       // Lấy category ID từ giá trị chọn (nếu không có, mặc định là 1)
       const catId = categoryMap[values.category] || 1;
+
       // Nếu người dùng không chọn ảnh, sử dụng ảnh mặc định
       const postImageLink = imageBase64 || "https://via.placeholder.com/300";
 
-      // Tạo body request theo cấu trúc BE (CreatePostWithContentsRequest)
+      // (Tuỳ chọn) Xử lý để lấy summary gọn gàng, không dính tag HTML
+      const plainText = convert(content, { wordwrap: 130 });
+      const summary = plainText.substring(0, 100);
+
+      // Tạo body request theo cấu trúc BE mong đợi
       const body = {
-        userId: user.id||user.userId,
+        userId: user.id || user.userId,   // userId từ context
         title: values.title,
-        contents: [
-          {
-            contentOfPost: content,
-            contentType: 0,
-            position: 1,
-            imageLink: "",
-            postId: 0,
-          },
-        ],
+        content: content,                // Nội dung đầy đủ (HTML)
+        summary: summary,                // Tóm tắt 100 ký tự (hoặc tuỳ chỉnh)
         categoryId: catId,
         imageLink: postImageLink,
       };
 
-      // Gọi API: POST /Post/Create
+      // Gọi API: POST /Post/Create (hoặc /Post/CreateWithContent nếu BE yêu cầu)
       const res = await apiClient.post("/Post/Create", body);
       console.log("Create post response:", res.data);
 
@@ -133,6 +134,8 @@ const CreateBlog = () => {
     } catch (error) {
       console.error("Lỗi khi gọi API tạo bài:", error);
       let errorMsg = "Lỗi khi tạo bài viết. Hãy thử lại!";
+
+      // Lấy message từ response (nếu có)
       if (error.response?.data) {
         const serverData = error.response.data;
         if (typeof serverData === "object") {
@@ -141,6 +144,7 @@ const CreateBlog = () => {
           errorMsg = serverData;
         }
       }
+
       message.error(errorMsg);
     } finally {
       setLoading(false);
