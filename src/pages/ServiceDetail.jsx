@@ -6,7 +6,6 @@ import useAuth from "../hooks/useAuth";
 
 import "../styles/ServiceDetail.css";
 
-
 const { Step } = Steps;
 
 const ServiceDetail = () => {
@@ -100,12 +99,14 @@ const ServiceDetail = () => {
 
   return (
     <div className="service-detail">
-      <h1 className="service-title">Quy Trình Chăm Sóc Da Chuyên Nghiệp</h1>
-      <p className="service-description">
-        Trải nghiệm quy trình chăm sóc da toàn diện với 6 bước chuẩn spa, giúp làn da của bạn được chăm sóc một cách khoa học và hiệu quả nhất.
-      </p>
+      <div className="service-overview">
+        <h1>Quy Trình Chăm Sóc Da Chuyên Nghiệp</h1>
+        <p className="overview-description">
+          Trải nghiệm quy trình chăm sóc da toàn diện với 6 bước chuẩn spa, giúp làn da của bạn được chăm sóc một cách khoa học và hiệu quả nhất.
+        </p>
+      </div>
 
-      <div className="service-carousel">
+      <div className="steps-carousel">
         <Carousel
           ref={carouselRef}
           afterChange={setCurrentStep}
@@ -117,15 +118,18 @@ const ServiceDetail = () => {
         >
           {steps.map((step, index) => (
             <div key={step.id} className="step-slide">
-              <img
-                src={imageMap[step.id] || "/images/default-placeholder.png"}
-                alt={step.title}
-                className="step-image"
-              />
-              <div className="step-info">
-                <h2>{step.title}</h2>
-                <p>{step.description}</p>
-                <p className="step-duration">Thời gian: {step.duration} phút</p>
+              <div className="step-content">
+                <div className="step-image">
+                  <img
+                    src={imageMap[step.id] || "/images/default-placeholder.png"}
+                    alt={step.title}
+                  />
+                </div>
+                <div className="step-info">
+                  <h2>{step.title}</h2>
+                  <p className="step-description">{step.description}</p>
+                  <p className="step-duration">Thời gian: {step.duration} phút</p>
+                </div>
               </div>
             </div>
           ))}
@@ -136,7 +140,7 @@ const ServiceDetail = () => {
           carouselRef.current?.goTo(index);
         }} className="steps-progress">
           {steps.map((step, index) => (
-            <Step key={step.id} title={`Bước ${index + 1}`} description={step.title} />
+            <Step key={step.id} title={`Bước ${index + 1}`} description={step.title} className="progress-step" />
           ))}
         </Steps>
       </div>
