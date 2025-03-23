@@ -12,6 +12,7 @@
     "aos": "^2.3.4",
     "axios": "^1.7.9",
     "cra-template-pwa": "2.0.0",
+    "html-to-text": "^9.0.5",
     "jwt-decode": "^4.0.0",
     "payos-checkout": "^1.0.9",
     "qrcode.react": "^4.2.0",
@@ -22,7 +23,9 @@
     "react-quill": "^2.0.0",
     "react-router-dom": "^7.1.1",
     "react-scripts": "5.0.1",
-    "react-toastify": "^11.0.3"
+    "react-slick": "^0.30.3",
+    "react-toastify": "^11.0.3",
+    "slick-carousel": "^1.8.1"
   },
   "scripts": {
     "dev": "react-scripts start",

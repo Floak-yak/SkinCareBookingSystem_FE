@@ -5,6 +5,9 @@ const servicesApi = {
   getAllServices: () =>
     apiClient.get("/SkincareServices/GetServices?page=1&pageSize=20"),
 
+  getAllServices1: () =>
+    apiClient.get("/SkincareServices/GetServices?page=1&pageSize=8"),
+
   // Lấy chi tiết dịch vụ theo ID
   getServiceById: (id) => apiClient.get(`/ServicesDetail/GetByService/${id}`),
 
@@ -26,6 +29,8 @@ const servicesApi = {
 
   // Xóa dịch vụ theo ID
   deleteService: (id) => apiClient.delete(`/SkincareServices/Delete?id=${id}`),
+  // Lấy ảnh theo ID
+  getImageById: (imageId) => apiClient.get(`/api/Image/GetImageById?imageId=${imageId}`)
 };
 
 export default servicesApi;
