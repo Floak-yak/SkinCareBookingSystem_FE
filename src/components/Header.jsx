@@ -116,7 +116,7 @@ const Header = () => {
           <Link to="/admin/manage-services">Quản lý dịch vụ</Link>
           <Link to="/admin/categories">Quản lý danh mục</Link>
           <Link to="/admin/manager-orders">Quản lý đơn hàng</Link>
-          <Link to="/admin/survey-manager">Quản lý Survey</Link>
+          <Link to="/admin/survey-manager">Quản lý câu hỏi</Link>
         </>
       );
     } else if (role === "Staff") {
