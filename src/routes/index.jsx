@@ -23,6 +23,7 @@ import ManageSkincareServicesPage from "../pages/admin/ManageSkincareServicesPag
 import ManageServiceDetailsPage from "../pages/admin/ManageServiceDetailsPage";
 import ManagerOrders from "../pages/admin/ManagerOrders";
 import OrderHistory from "../pages/OrderHistory";
+import SurveyQuestionPage from "../pages/SurveyQuestionPage";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -56,6 +57,7 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/order-history" element={<OrderHistory />} />
+      <Route path="/survey" element={<SurveyQuestionPage />} />
         
       {/* admin page */}
       <Route path="/admin/product" element={<ManageProductsPage />} />
