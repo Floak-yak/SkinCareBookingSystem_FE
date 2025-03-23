@@ -24,6 +24,7 @@ import ManageServiceDetailsPage from "../pages/admin/ManageServiceDetailsPage";
 import ManagerOrders from "../pages/admin/ManagerOrders";
 import OrderHistory from "../pages/OrderHistory";
 import SurveyQuestionPage from "../pages/SurveyQuestionPage";
+import SurveyManagerPage from "../pages/admin/SurveyManagerPage";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -51,7 +52,7 @@ const AppRoutes = () => {
       <Route path="/services" element={<Services />} />
       <Route path="/booking" element={<Booking />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/servicesDetail/:id" element={<ServiceDetail />} /> {/* Sửa lỗi route */}
+      <Route path="/servicesDetail/:id" element={<ServiceDetail />} />
       <Route path="/products" element={<ProductPage />} />
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
@@ -72,6 +73,7 @@ const AppRoutes = () => {
         path="/admin/manage-service-details/:serviceId"
         element={<ManageServiceDetailsPage />}
       />
+      <Route path="/admin/survey-manager" element={<SurveyManagerPage />} />
     </Routes>
   );
 };
