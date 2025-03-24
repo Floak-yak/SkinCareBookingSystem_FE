@@ -73,7 +73,7 @@ const Cart = () => {
       cancelUrl: `${window.location.origin}/cancel.html`,   // Redirect khi người dùng hủy hoặc thanh toán thất bại
     };
   
-    console.log("Checkout Data gửi lên:", checkoutData); // Debug dữ liệu gửi lên BE
+    console.log("Checkout Data gửi lên:", checkoutData); 
   
     try {
       const res = await productApi.checkOut(checkoutData);
@@ -139,7 +139,7 @@ const Cart = () => {
                               ".",
                               ""
                             )};base64,${item.image.bytes}`
-                          : "/images/default-placeholder.png" // Ảnh mặc định nếu không có
+                          : "/images/default-placeholder.png" 
                       }
                       alt={item.name}
                       onError={(e) =>
@@ -153,7 +153,7 @@ const Cart = () => {
                       }}
                     />
                   }
-                  title={<strong>{item.productName || "Không có tên"}</strong>} // 🟢 Hiển thị tên sản phẩm
+                  title={<strong>{item.productName || "Không có tên"}</strong>} 
                   description={`${item.price.toLocaleString()} VND`}
                 />
               </List.Item>

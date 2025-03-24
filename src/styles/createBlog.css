@@ -1,27 +1,67 @@
-.create-blog-container {
-  padding: 30px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 600px;
-  margin: 100px auto;
+.create-blog {
+  max-width: 700px;
+  margin: 50px auto;
+  background: #ffffff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', sans-serif;
 }
 
-.create-blog-container h2 {
+.create-blog h2 {
   text-align: center;
-  margin-bottom: 20px;
-  font-size: 22px;
+  margin-bottom: 30px;
+  color: #333;
 }
 
-.rich-text-editor {
-  min-height: 200px;
+.create-blog .form-group {
   margin-bottom: 20px;
 }
 
-.preview-image {
+.create-blog label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+.create-blog input[type="text"],
+.create-blog select,
+.create-blog textarea {
   width: 100%;
-  max-height: 250px;
-  object-fit: cover;
-  margin-top: 10px;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
   border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.2s ease;
+}
+
+.create-blog input[type="text"]:focus,
+.create-blog select:focus,
+.create-blog textarea:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.create-blog textarea {
+  resize: vertical;
+}
+
+.create-blog button[type="submit"] {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  background-color: #1890ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.create-blog button[type="submit"]:hover {
+  background-color: #147bd1;
 }
