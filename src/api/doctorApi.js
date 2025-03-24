@@ -7,6 +7,8 @@ const doctorApi = {
   // Lấy thông tin chi tiết của một bác sĩ
   getDoctorById: (id) => apiClient.get(`/Doctor/${id}`),
 
+  getDoctorByCategoryId: (id) => apiClient.get(`/User/GetSkinTherapistsByCategoryId?categoryId=${id}`),
+
   // Lấy tất cả ảnh
   getAllImages: () => apiClient.get("/Image/Gets"),
 };

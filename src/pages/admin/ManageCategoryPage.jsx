@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Table, message, Button, Popconfirm, Modal, Form, Input } from "antd";
 import categoryApi from "../../api/categoryApi";
+import "../../styles/ManageCategoriesPage.css";
 
 const ManageCategoriesPage = () => {
   const [categories, setCategories] = useState([]);
@@ -94,20 +95,23 @@ const ManageCategoriesPage = () => {
   ];
 
   return (
-    <div>
-      <h2>Quản lý danh mục</h2>
+    <div className="manage-categories-container">
+      <h2 className="manage-categories-heading">Quản lý danh mục</h2>
 
       <Button
         type="primary"
         onClick={() => setIsCreateModalVisible(true)}
-        style={{ marginBottom: 16 }}
+        className="manage-categories-add-button"
       >
         Thêm danh mục
       </Button>
 
-      <Table dataSource={categories} columns={columns} rowKey="id" />
+      <div className="manage-categories-table">
+        <Table dataSource={categories} columns={columns} rowKey="id" />
+      </div>
 
       <Modal
+        className="manage-categories-modal"
         title="Thêm danh mục"
         visible={isCreateModalVisible}
         onCancel={() => setIsCreateModalVisible(false)}
@@ -117,6 +121,7 @@ const ManageCategoriesPage = () => {
           layout="vertical"
           form={createForm}
           onFinish={handleCreateCategory}
+          className="manage-categories-form"
         >
           <Form.Item
             label="Tên danh mục"
@@ -135,12 +140,18 @@ const ManageCategoriesPage = () => {
       </Modal>
 
       <Modal
+        className="manage-categories-modal"
         title="Cập nhật danh mục"
         visible={isEditModalVisible}
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
       >
-        <Form layout="vertical" form={editForm} onFinish={handleUpdateCategory}>
+        <Form
+          layout="vertical"
+          form={editForm}
+          onFinish={handleUpdateCategory}
+          className="manage-categories-form"
+        >
           <Form.Item
             label="Tên danh mục"
             name="categoryName"

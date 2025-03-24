@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Modal, Form, Input, InputNumber, message, Popconfirm, Select } from "antd";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Popconfirm,
+  Select,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import servicesApi from "../../api/servicesApi";
 import categoryApi from "../../api/categoryApi";
+import imageApi from "../../api/imageApi";
 import ImageManager from "../../components/ImageManager";
+import "../../styles/ManageServicesPage.css";
 
 const { Option } = Select;
 
@@ -13,81 +25,94 @@ const ManageServicesPage = () => {
   // State
   const [services, setServices] = useState([]);
   const [categories, setCategories] = useState([]);
-  
-  // Modal chính (Thêm/Sửa dịch vụ)
+
+  // Modal Thêm/Sửa
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentService, setCurrentService] = useState(null);
 
-  // ImageManager Modal
+  // ImageManager
   const [isImageManagerVisible, setIsImageManagerVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
-  // Form AntD
+  // Form
   const [form] = Form.useForm();
 
-  // Lấy danh sách dịch vụ + danh mục
   useEffect(() => {
     fetchServices();
     fetchCategories();
   }, []);
 
+  // Lấy danh sách dịch vụ
   const fetchServices = async () => {
     try {
-      const res = await servicesApi.getAllServices(); 
-      setServices(res.data || []);
+      const res = await servicesApi.getAllServices();
+      const rawServices = res.data || [];
+
+      // "Join" ảnh nếu chỉ trả về imageId
+      const servicesWithImage = await Promise.all(
+        rawServices.map(async (s) => {
+          if (!s.image && s.imageId) {
+            try {
+              const imgRes = await imageApi.getImageById(s.imageId);
+              s.image = imgRes.data;
+            } catch (err) {
+              console.error("Lỗi khi lấy ảnh:", err);
+            }
+          }
+          return s;
+        })
+      );
+
+      setServices(servicesWithImage);
     } catch (error) {
       message.error("Lỗi khi tải danh sách dịch vụ!");
     }
   };
 
+  // Lấy danh mục
   const fetchCategories = async () => {
     try {
       const resCat = await categoryApi.getAll();
-      // Tùy cấu trúc trả về, bạn map đúng trường data
       setCategories(resCat.data.data || []);
     } catch (error) {
       message.error("Lỗi khi tải danh mục!");
     }
   };
 
-  // ======= Tạo mới dịch vụ =======
+  // Thêm dịch vụ
   const handleAdd = () => {
     setIsEditing(false);
     setCurrentService(null);
-    setSelectedImage(null); // Chưa có ảnh
+    setSelectedImage(null);
     form.resetFields();
     setIsModalVisible(true);
   };
 
-  // ======= Sửa dịch vụ =======
+  // Sửa dịch vụ
   const handleEdit = (service) => {
     setIsEditing(true);
     setCurrentService(service);
 
-    // Nếu service có trường imageId hoặc image (tùy cách BE trả)
-    // Ta gán vào selectedImage để preview
-    // Ở đây giả sử service trả về { image: { id, bytes, fileExtension, ... } }
     if (service.image) {
       setSelectedImage(service.image);
     } else {
       setSelectedImage(null);
     }
 
-    // Gán giá trị form
     form.setFieldsValue({
       serviceName: service.serviceName,
       serviceDescription: service.serviceDescription,
       categoryId: service.categoryId,
       price: service.price,
       workTime: service.workTime,
-      imageId: service.imageId, // Nếu BE trả field imageId riêng
+      imageId: service.imageId,
     });
 
     setIsModalVisible(true);
   };
 
-  // ======= Xóa dịch vụ =======
+  // Xóa dịch vụ
   const handleDelete = async (id) => {
     try {
       await servicesApi.deleteService(id);
@@ -98,62 +123,79 @@ const ManageServicesPage = () => {
     }
   };
 
-  // ======= Lưu (Thêm hoặc Cập nhật) =======
+  // Lưu (Thêm/Cập nhật)
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      // values: { serviceName, serviceDescription, categoryId, price, workTime, imageId }
+      console.log("Dữ liệu form:", values);
+
+      // Nếu BE yêu cầu multipart/form-data, ta tạo FormData và append từng trường
+      const formData = new FormData();
+      formData.append("serviceName", values.serviceName);
+      formData.append("serviceDescription", values.serviceDescription);
+      formData.append("categoryId", values.categoryId);
+      formData.append("price", values.price);
+      formData.append("workTime", values.workTime);
+      formData.append("imageId", values.imageId || 0);
 
       if (isEditing && currentService) {
-        // Cập nhật
-        await servicesApi.updateService(currentService.id, values);
+        await servicesApi.updateService(currentService.id, {
+          serviceName: values.serviceName,
+          serviceDescription: values.serviceDescription,
+          categoryId: values.categoryId,
+          price: values.price,
+          workTime: values.workTime,
+          imageId: values.imageId || 0,
+        });
         message.success("Cập nhật dịch vụ thành công!");
       } else {
-        // Thêm mới
-        await servicesApi.createService(values);
+        console.log("FormData keys:", [...formData.keys()]);
+        await servicesApi.createService(formData);
         message.success("Thêm dịch vụ thành công!");
       }
+
       setIsModalVisible(false);
       fetchServices();
     } catch (error) {
+      console.error("Lỗi khi lưu dịch vụ:", error);
       message.error("Lỗi khi lưu dịch vụ!");
-      console.error(error);
     }
   };
 
-  // ======= Đóng modal =======
   const handleCancel = () => {
     setIsModalVisible(false);
   };
 
-  // ======= Chuyển sang trang quản lý ServiceDetail =======
+  // Quản lý ServiceDetail
   const handleManageDetails = (serviceId) => {
     navigate(`/admin/manage-service-details/${serviceId}`);
   };
 
-  // ======= Mở ImageManager =======
+  // ImageManager
   const handleOpenImageManager = () => {
     setIsImageManagerVisible(true);
   };
 
-  // ======= Callback khi chọn ảnh trong ImageManager =======
   const handleSelectImage = (img) => {
-    // Lưu object ảnh để hiển thị preview
     setSelectedImage(img);
-    // Gán imageId vào form
     form.setFieldsValue({ imageId: img.id });
   };
 
-  // ======= Đóng ImageManager =======
   const handleCloseImageManager = () => {
     setIsImageManagerVisible(false);
   };
 
-  // Cột bảng
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id", width: 70 },
-    { title: "Tên Dịch Vụ", dataIndex: "serviceName", key: "serviceName" },
-    { title: "Mô Tả", dataIndex: "serviceDescription", key: "serviceDescription" },
+    {
+      title: "Tên Dịch Vụ",
+      dataIndex: "serviceName",
+      key: "serviceName",
+    },
+    {
+      title: "Mô Tả",
+      dataIndex: "serviceDescription",
+      key: "serviceDescription",
+    },
     {
       title: "Giá",
       dataIndex: "price",
@@ -164,6 +206,21 @@ const ManageServicesPage = () => {
       title: "Thời Gian (phút)",
       dataIndex: "workTime",
       key: "workTime",
+    },
+    {
+      title: "Hình Ảnh",
+      key: "image",
+      render: (_, record) => {
+        if (!record.image) return "No image";
+        const ext = record.image.fileExtension?.replace(".", "") || "jpeg";
+        return (
+          <img
+            src={`data:image/${ext};base64,${record.image.bytes}`}
+            alt="preview"
+            style={{ width: 60, height: 60, objectFit: "cover" }}
+          />
+        );
+      },
     },
     {
       title: "Hành Động",
@@ -190,22 +247,30 @@ const ManageServicesPage = () => {
   ];
 
   return (
-    <div>
-      <h2>Quản Lý Dịch Vụ Skincare</h2>
-      <Button type="primary" onClick={handleAdd} style={{ marginBottom: 16 }}>
+    <div className="manage-services-container">
+      <h2 className="manage-services-heading">Quản Lý Dịch Vụ Skincare</h2>
+      <Button
+        type="primary"
+        onClick={handleAdd}
+        className="manage-services-add-button"
+      >
         Thêm Dịch Vụ
       </Button>
 
-      <Table dataSource={services} columns={columns} rowKey="id" />
+      {/* Bọc bảng trong một div để áp style */}
+      <div className="manage-services-table">
+        <Table dataSource={services} columns={columns} rowKey="id" />
+      </div>
 
-      {/* Modal Thêm/Sửa Dịch Vụ */}
+      {/* Modal Thêm/Sửa */}
       <Modal
+        className="manage-services-modal"
         title={isEditing ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ mới"}
         visible={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" className="manage-services-form">
           <Form.Item
             label="Tên Dịch Vụ"
             name="serviceName"
@@ -226,7 +291,6 @@ const ManageServicesPage = () => {
             label="Danh mục"
             name="categoryId"
             rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
-            initialValue={1}
           >
             <Select placeholder="Chọn danh mục">
               {categories.map((cat) => (
@@ -237,31 +301,36 @@ const ManageServicesPage = () => {
             </Select>
           </Form.Item>
 
-          {/* Trường ẩn lưu imageId */}
+          {/* Ẩn imageId */}
           <Form.Item name="imageId" hidden>
             <InputNumber />
           </Form.Item>
 
-          {/* Nút mở ImageManager + hiển thị ảnh đã chọn */}
           <div style={{ marginBottom: 16 }}>
             <Button onClick={handleOpenImageManager}>Chọn Ảnh</Button>
             {selectedImage && (
               <div style={{ marginTop: 8 }}>
                 <img
-                  src={`data:image/${selectedImage.fileExtension?.replace(".", "")};base64,${selectedImage.bytes}`}
+                  src={`data:image/${selectedImage.fileExtension?.replace(
+                    ".",
+                    ""
+                  )};base64,${selectedImage.bytes}`}
                   alt="preview"
-                  style={{ width: 80, height: 80, objectFit: "cover", marginRight: 8 }}
+                  style={{
+                    width: 80,
+                    height: 80,
+                    objectFit: "cover",
+                    marginRight: 8,
+                  }}
                 />
-                <span>{selectedImage.description || `Ảnh ID: ${selectedImage.id}`}</span>
+                <span>
+                  {selectedImage.description || `Ảnh ID: ${selectedImage.id}`}
+                </span>
               </div>
             )}
           </div>
 
-          <Form.Item
-            label="Giá"
-            name="price"
-            initialValue={0}
-          >
+          <Form.Item label="Giá" name="price" initialValue={0}>
             <InputNumber min={0} style={{ width: "100%" }} />
           </Form.Item>
 
@@ -281,6 +350,7 @@ const ManageServicesPage = () => {
         visible={isImageManagerVisible}
         onClose={handleCloseImageManager}
         onSelectImage={handleSelectImage}
+        // zIndex={2000}
       />
     </div>
   );
