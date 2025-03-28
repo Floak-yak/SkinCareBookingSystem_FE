@@ -53,12 +53,14 @@ export const AuthProvider = ({ children }) => {
   const login = (userData) => {
     localStorage.setItem("currentUser", JSON.stringify(userData));
     localStorage.setItem("token", userData.token);
+    localStorage.setItem("hideTestReminder", "false");
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem("currentUser");
     localStorage.removeItem("token");
+    localStorage.setItem("hideTestReminder", "false");
     setUser(null);
   };
 

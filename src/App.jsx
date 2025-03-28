@@ -5,6 +5,9 @@ import Footer from "./components/Footer";
 import AppRoutes from "./routes";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/index.css";
 
 const App = () => {
@@ -17,6 +20,7 @@ const App = () => {
             <AppRoutes />
           </main>
           <Footer />
+          <ToastContainer position="bottom-right" autoClose={3000} />
         </Router>
       </CartProvider>
     </AuthProvider>

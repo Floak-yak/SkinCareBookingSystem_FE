@@ -1,0 +1,505 @@
+.survey-result-page {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.survey-result-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  border: none;
+  color: #4a4a4a;
+  font-weight: 500;
+  padding: 0.5rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.back-button:hover {
+  color: #ff6b6b;
+}
+
+.result-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.result-header h2 {
+  color: #333;
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.result-header p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.result-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Skin Type Section */
+.skin-type-section {
+  margin-bottom: 2.5rem;
+}
+
+.skin-type-section h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.7rem;
+}
+
+.skin-type-result {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.skin-type-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background-color: #cee5ff;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skin-type-check {
+  color: #4a90e2;
+  font-size: 1.8rem;
+}
+
+.skin-type-details h4 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.skin-type-details p {
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Concerns Section */
+.concerns-section {
+  margin-bottom: 2.5rem;
+}
+
+.skin-concerns h4 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.skin-concerns ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.skin-concerns li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.skin-concerns li:last-child {
+  border-bottom: none;
+}
+
+.concern-icon {
+  color: #ff9800;
+}
+
+/* Recommendations Section */
+.recommendations-section {
+  margin-bottom: 2.5rem;
+}
+
+.recommendations-section h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.7rem;
+}
+
+.product-recommendations {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.product-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.product-image {
+  height: 200px;
+  overflow: hidden;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.product-card:hover .product-image img {
+  transform: scale(1.05);
+}
+
+.product-info {
+  padding: 1.2rem;
+}
+
+.product-info h5 {
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+  color: #333;
+}
+
+.product-rating {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.7rem;
+}
+
+.star-filled {
+  color: #ffc107;
+}
+
+.star-empty {
+  color: #e0e0e0;
+}
+
+.product-price {
+  font-weight: 600;
+  color: #4caf50;
+  margin-bottom: 0.7rem;
+}
+
+.product-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.view-product-btn {
+  width: 100%;
+  padding: 0.7rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.view-product-btn:hover {
+  background-color: #3a80d2;
+}
+
+/* Routine Section */
+.routine-section {
+  margin-bottom: 2.5rem;
+}
+
+.routine-section h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.7rem;
+}
+
+.routine-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.routine-step {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f1f8ff;
+  color: #4a90e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.step-details h5 {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.step-details p {
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Book Consultation Section */
+.book-consultation {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.book-consultation h3 {
+  color: #333;
+  font-size: 1.3rem;
+  margin-bottom: 0.7rem;
+}
+
+.book-consultation p {
+  color: #666;
+  margin-bottom: 1.2rem;
+}
+
+.consultation-btn {
+  padding: 0.8rem 2rem;
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.consultation-btn:hover {
+  background-color: #ff5252;
+}
+
+/* Loading State */
+.survey-result-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  gap: 1.5rem;
+}
+
+.survey-result-loading p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Error State */
+.survey-result-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.survey-result-error svg {
+  color: #ff6b6b;
+}
+
+.survey-result-error h3 {
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.survey-result-error p {
+  color: #666;
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+}
+
+.primary-button {
+  padding: 0.8rem 2rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.primary-button:hover {
+  background-color: #3a80d2;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .result-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .skin-type-result {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .product-recommendations {
+    grid-template-columns: 1fr;
+  }
+  
+  .routine-step {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .step-details {
+    text-align: center;
+  }
+}
+
+/* Survey Preferences */
+.survey-preferences {
+  padding-top: 2rem;
+  border-top: 1px dashed #e0e0e0;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.dont-ask-again-btn, 
+.reset-preference-btn {
+  padding: 0.6rem 1.5rem;
+  background-color: #f0f0f0;
+  color: #666;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.9rem;
+}
+
+.dont-ask-again-btn:hover {
+  background-color: #e0e0e0;
+  color: #444;
+}
+
+.reset-preference-btn {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.reset-preference-btn:hover {
+  background-color: #d4edff;
+}
+
+/* Survey History Section */
+.survey-history-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.survey-history-section h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.survey-history-section p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.history-item {
+  padding: 1.2rem;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  display: flex;
+  gap: 1.5rem;
+  transition: all 0.3s;
+}
+
+.history-item:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border-color: #e0e0e0;
+}
+
+.history-date {
+  min-width: 120px;
+  font-weight: 600;
+  color: #888;
+}
+
+.history-details h4 {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.history-details p {
+  margin-bottom: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 576px) {
+  .history-item {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  
+  .history-date {
+    min-width: unset;
+  }
+} 

@@ -7,6 +7,7 @@ import "../styles/HomePage.css";
 import { FaQuoteLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import AboutUs from "../components/AboutUs";
 import SpaGallery from "../components/SpaGallery";
+import SurveyPromptBanner from "../components/SurveyPromptBanner";
 import serviceApi from "../api/servicesApi";
 
 const HomePage = () => {
@@ -142,6 +143,9 @@ const HomePage = () => {
       </section>
 
       <SpaGallery></SpaGallery>
+      
+      {/* Survey prompt banner */}
+      <SurveyPromptBanner />
     </div>
   );
 };

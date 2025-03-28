@@ -94,6 +94,14 @@ const Header = () => {
         </Link>
       ),
     },
+    role === "Customer" && {
+      key: "skinSurvey",
+      label: (
+        <Link to="/survey" className="skin-survey-btn">
+          <ProfileOutlined /> Kiểm tra loại da
+        </Link>
+      ),
+    },
 
     { type: "divider" },
     {

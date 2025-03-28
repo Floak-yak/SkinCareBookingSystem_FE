@@ -1,108 +1,280 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Spin, Card, Button, Result, List, Typography, Avatar } from 'antd';
+import { CheckCircleOutlined, RightOutlined } from '@ant-design/icons';
+import useAuth from '../hooks/useAuth';
 import surveyApi from '../api/surveyApi';
 import "../styles/SurveyQuestionPage.css";
 
+const { Title, Paragraph, Text } = Typography;
+
 const SurveyQuestionPage = () => {
-  const [questionText, setQuestionText] = useState('');
-  const [options, setOptions] = useState([]);
-  const [currentQuestionId, setCurrentQuestionId] = useState(''); // lưu mã câu hỏi hiện tại
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  // General state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Question flow state
+  const [sessionId, setSessionId] = useState(null);
+  const [currentQuestionId, setCurrentQuestionId] = useState(null);
+  const [questionText, setQuestionText] = useState('');
+  const [options, setOptions] = useState([]);
+  
+  // Result state
   const [finished, setFinished] = useState(false);
-  const [resultData, setResultData] = useState(null); // lưu dữ liệu kết luận
+  const [resultData, setResultData] = useState(null);
+  const [recommendedServices, setRecommendedServices] = useState([]);
 
-  // Lấy câu hỏi đầu tiên khi component mount
+  // Start survey when component mounts
   useEffect(() => {
-    const fetchInitialQuestion = async () => {
-      try {
-        const response = await surveyApi.startSurvey();
-        setQuestionText(response.data.question);
-        setOptions(response.data.options);
-        // Giả sử câu hỏi đầu tiên luôn là Q1
-        setCurrentQuestionId('Q1'); 
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInitialQuestion();
+    startSurvey();
   }, []);
 
-  // Xử lý khi người dùng chọn một option
-  const handleOptionClick = async (index) => {
+  // Start a new survey session
+  const startSurvey = async () => {
     try {
       setLoading(true);
-      // Gọi API lấy câu hỏi tiếp theo dựa trên currentQuestionId và optionIndex
-      const nextResponse = await surveyApi.getNextQuestion(currentQuestionId, index);
-      const nextQuestionId = nextResponse.data.nextQuestionId;
-      console.log('Current question ID:', currentQuestionId);
+      setError(null);
       
-      // Nếu nextQuestionId bắt đầu bằng "RESULT_", coi đó là kết quả bài test
-      if (nextQuestionId.startsWith("RESULT_")) {
-        // Gọi API lấy kết luận chi tiết dựa trên nextQuestionId
-        const conclusionResponse = await surveyApi.getQuestion(nextQuestionId);
-        setResultData(conclusionResponse.data);
-        setFinished(true);
-      } else {
-        // Nếu chưa kết thúc, lấy chi tiết câu hỏi tiếp theo
-        const questionResponse = await surveyApi.getQuestion(nextQuestionId);
-        setQuestionText(questionResponse.data.question);
-        setOptions(questionResponse.data.options);
-        setCurrentQuestionId(nextQuestionId);
+      // Try to use the new database-backed API
+      try {
+        const response = await surveyApi.startDatabaseSurvey();
+        setSessionId(response.data.sessionId);
+        setCurrentQuestionId(response.data.questionId);
+        setQuestionText(response.data.question);
+        setOptions(response.data.options.map(o => ({
+          id: o.id,
+          text: o.text
+        })));
+      } catch (dbError) {
+        console.warn('Database survey not available, falling back to file-based survey', dbError);
+        
+        // Fall back to file-based API
+        const response = await surveyApi.startSurvey();
+        setQuestionText(response.data.question);
+        setOptions(response.data.options.map((option, index) => ({
+          id: index,
+          text: option.label
+        })));
+        setCurrentQuestionId('Q1');
       }
     } catch (err) {
-      setError(err);
+      console.error('Error starting survey:', err);
+      setError('Could not start the survey. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Khi người dùng nhấn nút "Hoàn thành", reload trang
+  // Handle when user selects an option
+  const handleOptionClick = async (optionId, optionIndex) => {
+    try {
+      setLoading(true);
+      
+      if (sessionId) {
+        // Use database-backed API
+        const response = await surveyApi.answerQuestion(sessionId, currentQuestionId, optionId);
+        
+        if (response.data.isResult) {
+          // We have a result
+          setResultData(response.data.result);
+          setRecommendedServices(response.data.recommendedServices || []);
+          setFinished(true);
+          
+          // Navigate to the results page with the session ID
+          navigate(`/survey-results?id=${sessionId}`);
+        } else {
+          // We have another question
+          setCurrentQuestionId(response.data.questionId);
+          setQuestionText(response.data.question);
+          setOptions(response.data.options.map(o => ({
+            id: o.id,
+            text: o.text
+          })));
+        }
+      } else {
+        // Use file-based API
+        const nextResponse = await surveyApi.getNextQuestion(currentQuestionId, optionIndex);
+        const nextQuestionId = nextResponse.data.nextQuestionId;
+        
+        if (nextQuestionId.startsWith("RESULT_")) {
+          // This is a result
+          const conclusionResponse = await surveyApi.getQuestion(nextQuestionId);
+          setResultData(conclusionResponse.data);
+          setFinished(true);
+          
+          // For file-based surveys without sessions, still show the result page
+          // but we'll need to temporarily store results in local storage
+          try {
+            localStorage.setItem('surveyResults', JSON.stringify(conclusionResponse.data));
+            navigate('/survey-results');
+          } catch (error) {
+            console.warn('Error saving survey results to localStorage:', error);
+            // Still navigate but we might not have results
+            navigate('/survey-results');
+          }
+        } else {
+          // This is another question
+          const questionResponse = await surveyApi.getQuestion(nextQuestionId);
+          setQuestionText(questionResponse.data.question);
+          setOptions(questionResponse.data.options.map((option, index) => ({
+            id: index,
+            text: option.label
+          })));
+          setCurrentQuestionId(nextQuestionId);
+        }
+      }
+    } catch (err) {
+      console.error('Error processing answer:', err);
+      setError('Could not process your answer. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle "Done" button click
   const handleFinish = () => {
-    window.location.reload();
+    navigate('/services');
+  };
+
+  // View a recommended service
+  const viewService = (serviceId) => {
+    navigate(`/servicesDetail/${serviceId}`);
+  };
+
+  // Book a recommended service
+  const bookService = () => {
+    navigate('/booking');
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-container">
+        <Spin size="large" tip="Loading survey..."/>
+      </div>
+    );
   }
+
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <Result
+        status="error"
+        title="Survey Error"
+        subTitle={error}
+        extra={<Button type="primary" onClick={startSurvey}>Try Again</Button>}
+      />
+    );
   }
-  if (!questionText) {
-    return <div>No question found.</div>;
+
+  if (finished && resultData) {
+    return (
+      <div className="survey-result-page">
+        <Result
+          icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
+          title="Survey Completed!"
+          subTitle="Thank you for taking the survey. Here are your results."
+        />
+        
+        <Card className="result-card">
+          <Title level={3}>Your Skin Analysis</Title>
+          
+          {sessionId ? (
+            // Display database-backed result
+            <>
+              <Paragraph>
+                <Text strong>Skin Type:</Text> {resultData.skinType}
+              </Paragraph>
+              <Paragraph>{resultData.resultText}</Paragraph>
+              <Paragraph>
+                <Text strong>Recommendations:</Text>
+              </Paragraph>
+              <Paragraph>{resultData.recommendationText}</Paragraph>
+            </>
+          ) : (
+            // Display file-based result
+            <Paragraph style={{ whiteSpace: 'pre-wrap' }}>
+              {typeof resultData.question === 'string' 
+                ? resultData.question.replace(/\\n/g, "\n") 
+                : resultData.question}
+            </Paragraph>
+          )}
+        </Card>
+        
+        {recommendedServices.length > 0 && (
+          <Card title="Recommended Services For You" className="recommended-services-card">
+            <List
+              itemLayout="horizontal"
+              dataSource={recommendedServices}
+              renderItem={service => (
+                <List.Item
+                  actions={[
+                    <Button 
+                      type="link" 
+                      onClick={() => viewService(service.id)}
+                      icon={<RightOutlined />}
+                    >
+                      View
+                    </Button>
+                  ]}
+                >
+                  <List.Item.Meta
+                    avatar={<Avatar src={service.imageUrl || '/images/service-default.png'} />}
+                    title={service.name}
+                    description={
+                      <>
+                        <Paragraph ellipsis={{ rows: 2 }}>{service.description}</Paragraph>
+                        <Text type="secondary">Price: {service.price?.toLocaleString() || 'Contact us'} VND</Text>
+                      </>
+                    }
+                  />
+                </List.Item>
+              )}
+            />
+            
+            <div className="action-buttons">
+              <Button type="primary" size="large" onClick={bookService}>
+                Book a Service
+              </Button>
+              <Button size="large" onClick={handleFinish}>
+                Done
+              </Button>
+            </div>
+          </Card>
+        )}
+        
+        {!recommendedServices.length && (
+          <div className="action-buttons">
+            <Button type="primary" size="large" onClick={bookService}>
+              Book a Service
+            </Button>
+            <Button size="large" onClick={handleFinish}>
+              Done
+            </Button>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
     <div className="survey-question-page">
-      <h2>{questionText}</h2>
-      <div className="options">
-        {options.map((option, index) => {
-          return (
-            <button key={index} onClick={() => handleOptionClick(index)}>
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Popup kết quả xuất hiện khi survey hoàn thành */}
-      {finished && resultData && (
-        <div className="popup-overlay">
-          <div className="popup">
-            {/* Sử dụng white-space: pre-wrap để hiển thị \n dưới dạng ngắt dòng */}
-            <p style={{ whiteSpace: 'pre-wrap' }}>{resultData.question.replace(/\\n/g, "\n")}</p>
-            <div className="options">
-              {resultData.options.map((option, index) => (
-                <button key={index} onClick={handleFinish}>
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
+      <Card className="question-card">
+        <Title level={3}>{questionText}</Title>
+        <div className="options">
+          {options.map((option, index) => (
+            <Button 
+              key={index} 
+              onClick={() => handleOptionClick(option.id, index)}
+              size="large"
+              className="option-button"
+            >
+              {option.text}
+            </Button>
+          ))}
         </div>
-      )}
+      </Card>
     </div>
   );
 };

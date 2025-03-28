@@ -42,6 +42,82 @@ const surveyApi = {
   startSurvey: () => {
     return apiClient.get(`/Survey/start`);
   },
+
+  // Bắt đầu survey (lấy câu hỏi đầu tiên) từ database
+  startDatabaseSurvey: () => {
+    return apiClient.get('/Survey/db/start');
+  },
+
+  // Trả lời câu hỏi trong survey từ database
+  answerQuestion: (sessionId, questionId, optionId) => {
+    return apiClient.post('/Survey/db/answer', {
+      sessionId,
+      questionId,
+      optionId
+    });
+  },
+
+  // Lấy kết quả survey từ database
+  getSurveyResults: (sessionId) => {
+    return apiClient.get(`/Survey/db/results/${sessionId}`);
+  },
+
+  // Lấy lịch sử survey của người dùng từ database
+  getUserSurveyHistory: () => {
+    return apiClient.get('/Survey/db/user-history');
+  },
+
+  // Lấy tất cả các câu hỏi từ database
+  getDatabaseQuestions: () => {
+    return apiClient.get('/Survey/db/admin/questions');
+  },
+
+  // Lấy câu hỏi từ database dựa trên id
+  getDatabaseQuestionById: (id) => {
+    return apiClient.get(`/Survey/db/admin/question/${id}`);
+  },
+
+  // Thêm câu hỏi mới vào database
+  addDatabaseQuestion: (question) => {
+    return apiClient.post('/Survey/db/admin/question', question);
+  },
+
+  // Cập nhật câu hỏi trong database
+  updateDatabaseQuestion: (id, question) => {
+    return apiClient.put(`/Survey/db/admin/question/${id}`, question);
+  },
+
+  // Xóa câu hỏi trong database dựa trên id
+  deleteDatabaseQuestion: (id) => {
+    return apiClient.delete(`/Survey/db/admin/question/${id}`);
+  },
+
+  // Lấy tất cả kết quả survey từ database
+  getAllResults: () => {
+    return apiClient.get('/Survey/db/admin/results');
+  },
+
+  // Lấy kết quả chi tiết cho trang kết quả survey
+  getSurveyResultDetails: (surveyId) => {
+    return apiClient.get(`/Survey/db/results/${surveyId}`);
+  },
+
+  // Lấy các sản phẩm được đề xuất dựa trên loại da
+  getRecommendedProducts: (skinType) => {
+    return apiClient.get(`/products/recommendations`, {
+      params: { skinType }
+    });
+  },
+
+  // Thêm dịch vụ được đề xuất mới vào database
+  addRecommendedService: (service) => {
+    return apiClient.post('/Survey/db/admin/recommended-service', service);
+  },
+
+  // Xóa dịch vụ được đề xuất trong database dựa trên id
+  deleteRecommendedService: (id) => {
+    return apiClient.delete(`/Survey/db/admin/recommended-service/${id}`);
+  }
 };
 
 export default surveyApi;
