@@ -21,10 +21,7 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await userApi.login({
-        email: formData.email,
-        password: formData.password,
-      });
+      const response = await userApi.login(formData.email, formData.password);
 
       const { token, userId } = response.data;
       if (!token) throw new Error("Token không hợp lệ!");

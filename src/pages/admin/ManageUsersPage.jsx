@@ -35,12 +35,9 @@ const ManageUsersPage = () => {
     fetchUsers();
   }, []);
 
-  // ======================
-  // Gọi song song 2 endpoint:
-  // 1) getAll() => toàn bộ user
-  // 2) getSkinTherapists() => user role=3 có categoryId
-  // Sau đó merge categoryId vào danh sách allUsers
-  // ======================
+  // getAll()
+  // getSkinTherapists() => user role=3 có categoryId
+  //  merge categoryId vào danh sách allUsers
   const fetchUsers = async () => {
     try {
       const [resAll, resSkin] = await Promise.all([
@@ -145,6 +142,8 @@ const ManageUsersPage = () => {
       };
 
       const response = await userApi.create(payload);
+      console.log("Response tạo tài khoản:", response);
+
       const generatedPassword = response.data?.password;
 
       message.success("Tạo tài khoản thành công!");
@@ -298,7 +297,7 @@ const ManageUsersPage = () => {
             name="yearOfBirth"
             rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
           >
-            <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
+            <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
           </Form.Item>
 
           <Form.Item
