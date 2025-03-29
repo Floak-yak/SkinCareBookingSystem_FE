@@ -396,8 +396,8 @@ const BookingPage = () => {
       //   console.log("URL thanh toán:", url);
       // }
 
-      if (response.data && response.data.qrCode) {
-        setQrCode(response.data.qrCode);
+      if (response.data && response.data.createPaymentResult?.qrCode) {
+        setQrCode(response.data.createPaymentResult.qrCode);
         setBookingConfirmed(true);
         toast.success("Đặt lịch thành công! Vui lòng quét mã QR để thanh toán");
 
@@ -878,28 +878,28 @@ const BookingPage = () => {
                 </div>
                 {/* )} */}
 
-                {/* Calendar section - Show when either selecting new booking or rescheduling */}
+                {/* calendar-booking section - Show when either selecting new booking or rescheduling */}
                 {/* {(selectedStaff || isRescheduling) && ( */}
-                <div className="calendar-section">
+                <div className="calendar-booking-section">
                   <label className="form-label">
                     Chọn ngày và giờ{isRescheduling ? " mới" : ""}:
                   </label>
-                  <div className="calendar-controls">
+                  <div className="calendar-booking-controls">
                     <button
                       onClick={() =>
                         setCurrentWeek(Math.max(0, currentWeek - 1))
                       }
-                      className="calendar-button"
+                      className="calendar-booking-button"
                     >
                       &lt;
                     </button>
-                    <div className="calendar-container">
-                      <table className="calendar-table">
+                    <div className="calendar-booking-container">
+                      <table className="calendar-booking-table">
                         <thead>
-                          <tr className="calendar-header">
-                            <th className="calendar-header-cell">Giờ</th>
+                          <tr className="calendar-booking-header">
+                            <th className="calendar-booking-header-cell">Giờ</th>
                             {weeks[currentWeek].map((d, index) => (
-                              <th key={index} className="calendar-header-cell">
+                              <th key={index} className="calendar-booking-header-cell">
                                 {new Date(d).toLocaleDateString("vi-VN", {
                                   weekday: "short",
                                   day: "numeric",
@@ -912,8 +912,8 @@ const BookingPage = () => {
                         <tbody>
                           {defaultTimes.map((time, rowIndex) => (
                             <tr key={rowIndex}>
-                              <td className="calendar-cell calendar-time-cell">  {/* Thêm class mới */}
-                                <span className="calendar-time">{time}</span>   {/* Bọc trong span */}
+                              <td className="calendar-booking-cell calendar-booking-time-cell">  {/* Thêm class mới */}
+                                <span className="calendar-booking-time">{time}</span>   {/* Bọc trong span */}
                               </td>
                               {weeks[currentWeek].map((d, colIndex) => {
                                 const isBooked = isTimeSlotBooked(
@@ -930,7 +930,7 @@ const BookingPage = () => {
                                   }`;
 
                                 return (
-                                  <td key={colIndex} className="calendar-cell">
+                                  <td key={colIndex} className="calendar-booking-cell">
                                     <button
                                       onClick={() =>
                                         handleSelectDateTime(d, time)
@@ -959,7 +959,7 @@ const BookingPage = () => {
                           Math.min(weeks.length - 1, currentWeek + 1)
                         )
                       }
-                      className="calendar-button"
+                      className="calendar-booking-button"
                     >
                       &gt;
                     </button>

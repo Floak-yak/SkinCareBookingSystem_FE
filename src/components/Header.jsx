@@ -126,6 +126,12 @@ const Header = () => {
           <Link to="/staff/approve-blogs">Duyệt bài</Link>
         </>
       );
+    } else if (role === "SkinTherapist") {
+      return (
+        <>
+          <Link to="/staff-calendar">Calendar</Link>
+        </>
+      );
     } else {
       // Role = "Customer" hoặc chưa login
       return (

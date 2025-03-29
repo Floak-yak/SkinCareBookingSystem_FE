@@ -162,9 +162,9 @@
   }
 }
 
-/* Calendar section */
-/* CSS cải tiến cho phần giờ và toàn bộ calendar */
-.calendar-section {
+/* calendar-booking section */
+/* CSS cải tiến cho phần giờ và toàn bộ calendar-booking */
+.calendar-booking-section {
   background: white;
   border-radius: 12px;
   padding: 25px;
@@ -173,20 +173,20 @@
   border: 1px solid #f0f0f0;
 }
 
-.calendar-controls {
+.calendar-booking-controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
 }
 
-.calendar-nav-title {
+.calendar-booking-nav-title {
   font-size: 1.2rem;
   font-weight: 600;
   color: #333;
 }
 
-.calendar-button {
+.calendar-booking-button {
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -203,30 +203,30 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.calendar-button:hover {
+.calendar-booking-button:hover {
   background: #f9b37a;
   color: white;
   transform: scale(1.1);
 }
 
-.calendar-container {
+.calendar-booking-container {
   width: 100%;
   overflow-x: auto;
   padding: 10px 0;
 }
 
-.calendar-table {
+.calendar-booking-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 10px;
   min-width: 650px;
 }
 
-.calendar-header {
+.calendar-booking-header {
   background: transparent;
 }
 
-.calendar-header-cell {
+.calendar-booking-header-cell {
   padding: 15px 10px;
   text-align: center;
   font-weight: 600;
@@ -238,14 +238,14 @@
 }
 
 /* Phần giờ - Cải tiến mới */
-.calendar-time-cell {
+.calendar-booking-time-cell {
   padding: 0 15px;
   background: #f9f9f9;
   border-radius: 8px;
   position: relative;
 }
 
-.calendar-time {
+.calendar-booking-time {
   font-weight: 500;
   color: #444;
   font-size: 0.95rem;
@@ -258,7 +258,7 @@
   /* Khoảng cách cho icon */
 }
 
-.calendar-time::before {
+.calendar-booking-time::before {
   content: "⏱";
   position: absolute;
   left: 5px;
@@ -339,22 +339,22 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .calendar-section {
+  .calendar-booking-section {
     padding: 15px;
   }
 
-  .calendar-header-cell {
+  .calendar-booking-header-cell {
     padding: 10px 5px;
     font-size: 0.85rem;
     min-width: 70px;
   }
 
-  .calendar-time {
+  .calendar-booking-time {
     font-size: 0.85rem;
     padding-left: 20px;
   }
 
-  .calendar-time::before {
+  .calendar-booking-time::before {
     font-size: 0.8rem;
   }
 
