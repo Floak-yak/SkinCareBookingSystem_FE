@@ -1,69 +1,121 @@
-/* Feedback
-.feedback {
-    display: flex;
-    justify-content: center;
-    margin: auto 100px;
-}
-
-.feedback-img {
-    width: calc((100%/12)*3);
-    width: 70%;
-    text-align: center;
-}
-
-.feedback-img img {
-    border-radius: 50%;
-} */
 .container {
     text-align: center;
-    padding: 20px;
-    margin-top: 30px;
-    margin-bottom: 30px;
+    padding: 40px 20px;
+    margin: 0 auto;
+    max-width: 1200px;
 }
 
 .title {
     font-size: 2.5rem;
-    margin-bottom: 20px;
+    margin-bottom: 40px;
     color: #f9b37a;
-    font-family: serif;
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+}
+
+.title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #f9b37a, transparent);
 }
 
 .profiles {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 30px;
     flex-wrap: wrap;
+    padding: 20px 0;
 }
 
 .card {
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 10px;
-    width: 250px;
+    background: white;
+    padding: 25px 20px;
+    border-radius: 15px;
+    width: 230px;
     text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-/* add hover effect */
 .card:hover {
-    transform: translateY(-25px);
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #f9b37a, #ff8a65);
 }
 
 .image {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 10px;
+    margin: 0 auto 15px;
+    border: 4px solid #f9f9f9;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover .image {
+    transform: scale(1.05);
+    border-color: #f9b37a;
 }
 
 .name {
-    font-size: 18px;
-    font-weight: bold;
-    margin: 10px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 15px 0 10px;
+    color: #333;
 }
 
 .comment {
-    font-size: 14px;
-    color: #555;
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.6;
+    padding: 0 10px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .profiles {
+        gap: 20px;
+    }
+
+    .card {
+        width: 220px;
+        padding: 20px 15px;
+    }
+
+    .image {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 300px;
+    }
 }

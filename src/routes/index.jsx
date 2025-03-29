@@ -25,6 +25,7 @@ import ManagerOrders from "../pages/admin/ManagerOrders";
 import OrderHistory from "../pages/OrderHistory";
 import SurveyQuestionPage from "../pages/SurveyQuestionPage";
 import SurveyManagerPage from "../pages/admin/SurveyManagerPage";
+import BookingHistory from "../pages/BookingHistory";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -51,6 +52,7 @@ const AppRoutes = () => {
       <Route path="/staff/approve-blogs" element={<ApproveBlog />} />
       <Route path="/services" element={<Services />} />
       <Route path="/booking" element={<Booking />} />
+      <Route path="/booking-history" element={<BookingHistory />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/servicesDetail/:id" element={<ServiceDetail />} />
       <Route path="/products" element={<ProductPage />} />
@@ -59,7 +61,7 @@ const AppRoutes = () => {
       <Route path="/about" element={<AboutUs />} />
       <Route path="/order-history" element={<OrderHistory />} />
       <Route path="/survey" element={<SurveyQuestionPage />} />
-        
+
       {/* admin page */}
       <Route path="/admin/product" element={<ManageProductsPage />} />
       <Route path="/admin/user" element={<ManageUsersPage />} />

@@ -137,6 +137,7 @@ const Header = () => {
           <Link to="/survey">Kiểm tra loại da</Link>
           <Link to="/contact">Liên hệ</Link>
           <Link to="/about">Về chúng tôi</Link>
+          <Link to="/booking-history">Lịch sử Booking</Link>
         </>
       );
     }
