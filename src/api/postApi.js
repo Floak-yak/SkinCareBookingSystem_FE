@@ -5,7 +5,7 @@ const postApi = {
   getPosts: () => apiClient.get("/Post/GetPosts"),
 
   // Lấy thông tin bài đăng theo ID
-  getPostById: (id) => apiClient.get(`/Post/GetPostById?id=${id}`),
+  getPostById: (id) => apiClient.get(`/Post/GetPostById?postId=${id}`),
 
   // Xóa bài đăng theo ID
   deletePost: (id) => apiClient.delete(`/Post/${id}`),
@@ -27,7 +27,7 @@ const postApi = {
     apiClient.get(`/Post/CategoryId?categoryId=${categoryId}`),
 
   // Lấy danh sách bài đăng có chứa name
-  getPostsIncludeName: (name) => apiClient.get(`/Post/IncludeName?name=${name}`),
+  getPostsIncludeName: (name) => apiClient.get(`/Post/IncludeName?text=${name}`),
 };
 
 export default postApi;
