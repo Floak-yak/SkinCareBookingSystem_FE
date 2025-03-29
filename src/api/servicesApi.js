@@ -1,35 +1,34 @@
 import apiClient from "./apiClient";
 
 const servicesApi = {
-  // Lấy danh sách tất cả dịch vụ
   getAllServices: () =>
-    apiClient.get("/SkincareServices/GetServices?page=1&pageSize=20"),
+    apiClient.get("/api/SkincareServices/GetServices", {
+      params: { page: 1, pageSize: 20 }
+    }),
 
   getAllServices1: () =>
-    apiClient.get("/SkincareServices/GetServices?page=1&pageSize=8"),
+    apiClient.get("/api/SkincareServices/GetServices", {
+      params: { page: 1, pageSize: 8 }
+    }),
 
-  // Lấy chi tiết dịch vụ theo ID
-  getServiceById: (id) => apiClient.get(`/ServicesDetail/GetByService/${id}`),
+  getServiceById: (id) => apiClient.get(`/api/ServicesDetail/GetByService/${id}`),
 
-  // Tạo dịch vụ (multipart)
   createService: (formData) =>
-    apiClient.post("/SkincareServices/Create", formData, {
+    apiClient.post("/api/SkincareServices/Create", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     }),
 
-  // Cập nhật dịch vụ
   updateService: (id, formData) =>
-    apiClient.put(`/SkincareServices/Update?id=${id}`, formData, {
+    apiClient.put(`/api/SkincareServices/Update?id=${id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     }),
 
-  // Xóa dịch vụ theo ID
-  deleteService: (id) => apiClient.delete(`/SkincareServices/Delete?id=${id}`),
-  // Lấy ảnh theo ID
+  deleteService: (id) => apiClient.delete(`/api/SkincareServices/Delete?id=${id}`),
+  
   getImageById: (imageId) => apiClient.get(`/api/Image/GetImageById?imageId=${imageId}`)
 };
 
