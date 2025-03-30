@@ -33,7 +33,7 @@ const SurveyQuestionPage = () => {
   }, []);
 
   // Start a new survey session
-  const startSurvey = async () => {
+  const startSurvey = async (retryCount = 0) => {
     try {
       setLoading(true);
       setError(null);
@@ -41,28 +41,40 @@ const SurveyQuestionPage = () => {
       // Try to use the new database-backed API
       try {
         const response = await surveyApi.startDatabaseSurvey();
+        if (!response || !response.data) {
+          throw new Error('Invalid response from server');
+        }
         setSessionId(response.data.sessionId);
         setCurrentQuestionId(response.data.questionId);
         setQuestionText(response.data.question);
-        setOptions(response.data.options.map(o => ({
+        setOptions(response.data.options?.map(o => ({
           id: o.id,
           text: o.text
-        })));
+        })) || []);
       } catch (dbError) {
         console.warn('Database survey not available, falling back to file-based survey', dbError);
         
         // Fall back to file-based API
         const response = await surveyApi.startSurvey();
+        if (!response || !response.data) {
+          throw new Error('Invalid response from file-based survey');
+        }
         setQuestionText(response.data.question);
-        setOptions(response.data.options.map((option, index) => ({
+        setOptions(response.data.options?.map((option, index) => ({
           id: index,
           text: option.label
-        })));
+        })) || []);
         setCurrentQuestionId('Q1');
       }
     } catch (err) {
       console.error('Error starting survey:', err);
-      setError('Could not start the survey. Please try again later.');
+      // Attempt to retry up to 2 times
+      if (retryCount < 2) {
+        console.log(`Retrying survey start (attempt ${retryCount + 1})...`);
+        setTimeout(() => startSurvey(retryCount + 1), 1000);
+        return;
+      }
+      setError('Could not start the survey. Please check your internet connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -91,7 +103,7 @@ const SurveyQuestionPage = () => {
           setQuestionText(response.data.question);
           setOptions(response.data.options.map(o => ({
             id: o.id,
-            text: o.text
+            text: o.optionText || o.text // Add fallback to o.text
           })));
         }
       } else {

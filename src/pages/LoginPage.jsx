@@ -16,7 +16,7 @@ const LoginPage = () => {
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      const response = await apiClient.post("/User/Login", {
+      const response = await apiClient.post("/api/User/Login", {
         email: values.email,
         password: values.password,
       });

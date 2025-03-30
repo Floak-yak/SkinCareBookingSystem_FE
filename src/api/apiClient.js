@@ -4,9 +4,7 @@ const apiClient = axios.create({
   baseURL: 'https://localhost:7101',
   headers: {
     "Content-Type": "application/json",
-  },
-  httpsAgent: process.env.NODE_ENV === 'development' ? 
-    new (require('https').Agent)({ rejectUnauthorized: false }) : undefined
+  }
 });
 
 apiClient.interceptors.request.use(request => {
