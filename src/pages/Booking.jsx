@@ -11,6 +11,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { Link } from "react-router-dom";
 import { FiX, FiCheckCircle, FiXCircle, FiSmartphone, FiAlertTriangle, FiCreditCard } from "react-icons/fi";
 import Swal from 'sweetalert2';
+import transactionApi from "../api/transactionApi";
+import { message, Modal } from "antd";
 
 // Thời gian mặc định cho tất cả các dịch vụ
 const defaultTimes = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00",];
@@ -54,6 +56,9 @@ const BookingPage = () => {
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [currentBookingId, setCurrentBookingId] = useState(null);
   const [filteredStaffList, setFilteredStaffList] = useState([]);
+  const [orderCode, setOrderCode] = useState("");
+  const [resultTransaction, setResultTransaction] = useState("");
+  const [transactionId, setTransactionId] = useState("");
 
   let latestId = null;
 
@@ -217,6 +222,8 @@ const BookingPage = () => {
     }
   }, [selectedCategory]);
 
+
+
   // Add this after the other useEffect hooks
   useEffect(() => {
     const fetchBookings = async () => {
@@ -292,11 +299,6 @@ const BookingPage = () => {
     fetchBookings();
     // }, [currentUser, staffList]);
   }, [currentUser]);
-
-  const validatePhone = (phone) => {
-    const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
-    return phoneRegex.test(phone);
-  };
 
   // Kiểm tra xem thời gian đã được đặt chưa
   // const isTimeSlotBooked = (date, time, staffId) => {
@@ -389,6 +391,7 @@ const BookingPage = () => {
 
       // Gọi API tạo booking
       const response = await bookingApi.createBooking(bookingData);
+      console.log("Full API BOOKING: ", response);
       // const url = response.data?.checkoutUrl;
       // if (url) {
       //   // Chuyển hướng trang web sang URL của payOS
@@ -398,6 +401,8 @@ const BookingPage = () => {
 
       if (response.data && response.data.createPaymentResult?.qrCode) {
         setQrCode(response.data.createPaymentResult.qrCode);
+        setOrderCode(response.data.createPaymentResult.orderCode);
+        setTransactionId(response.data.transactionId);
         setBookingConfirmed(true);
         toast.success("Đặt lịch thành công! Vui lòng quét mã QR để thanh toán");
 
@@ -464,19 +469,51 @@ const BookingPage = () => {
     }
   };
 
+  const handlePayLater = () => {
+    return (
+      <Link to="/">Thanh Toán Sau</Link>
+    );
+  }
+
   const handleQRScanned = async () => {
+    if (!orderCode) {
+      message.error("Không có giao dịch nào được tạo.");
+      return;
+    }
     try {
       setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setPaymentStatus("success");
-      toast.success("Thanh toán thành công!");
+      const { data } = await transactionApi.checkTransaction(orderCode);
+      console.log("Respone data OrderCode: ", data);
+      // Nếu data là string, lấy luôn giá trị đó, nếu là object thì lấy data.status
+      const status = typeof data === "string" ? data : data.status;
 
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      resetBookingForm();
+      if (status === "PAID") {
+        window.location.href = `${window.location.origin}/success.html?transactionId=${transactionId}`;
+      } else if (status === "CANCEL") {
+        window.location.href = `${window.location.origin}/cancel.html?transactionId=${transactionId}`;
+      } else if (status === "PENDING") {
+        Modal.confirm({
+          title: "Giao dịch đang chờ xử lý",
+          content:
+            "Giao dịch của bạn đang ở trạng thái PENDING. Bạn có muốn thanh toán sau không?",
+          okText: "Thanh toán sau",
+          cancelText: "Thử lại",
+          onOk: () => {
+            handlePayLater();
+          },
+          onCancel: () => {
+            message.info("Vui lòng thử xác nhận lại giao dịch sau ít phút.");
+          },
+        });
+      } else {
+        message.error("Trạng thái giao dịch không xác định!");
+      }
     } catch (error) {
-      setPaymentStatus("failed");
-      toast.error("Thanh toán thất bại. Vui lòng thử lại!");
+      console.error(
+        "❌ Lỗi xác nhận giao dịch:",
+        error.response?.data || error.message
+      );
+      message.error("Xác nhận thanh toán thất bại!");
     } finally {
       setIsLoading(false);
     }
@@ -684,10 +721,6 @@ const BookingPage = () => {
 
       // Chuẩn bị dữ liệu cho API
       const updateData = {
-        // bookingId: currentBookingId,
-        // newDate: selectedDate,
-        // newTime: selectedTime,
-        // newSkinTherapistId: parseInt(selectedStaff)
         bookingId: currentBookingId,
         date: selectedDate,
         time: selectedTime,
