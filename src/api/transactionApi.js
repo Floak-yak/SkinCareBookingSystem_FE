@@ -8,9 +8,8 @@ const transactionApi = {
   // Lấy tất cả giao dịch (giữ nguyên như cũ)
   getAll: () => apiClient.get("/Transaction/Gets"),
 
-  // Kiểm tra trạng thái thanh toán 
-  checkTransaction: (orderId) =>
-    apiClient.get(`/Transaction/${orderId}`),
+  // Kiểm tra trạng thái thanh toán
+  checkTransaction: (orderId) => apiClient.get(`/Transaction/${orderId}`),
 
   // Hủy giao dịch
   cancel: (transactionId) =>
@@ -21,7 +20,15 @@ const transactionApi = {
     apiClient.get(`/Transaction/Checkout?transactionId=${transactionId}`),
 
   getByBookingId: (bookingId) =>
-    apiClient.get(`/Transaction/GetTransactionByBookingId?bookingId=${bookingId}`),
+    apiClient.get(
+      `/Transaction/GetTransactionByBookingId?bookingId=${bookingId}`
+    ),
+
+  // Lấy thông tin giao dịch theo transactionId
+  getById: (transactionId) =>
+    apiClient.get(
+      `/Transaction/GetTransactionById?transactionId=${transactionId}`
+    ),
 };
 
 export default transactionApi;
