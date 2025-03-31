@@ -1,56 +1,79 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Thanh toán không thành công</title>
-  <!-- Tự động chuyển hướng về trang chủ sau 5 giây -->
-  <meta http-equiv="refresh" content="5;url=/" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      text-align: center;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      color: red;
-    }
-    p {
-      margin: 20px 0;
-    }
-    .btn {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 5px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Thanh toán không thành công</h1>
-    <p>Giao dịch của bạn đã bị hủy hoặc không thành công. Đang chuyển về trang chủ...</p>
-    <p>
-      <a href="/" class="btn">Bấm vào đây nếu không chuyển tự động</a>
-    </p>
-  </div>
-  <script>
-    setTimeout(function () {
-      window.location.href = "/";
-    }, 5000);
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thanh toán không thành công</title>
+    <meta http-equiv="refresh" content="5;url=/" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        text-align: center;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: red;
+      }
+      p {
+        margin: 20px 0;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Thanh toán không thành công</h1>
+      <p>Giao dịch của bạn đã bị hủy hoặc không thành công. Đang chuyển về trang chủ...</p>
+      <p>
+        <a href="/" class="btn">Bấm vào đây nếu không chuyển tự động</a>
+      </p>
+      <div id="api-result" style="margin-top: 10px; font-size: 14px; color: #666;"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const transactionId = params.get("transactionId");
+
+      if (transactionId) {
+        axios
+          .get(`https://localhost:7101/api/Transaction/Cancel?transactionId=${transactionId}`)
+          .then((response) => {
+            console.log("Hủy giao dịch thành công:", response.data);
+            document.getElementById("api-result").textContent =
+              "Hủy giao dịch trên server thành công!";
+          })
+          .catch((error) => {
+            console.error("Lỗi khi hủy giao dịch:", error);
+            document.getElementById("api-result").textContent =
+              "Có lỗi xảy ra khi hủy giao dịch!";
+          });
+      } else {
+        document.getElementById("api-result").textContent =
+          "Không tìm thấy transactionId trong URL.";
+      }
+
+      setTimeout(function () {
+        window.location.href = "/";
+      }, 5000);
+    </script>
+  </body>
 </html>

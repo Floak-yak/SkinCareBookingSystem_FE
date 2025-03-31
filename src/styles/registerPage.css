@@ -1,86 +1,118 @@
-/* registerPage.css */
+@import url("https://fonts.googleapis.com/css2?family=Quicksand&display=swap");
 
-/* Container tổng thể */
-.register-container {
-  margin: 50px auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(90vh - 200px);
-  width: 100%;
+body {
+  font-family: "Quicksand", sans-serif;
+  background: url("https://raw.githubusercontent.com/CiurescuP/LogIn-Form/main/bg.jpg")
+    no-repeat center center fixed;
+  background-size: cover;
 }
 
-/* Hộp đăng ký */
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .register-box {
-  background: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 400px;
-  max-width: 90%;
+  background-color: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(6px);
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  padding: 40px 30px;
+  color: #fff;
   text-align: center;
 }
 
-/* Tiêu đề */
 .register-box h2 {
+  font-size: 32px;
+  font-weight: 700;
   margin-bottom: 20px;
-  color: #f9b37a;
-  font-size: 1.8em;
-  font-weight: bold;
-  border-bottom: 2px solid #f9b37a;
-  padding-bottom: 10px;
-  font-family: serif;
+  color: #fff;
 }
 
-/* Form đăng ký */
-.register-form .ant-input,
-.register-form .ant-picker {
-  border-radius: 8px;
-  height: 40px;
+/* Các input */
+.register-box input[type="text"],
+.register-box input[type="email"],
+.register-box input[type="tel"],
+.register-box input[type="date"],
+.register-box input[type="password"] {
+  width: 90%;
+  height: 44px;
+  margin: 10px auto;
+  padding: 10px 15px;
+  font-size: 15px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  transition: 0.3s;
 }
 
-/* Nút đăng ký */
-.register-button {
+.register-box input::placeholder {
+  color: #ccc;
+}
+
+.register-box input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(129, 236, 174, 0.5);
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Nút */
+.register-box button[type="submit"] {
   width: 100%;
-  border-radius: 8px;
-  background: #f9b37a;
+  height: 44px;
+  margin: 10px auto;
+  border-radius: 10px;
+  background-color: #82ccdd;
   border: none;
-  height: 40px;
-  font-size: 1em;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
   transition: background-color 0.3s ease;
-  font-family: serif;
 }
 
-.register-button:hover,
-.register-button:focus {
-  background: #e08865;
-  border: none;
+.register-box button:hover {
+  background-color: #60a3bc;
 }
 
-/* Liên kết đăng nhập */
-.login-link {
-  margin-top: 15px;
-  color: #555;
-  font-family: serif;
+/* Link điều hướng */
+.login-link,
+.back-home-link {
+  font-size: 14px;
+  margin-top: 12px;
+  color: #eee;
 }
 
-.login-link a {
-  color: #f9b37a;
+.login-link a,
+.back-home-link a {
+  color: #00cec9;
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: color 0.3s;
 }
 
-.login-link a:hover {
-  color: #e08865;
+.login-link a:hover,
+.back-home-link a:hover {
+  color: #55efc4;
 }
 
-/* Responsive cho mobile */
+.back-home-link {
+  text-align: right;
+  margin-bottom: 10px;
+}
+
+/* Responsive */
 @media (max-width: 480px) {
   .register-box {
-    padding: 20px;
+    width: 90%;
+    padding: 30px 20px;
   }
 
   .register-box h2 {
-    font-size: 1.5em;
+    font-size: 26px;
   }
 }

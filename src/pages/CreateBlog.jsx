@@ -1,205 +1,163 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Input, Button, Upload, Select, message } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import useAuth from "../hooks/useAuth";
-import apiClient from "../api/apiClient";
+import postApi from "../api/postApi";
+import categoryApi from "../api/categoryApi";
 import "../styles/createBlog.css";
-
-const { Option } = Select;
-
-// Map tên danh mục -> ID (theo quy ước của BE)
-const categoryMap = {
-  "Chăm sóc da": 1,
-  "Sản phẩm skincare": 2,
-  "Hướng dẫn skincare": 3,
-};
 
 const CreateBlog = () => {
   const { user } = useAuth();
-  const [form] = Form.useForm();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
-  const [content, setContent] = useState(""); // Nội dung bài viết (HTML)
-  const [imageBase64, setImageBase64] = useState(null); // Ảnh đại diện
+  const [categories, setCategories] = useState([]);
 
-  // Ref cho ReactQuill
-  const quillRef = useRef(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    summary: "",
+    categoryId: "",
+    imageLink: "",
+    content: "",
+  });
 
   useEffect(() => {
-    if (!user) {
-      message.error("Bạn cần đăng nhập để viết bài!");
-      navigate("/login");
-    }
-  }, [user, navigate]);
-
-  // Hàm upload ảnh đại diện (preview FE)
-  const handleImageUpload = (file) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => setImageBase64(reader.result);
-    return false; // Ngăn upload mặc định của antd
-  };
-
-  // Custom image handler cho ReactQuill (cho phép chèn ảnh vào nội dung)
-  const handleQuillImage = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.click();
-
-    input.onchange = async () => {
-      const file = input.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          const base64 = reader.result;
-          const quillEditor = quillRef.current.getEditor();
-          const range = quillEditor.getSelection();
-          quillEditor.insertEmbed(range.index, "image", base64, "user");
-        };
+    const fetchCategories = async () => {
+      try {
+        const response = await categoryApi.getAll();
+        const fetchedCategories = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error("Lỗi tải danh mục:", error);
       }
     };
+
+    fetchCategories();
+  }, []);
+
+  if (!user) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>
+        <h3>Bạn cần đăng nhập mới có thể tạo bài viết!</h3>
+        <button onClick={() => navigate("/login")}>Đăng nhập ngay</button>
+      </div>
+    );
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // Cấu hình toolbar của ReactQuill với custom image handler
-  const quillModules = useMemo(
-    () => ({
-      toolbar: {
-        container: [
-          ["bold", "italic", "underline", "strike"],
-          [{ header: 1 }, { header: 2 }],
-          [{ list: "ordered" }, { list: "bullet" }],
-          ["link", "image"],
-          ["clean"],
-        ],
-        handlers: {
-          image: handleQuillImage,
-        },
-      },
-    }),
-    []
-  );
-
-  // Khi submit form, gọi API tạo bài viết (CreatePost)
-  const handleSubmit = async (values) => {
-    if (!user) {
-      message.error("Bạn cần đăng nhập để đăng bài!");
-      return;
-    }
-    if (!content.trim()) {
-      message.error("Nội dung bài viết không được để trống!");
-      return;
-    }
-    setLoading(true);
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      // Lấy category ID từ giá trị chọn (nếu không có, mặc định là 1)
-      const catId = categoryMap[values.category] || 1;
-      // Nếu người dùng không chọn ảnh, sử dụng ảnh mặc định
-      const postImageLink = imageBase64 || "https://via.placeholder.com/300";
-
-      // Tạo body request theo cấu trúc BE (CreatePostWithContentsRequest)
-      const body = {
-        userId: user.id||user.userId,
-        title: values.title,
-        contents: [
-          {
-            contentOfPost: content,
-            contentType: 0,
-            position: 1,
-            imageLink: "",
-            postId: 0,
-          },
-        ],
-        categoryId: catId,
-        imageLink: postImageLink,
+      let contentHTML = formData.content.trim();
+  
+      // Nếu content không có thẻ HTML thì wrap lại thành <p>...
+      // if (!contentHTML.startsWith("<")) {
+      //   contentHTML = `<p>${contentHTML}</p>`;
+      // }
+  
+      const postData = {
+        ...formData,
+        content: contentHTML,
+        userId: user.userId,
       };
-
-      // Gọi API: POST /Post/Create
-      const res = await apiClient.post("/Post/Create", body);
-      console.log("Create post response:", res.data);
-
-      message.success(
-        user.role === "Staff"
-          ? "Bài viết đã được đăng (và được duyệt ngay)!"
-          : "Bài viết đã lưu, chờ duyệt!"
-      );
-      navigate("/blogs");
-    } catch (error) {
-      console.error("Lỗi khi gọi API tạo bài:", error);
-      let errorMsg = "Lỗi khi tạo bài viết. Hãy thử lại!";
-      if (error.response?.data) {
-        const serverData = error.response.data;
-        if (typeof serverData === "object") {
-          errorMsg = serverData.title || JSON.stringify(serverData);
-        } else {
-          errorMsg = serverData;
-        }
+  
+      console.log("Payload gửi đi:", postData);
+  
+      const response = await postApi.createPost(postData);
+  
+      if (response.data === "Create Success") {
+        alert("Tạo bài viết thành công!");
+        setFormData({
+          title: "",
+          summary: "",
+          categoryId: "",
+          imageLink: "",
+          content: "",
+        });
+        navigate("/blogs");
+      } else {
+        alert("Tạo bài viết thất bại!");
       }
-      message.error(errorMsg);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Lỗi tạo bài viết:", error);
+      alert("Có lỗi xảy ra khi tạo bài viết!");
     }
   };
+  
 
   return (
-    <div className="create-blog-container">
-      <h2>Viết bài mới</h2>
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <Form.Item
-          label="Tiêu đề"
-          name="title"
-          rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
-        >
-          <Input placeholder="Nhập tiêu đề bài viết..." />
-        </Form.Item>
-
-        <Form.Item label="Nội dung">
-          <ReactQuill
-            ref={quillRef}
-            value={content}
-            onChange={setContent}
-            modules={quillModules}
-            className="rich-text-editor"
+    <div className="create-blog">
+      <h2>Tạo Bài Viết Mới</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Tiêu đề:</label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="Nhập tiêu đề bài viết..."
+            required
           />
-        </Form.Item>
-
-        <Form.Item
-          label="Danh mục"
-          name="category"
-          rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
-        >
-          <Select placeholder="Chọn danh mục">
-            <Option value="Chăm sóc da">Chăm sóc da</Option>
-            <Option value="Sản phẩm skincare">Sản phẩm skincare</Option>
-            <Option value="Hướng dẫn skincare">Hướng dẫn skincare</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item label="Ảnh đại diện">
-          <Upload
-            showUploadList={false}
-            beforeUpload={handleImageUpload}
-            accept="image/*"
+        </div>
+        <div className="form-group">
+          <label>Tóm tắt:</label>
+          <input
+            type="text"
+            name="summary"
+            value={formData.summary}
+            onChange={handleChange}
+            placeholder="Nhập tóm tắt nội dung bài viết..."
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Danh mục:</label>
+          <select
+            name="categoryId"
+            value={formData.categoryId}
+            onChange={handleChange}
+            required
           >
-            <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
-          </Upload>
-          {imageBase64 && (
-            <img src={imageBase64} alt="Preview" className="preview-image" />
-          )}
-        </Form.Item>
-
-        <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            Đăng bài
-          </Button>
-        </Form.Item>
-      </Form>
+            <option value="">-- Chọn danh mục --</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.categoryName}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Image Link:</label>
+          <input
+            type="text"
+            name="imageLink"
+            value={formData.imageLink}
+            onChange={handleChange}
+            placeholder="Nhập đường dẫn ảnh..."
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Nội dung:</label>
+          <textarea
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            placeholder="Nhập nội dung bài viết..."
+            rows="10"
+            required
+          />
+        </div>
+        <button type="submit">Tạo Bài Viết</button>
+      </form>
     </div>
   );
 };

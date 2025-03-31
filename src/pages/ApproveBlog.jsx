@@ -1,27 +1,56 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Button, message, Spin, Card, Modal } from "antd";
+import postApi from "../api/postApi";
 import "../styles/approveBlog.css";
-import useFetch from "../hooks/useFetch";
 
 const ApproveBlogs = () => {
-  const { data: allBlogs, loading, updateData } = useFetch("/data/blogs.json", "blogs");
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Lọc bài viết chưa duyệt
-  const pendingBlogs = allBlogs.filter(blog => !blog.isApproved);
+  // Lấy danh sách bài viết từ BE sử dụng postApi
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
-  // Duyệt bài
-  const handleApprove = (id) => {
-    const blogToApprove = allBlogs.find(blog => blog.id === id);
-    if (!blogToApprove) return;
-
-    const updatedBlog = { ...blogToApprove, isApproved: true };
-    updateData(updatedBlog);
-    message.success("Bài viết đã được duyệt!");
+  const fetchPosts = () => {
+    setLoading(true);
+    postApi
+      .getPosts()
+      .then((res) => {
+        setPosts(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   };
 
-  // Mở modal, hiển thị chi tiết
+  // Lọc ra các bài chưa duyệt (postStatus !== 1)
+  const pendingBlogs = posts.filter((post) => post.postStatus !== 1);
+
+  // Duyệt bài: gọi API duyệt bài với payload { id, status: 1 }
+  const handleApprove = (id) => {
+    const blogToApprove = posts.find((post) => post.id === id);
+    if (!blogToApprove) return;
+
+    const payload = { id, status: 1 };
+    postApi
+      .approvePost(payload)
+      .then((res) => {
+        message.success("Bài viết đã được duyệt!");
+        // Update state: loại bỏ bài vừa duyệt khỏi danh sách
+        setPosts((prev) => prev.filter((post) => post.id !== id));
+      })
+      .catch((err) => {
+        message.error("Có lỗi xảy ra khi duyệt bài!");
+      });
+  };
+
+  // Mở modal hiển thị chi tiết bài viết
   const showModal = (blog) => {
     setSelectedBlog(blog);
     setModalVisible(true);
@@ -35,7 +64,11 @@ const ApproveBlogs = () => {
 
   const columns = [
     { title: "Tiêu đề", dataIndex: "title", key: "title" },
-    { title: "Tác giả", dataIndex: "author", key: "author" },
+    {
+      title: "Tác giả",
+      key: "author",
+      render: (_, record) => record.user?.fullName || "Ẩn danh",
+    },
     {
       title: "Hành động",
       key: "action",
@@ -52,19 +85,14 @@ const ApproveBlogs = () => {
     },
   ];
 
+  if (loading) return <Spin size="large" />;
+  if (error) return <p>Có lỗi xảy ra khi tải bài viết: {error}</p>;
+
   return (
     <div className="approve-blogs-container">
       <Card className="approve-blogs-card">
         <h2>Duyệt Bài Viết</h2>
-        {loading ? (
-          <Spin size="large" />
-        ) : (
-          <Table
-            dataSource={pendingBlogs}
-            columns={columns}
-            rowKey="id"
-          />
-        )}
+        <Table dataSource={pendingBlogs} columns={columns} rowKey="id" />
       </Card>
 
       <Modal
@@ -76,28 +104,22 @@ const ApproveBlogs = () => {
         {selectedBlog && (
           <div className="blog-detail-modal">
             <h3 className="blog-detail-title">{selectedBlog.title}</h3>
-
-            {/* Thông tin tác giả, ngày đăng */}
             <p className="blog-detail-meta">
               <span className="blog-detail-author">
-                Đăng bởi {selectedBlog.author}
+                Đăng bởi {selectedBlog.user?.fullName || "Ẩn danh"}
               </span>
               {" - "}
               <span className="blog-detail-date">
-                {new Date(selectedBlog.date).toLocaleDateString()}
+                {new Date(selectedBlog.datePost).toLocaleDateString()}
               </span>
             </p>
-
-            {/* Ảnh (nếu có) */}
-            {selectedBlog.image && (
+            {selectedBlog.image && selectedBlog.image.description && (
               <img
-                src={selectedBlog.image}
+                src={selectedBlog.image.description}
                 alt={selectedBlog.title}
                 className="blog-detail-image"
               />
             )}
-
-            {/* Nội dung (có thể chứa HTML, ảnh base64) */}
             <div
               className="blog-detail-content"
               dangerouslySetInnerHTML={{ __html: selectedBlog.content }}

@@ -2,17 +2,26 @@ import React, { useState, useEffect, use } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/booking.css";
-import bookingApi from '../api/bookingApi';
-import serviceApi from '../api/servicesApi';
-import doctorApi from '../api/doctorApi';
-import categoryApi from '../api/categoryApi';
-import { QRCodeSVG } from 'qrcode.react';
+import bookingApi from "../api/bookingApi";
+import serviceApi from "../api/servicesApi";
+import doctorApi from "../api/doctorApi";
+import categoryApi from "../api/categoryApi";
+import { QRCodeSVG } from "qrcode.react";
 
 // Thời gian mặc định cho tất cả các dịch vụ
-const defaultTimes = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
+const defaultTimes = [
+  "09:00",
+  "10:00",
+  "11:00",
+  "13:00",
+  "14:00",
+  "15:00",
+  "16:00",
+];
 
 const generateWeeks = (start) => {
   const weeks = [];
+  start.setDate(start.getDate() + 1);
   for (let i = 0; i < 2; i++) {
     const week = [];
     for (let j = 0; j < 7; j++) {
@@ -50,21 +59,21 @@ const BookingPage = () => {
   const [currentBookingId, setCurrentBookingId] = useState(null);
   const [filteredStaffList, setFilteredStaffList] = useState([]);
 
-
   // Fetch services and staff when component mounts
   useEffect(() => {
     const fetchServicesAndStaff = async () => {
       try {
         const [servicesResponse, staffResponse] = await Promise.all([
           serviceApi.getAllServices(),
-          doctorApi.getAllDoctors()
+          doctorApi.getAllDoctors(),
         ]);
 
         setServices(servicesResponse.data);
+        console.log("Services response:", servicesResponse.data);
         setStaffList(staffResponse.data);
       } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Không thể tải thông tin dịch vụ và nhân viên');
+        console.error("Error fetching data:", error);
+        toast.error("Không thể tải thông tin dịch vụ và nhân viên");
       }
     };
 
@@ -73,14 +82,14 @@ const BookingPage = () => {
 
   useEffect(() => {
     // Load current user
-    const userJson = localStorage.getItem('currentUser');
+    const userJson = localStorage.getItem("currentUser");
     if (userJson) {
       const user = JSON.parse(userJson);
       setCurrentUser(user);
     }
 
     // Load booked appointments
-    const savedAppointments = localStorage.getItem('bookedAppointments');
+    const savedAppointments = localStorage.getItem("bookedAppointments");
     if (savedAppointments) {
       setBookedAppointments(JSON.parse(savedAppointments));
     }
@@ -89,7 +98,7 @@ const BookingPage = () => {
   // Thêm useEffect để lắng nghe thay đổi đăng nhập/đăng xuất
   useEffect(() => {
     const handleStorageChange = () => {
-      const userJson = localStorage.getItem('currentUser');
+      const userJson = localStorage.getItem("currentUser");
       if (userJson) {
         const user = JSON.parse(userJson);
         setCurrentUser(user);
@@ -98,12 +107,12 @@ const BookingPage = () => {
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('logout', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("logout", handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('logout', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("logout", handleStorageChange);
     };
   }, []);
 
@@ -111,14 +120,14 @@ const BookingPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await categoryApi.getAllCategories();
-        console.log('Categories response:', response.data);
+        const response = await categoryApi.getAll();
+        console.log("Categories response:", response.data);
         // Lấy mảng categories từ response.data.data
         const categoriesData = response.data.data || [];
         setCategories(categoriesData);
       } catch (error) {
-        console.error('Error fetching categories:', error);
-        toast.error('Không thể tải danh sách loại dịch vụ');
+        console.error("Error fetching categories:", error);
+        toast.error("Không thể tải danh sách loại dịch vụ");
         setCategories([]); // Set empty array on error
       }
     };
@@ -130,12 +139,14 @@ const BookingPage = () => {
     if (selectedCategory) {
       const fetchStaffByCategory = async () => {
         try {
-          const response = await doctorApi.getDoctorByCategoryId(selectedCategory);
-          console.log('Staff response:', response.data);
+          const response = await doctorApi.getDoctorByCategoryId(
+            selectedCategory
+          );
+          console.log("Staff response:", response.data);
           setFilteredStaffList(response.data);
         } catch (error) {
-          console.error('Error fetching staff:', error);
-          toast.error('Không thể tải danh sách nhân viên');
+          console.error("Error fetching staff:", error);
+          toast.error("Không thể tải danh sách nhân viên");
           setFilteredStaffList([]); // Set empty array on error
         }
       };
@@ -150,14 +161,14 @@ const BookingPage = () => {
       try {
         if (currentUser) {
           const response = await bookingApi.getAllBookings();
-          console.log('Bookings response:', response); // For debugging
+          console.log("Bookings response:", response); // For debugging
 
           if (response.data) {
             // Transform the API response to match our local format
-            const transformedBookings = response.data.map(booking => {
+            const transformedBookings = response.data.map((booking) => {
               // Format the date string
               const dateObj = new Date(booking.date);
-              const formattedDate = dateObj.toISOString().split('T')[0];
+              const formattedDate = dateObj.toISOString().split("T")[0];
 
               // const dateTimeObj = booking.createdTime ? new Date(booking.createdTime) : null;
               // const formattedTime = dateTimeObj
@@ -165,7 +176,10 @@ const BookingPage = () => {
               //   : "Chưa có thông tin";
               const dateTimeObj = booking.date ? new Date(booking.date) : null;
               const formattedTime = dateTimeObj
-                ? dateTimeObj.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+                ? dateTimeObj.toLocaleTimeString("vi-VN", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
                 : "Chưa có thông tin";
 
               return {
@@ -180,25 +194,28 @@ const BookingPage = () => {
                 categoryId: booking.categoryId,
                 customerName: booking.user?.fullName || "Chưa xác định",
                 email: booking.user?.email || "",
-                status: booking.status === 1 ? 'pending' : 'completed',
-                totalPrice: booking.totalPrice || 0
+                status: booking.status === 1 ? "pending" : "completed",
+                totalPrice: booking.totalPrice || 0,
               };
             });
 
-            console.log('Transformed bookings:', transformedBookings); // For debugging
+            console.log("Transformed bookings:", transformedBookings); // For debugging
 
             // Filter bookings for current user
             const userBookings = transformedBookings.filter(
-              booking => booking.userId === currentUser.userId
+              (booking) => booking.userId === currentUser.userId
             );
 
             setBookedAppointments(userBookings);
-            localStorage.setItem('bookedAppointments', JSON.stringify(userBookings));
+            localStorage.setItem(
+              "bookedAppointments",
+              JSON.stringify(userBookings)
+            );
           }
         }
       } catch (error) {
-        console.error('Error fetching bookings:', error);
-        toast.error('Không thể tải danh sách lịch đặt');
+        console.error("Error fetching bookings:", error);
+        toast.error("Không thể tải danh sách lịch đặt");
       }
     };
 
@@ -214,10 +231,11 @@ const BookingPage = () => {
   // Kiểm tra xem thời gian đã được đặt chưa
   const isTimeSlotBooked = (date, time, staffId) => {
     if (!staffId) return false;
-    return bookedAppointments.some(appointment =>
-      appointment.date === date &&
-      appointment.time === time &&
-      appointment.skinTherapistId === parseInt(staffId)
+    return bookedAppointments.some(
+      (appointment) =>
+        appointment.date === date &&
+        appointment.time === time &&
+        appointment.skinTherapistId === parseInt(staffId)
     );
   };
 
@@ -227,7 +245,7 @@ const BookingPage = () => {
       if (!bookingDate || !bookingTime) return false;
 
       const now = new Date();
-      const [hours, minutes] = bookingTime.split(':').map(Number);
+      const [hours, minutes] = bookingTime.split(":").map(Number);
 
       // Tạo datetime chính xác của lịch hẹn
       const bookingDateTime = new Date(bookingDate);
@@ -237,7 +255,7 @@ const BookingPage = () => {
       const hoursDiff = (bookingDateTime - now) / (1000 * 60 * 60);
       return hoursDiff >= 24; // true nếu còn trên 24h
     } catch (error) {
-      console.error('Error in checkBookingTime:', error);
+      console.error("Error in checkBookingTime:", error);
       return false;
     }
   };
@@ -251,22 +269,30 @@ const BookingPage = () => {
 
       let errors = [];
       if (!selectedService) errors.push("Vui lòng chọn dịch vụ.");
-      if (!selectedDate || !selectedTime) errors.push("Vui lòng chọn ngày và giờ.");
+      if (!selectedDate || !selectedTime)
+        errors.push("Vui lòng chọn ngày và giờ.");
       if (!selectedStaff) errors.push("Vui lòng chọn bác sĩ.");
 
-      if (selectedStaff && isTimeSlotBooked(selectedDate, selectedTime, selectedStaff)) {
-        errors.push("Thời gian này đã được đặt cho bác sĩ này. Vui lòng chọn thời gian khác hoặc bác sĩ khác.");
+      if (
+        selectedStaff &&
+        isTimeSlotBooked(selectedDate, selectedTime, selectedStaff)
+      ) {
+        errors.push(
+          "Thời gian này đã được đặt cho bác sĩ này. Vui lòng chọn thời gian khác hoặc bác sĩ khác."
+        );
       }
 
       if (errors.length > 0) {
-        errors.forEach(err => toast.error(err));
+        errors.forEach((err) => toast.error(err));
         return;
       }
 
       setIsLoading(true);
 
       // Tìm thông tin service được chọn
-      const selectedServiceInfo = services.find(s => s.id === parseInt(selectedService));
+      const selectedServiceInfo = services.find(
+        (s) => s.id === parseInt(selectedService)
+      );
 
       // Chuẩn bị dữ liệu cho API
       const bookingData = {
@@ -275,12 +301,17 @@ const BookingPage = () => {
         serviceName: selectedServiceInfo?.serviceName || "",
         userId: currentUser.userId,
         skinTherapistId: parseInt(selectedStaff),
-        categoryId: parseInt(selectedCategory)
+        categoryId: parseInt(selectedCategory),
       };
 
       // Gọi API tạo booking
       const response = await bookingApi.createBooking(bookingData);
-
+      const url = response.data?.checkoutUrl;
+      if (url) {
+        // Chuyển hướng trang web sang URL của payOS
+        window.location.href = url;
+        console.log("URL thanh toán:", url);
+      }
       if (response.data && response.data.qrCode) {
         setQrCode(response.data.qrCode);
         setBookingConfirmed(true);
@@ -296,21 +327,28 @@ const BookingPage = () => {
           time: selectedTime,
           skinTherapistId: parseInt(selectedStaff),
           // skinTherapistName: staffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "",
-          skinTherapistName: filteredStaffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "",
+          skinTherapistName:
+            filteredStaffList.find((s) => s.id === parseInt(selectedStaff))
+              ?.fullName || "",
           customerName: currentUser.fullName,
           email: currentUser.email,
-          status: 'pending'
+          status: "pending",
         };
 
         const updatedAppointments = [...bookedAppointments, newBooking];
         setBookedAppointments(updatedAppointments);
-        localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
+        localStorage.setItem(
+          "bookedAppointments",
+          JSON.stringify(updatedAppointments)
+        );
       } else {
         throw new Error("Không nhận được mã QR từ server");
       }
     } catch (error) {
-      console.error('Booking error:', error);
-      toast.error(error.message || "Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại!");
+      console.error("Booking error:", error);
+      toast.error(
+        error.message || "Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại!"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -321,7 +359,9 @@ const BookingPage = () => {
     setSelectedService(serviceId);
 
     // Lấy thông tin dịch vụ được chọn
-    const selectedServiceInfo = services.find(s => s.id === parseInt(serviceId));
+    const selectedServiceInfo = services.find(
+      (s) => s.id === parseInt(serviceId)
+    );
     if (selectedServiceInfo) {
       setSelectedServiceData(selectedServiceInfo);
     }
@@ -330,11 +370,11 @@ const BookingPage = () => {
   const handleQRScanned = async () => {
     try {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       setPaymentStatus("success");
       toast.success("Thanh toán thành công!");
 
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       resetBookingForm();
     } catch (error) {
@@ -384,7 +424,7 @@ const BookingPage = () => {
 
       // Tìm lịch hẹn cần hủy
       const bookingToCancel = bookedAppointments.find(
-        appointment =>
+        (appointment) =>
           appointment.date === selectedDate &&
           appointment.time === selectedTime &&
           appointment.skinTherapistId === parseInt(selectedStaff)
@@ -400,10 +440,13 @@ const BookingPage = () => {
 
       // Cập nhật danh sách lịch đặt trên UI
       const updatedAppointments = bookedAppointments.filter(
-        appointment => appointment.id !== bookingToCancel.id
+        (appointment) => appointment.id !== bookingToCancel.id
       );
       setBookedAppointments(updatedAppointments);
-      localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
+      localStorage.setItem(
+        "bookedAppointments",
+        JSON.stringify(updatedAppointments)
+      );
 
       // Reset giao diện
       setBookingConfirmed(false);
@@ -422,10 +465,11 @@ const BookingPage = () => {
     }
   };
 
-
   const handleSelectDateTime = (date, time) => {
     // Kiểm tra xem khung giờ đã được đặt chưa
-    const isBooked = bookedSlots.some(slot => slot.date === date && slot.time === time);
+    const isBooked = bookedSlots.some(
+      (slot) => slot.date === date && slot.time === time
+    );
     if (isBooked) return; // Nếu đã được đặt, không cho phép chọn
 
     if (selectedDate === date && selectedTime === time) {
@@ -451,7 +495,6 @@ const BookingPage = () => {
         setSelectedStaff(booking.skinTherapistId?.toString() || "");
         setSelectedCategory(booking.categoryId?.toString() || "");
 
-
         // const categoryId = services.find(s => s.id === booking.serviceId)?.categoryId || null;
         // if (categoryId) {
         //   setSelectedCategory(categoryId); // Cập nhật category
@@ -476,16 +519,19 @@ const BookingPage = () => {
 
           // Cập nhật state sau khi hủy
           const updatedAppointments = bookedAppointments.filter(
-            appointment => appointment.id !== booking.id
+            (appointment) => appointment.id !== booking.id
           );
           setBookedAppointments(updatedAppointments);
-          localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
+          localStorage.setItem(
+            "bookedAppointments",
+            JSON.stringify(updatedAppointments)
+          );
 
           toast.success("Hủy lịch thành công");
         }
       }
     } catch (error) {
-      console.error('Error handling booking:', error);
+      console.error("Error handling booking:", error);
       toast.error("Có lỗi xảy ra khi xử lý lịch đặt!");
     }
   };
@@ -509,31 +555,36 @@ const BookingPage = () => {
         bookingId: currentBookingId,
         date: selectedDate,
         time: selectedTime,
-        skinTherapistId: parseInt(selectedStaff)
+        skinTherapistId: parseInt(selectedStaff),
       };
 
-      console.log('Update data being sent:', updateData); // Log dữ liệu gửi đi
+      console.log("Update data being sent:", updateData); // Log dữ liệu gửi đi
 
       // Gọi API cập nhật booking
       const response = await bookingApi.updateBookingDate(updateData);
-      console.log('Update response:', response); // Log response từ API
+      console.log("Update response:", response); // Log response từ API
 
       // Cập nhật danh sách đặt lịch
-      const updatedAppointments = bookedAppointments.map(booking =>
+      const updatedAppointments = bookedAppointments.map((booking) =>
         booking.id === currentBookingId
           ? {
-            ...booking,
-            date: selectedDate,
-            time: selectedTime,
-            skinTherapistId: parseInt(selectedStaff),
-            // skinTherapistName: staffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "Chưa xác định"
-            skinTherapistName: filteredStaffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "Chưa xác định"
-          }
+              ...booking,
+              date: selectedDate,
+              time: selectedTime,
+              skinTherapistId: parseInt(selectedStaff),
+              // skinTherapistName: staffList.find(s => s.id === parseInt(selectedStaff))?.fullName || "Chưa xác định"
+              skinTherapistName:
+                filteredStaffList.find((s) => s.id === parseInt(selectedStaff))
+                  ?.fullName || "Chưa xác định",
+            }
           : booking
       );
 
       setBookedAppointments(updatedAppointments);
-      localStorage.setItem('bookedAppointments', JSON.stringify(updatedAppointments));
+      localStorage.setItem(
+        "bookedAppointments",
+        JSON.stringify(updatedAppointments)
+      );
 
       // Reset các state
       setIsRescheduling(false);
@@ -544,8 +595,10 @@ const BookingPage = () => {
 
       toast.success("Dời lịch thành công!");
     } catch (error) {
-      console.error('Error updating booking:', error);
-      toast.error(error.response?.data?.message || "Có lỗi xảy ra khi cập nhật lịch!");
+      console.error("Error updating booking:", error);
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi cập nhật lịch!"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -554,18 +607,20 @@ const BookingPage = () => {
   // Thêm hàm getCurrentUserBookings
   const getCurrentUserBookings = () => {
     if (!currentUser) return [];
-    return bookedAppointments.filter(booking => booking.userId === currentUser.userId);
+    return bookedAppointments.filter(
+      (booking) => booking.userId === currentUser.userId
+    );
   };
 
   // Sửa lại hàm handleDirectBooking
   const handleDirectBooking = async () => {
     try {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       setPaymentStatus("success");
       toast.success("Đặt lịch thành công!");
 
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       setBookingConfirmed(false);
       setQrCode("");
@@ -585,7 +640,9 @@ const BookingPage = () => {
   // Add this function to filter services by category
   const getServicesByCategory = (categoryId) => {
     if (!categoryId) return [];
-    return services.filter(service => service.categoryId === parseInt(categoryId));
+    return services.filter(
+      (service) => service.categoryId === parseInt(categoryId)
+    );
   };
 
   return (
@@ -632,11 +689,13 @@ const BookingPage = () => {
                         className="form-select"
                       >
                         <option value="">Chọn dịch vụ</option>
-                        {getServicesByCategory(selectedCategory).map((service) => (
-                          <option key={service.id} value={service.id}>
-                            {service.serviceName} ({service.workTime} phút)
-                          </option>
-                        ))}
+                        {getServicesByCategory(selectedCategory).map(
+                          (service) => (
+                            <option key={service.id} value={service.id}>
+                              {service.serviceName} ({service.workTime} phút)
+                            </option>
+                          )
+                        )}
                       </select>
                     </div>
                   )}
@@ -646,10 +705,14 @@ const BookingPage = () => {
               {/* Calendar section - Show when either selecting new booking or rescheduling */}
               {(selectedService || isRescheduling) && (
                 <div className="calendar-section">
-                  <label className="form-label">Chọn ngày và giờ{isRescheduling ? ' mới' : ''}:</label>
+                  <label className="form-label">
+                    Chọn ngày và giờ{isRescheduling ? " mới" : ""}:
+                  </label>
                   <div className="calendar-controls">
                     <button
-                      onClick={() => setCurrentWeek(Math.max(0, currentWeek - 1))}
+                      onClick={() =>
+                        setCurrentWeek(Math.max(0, currentWeek - 1))
+                      }
                       className="calendar-button"
                     >
                       &lt;
@@ -661,7 +724,11 @@ const BookingPage = () => {
                             <th className="calendar-header-cell">Giờ</th>
                             {weeks[currentWeek].map((d, index) => (
                               <th key={index} className="calendar-header-cell">
-                                {new Date(d).toLocaleDateString("vi-VN", { weekday: "short", day: "numeric", month: "numeric" })}
+                                {new Date(d).toLocaleDateString("vi-VN", {
+                                  weekday: "short",
+                                  day: "numeric",
+                                  month: "numeric",
+                                })}
                               </th>
                             ))}
                           </tr>
@@ -669,24 +736,39 @@ const BookingPage = () => {
                         <tbody>
                           {defaultTimes.map((time, rowIndex) => (
                             <tr key={rowIndex}>
-                              <td className="calendar-cell calendar-time">{time}</td>
+                              <td className="calendar-cell calendar-time">
+                                {time}
+                              </td>
                               {weeks[currentWeek].map((d, colIndex) => {
-                                const isBooked = isTimeSlotBooked(d, time, selectedStaff);
-                                const buttonClass = `time-slot-button ${isBooked
-                                  ? 'time-slot-button-booked'
-                                  : selectedDate === d && selectedTime === time
-                                    ? 'time-slot-button-selected'
-                                    : 'time-slot-button-available'
-                                  }`;
+                                const isBooked = isTimeSlotBooked(
+                                  d,
+                                  time,
+                                  selectedStaff
+                                );
+                                const buttonClass = `time-slot-button ${
+                                  isBooked
+                                    ? "time-slot-button-booked"
+                                    : selectedDate === d &&
+                                      selectedTime === time
+                                    ? "time-slot-button-selected"
+                                    : "time-slot-button-available"
+                                }`;
 
                                 return (
                                   <td key={colIndex} className="calendar-cell">
                                     <button
-                                      onClick={() => handleSelectDateTime(d, time)}
+                                      onClick={() =>
+                                        handleSelectDateTime(d, time)
+                                      }
                                       disabled={isBooked}
                                       className={buttonClass}
                                     >
-                                      {isBooked ? "Đã đặt" : selectedDate === d && selectedTime === time ? "✔" : "Chọn"}
+                                      {isBooked
+                                        ? "Đã đặt"
+                                        : selectedDate === d &&
+                                          selectedTime === time
+                                        ? "✔"
+                                        : "Chọn"}
                                     </button>
                                   </td>
                                 );
@@ -697,7 +779,11 @@ const BookingPage = () => {
                       </table>
                     </div>
                     <button
-                      onClick={() => setCurrentWeek(Math.min(weeks.length - 1, currentWeek + 1))}
+                      onClick={() =>
+                        setCurrentWeek(
+                          Math.min(weeks.length - 1, currentWeek + 1)
+                        )
+                      }
                       className="calendar-button"
                     >
                       &gt;
@@ -709,7 +795,9 @@ const BookingPage = () => {
               {/* Staff selection - Show when either date/time is selected or rescheduling */}
               {(selectedTime || isRescheduling) && (
                 <div className="form-group">
-                  <label className="form-label">Chọn bác sĩ{isRescheduling ? ' mới' : ''}:</label>
+                  <label className="form-label">
+                    Chọn bác sĩ{isRescheduling ? " mới" : ""}:
+                  </label>
                   <select
                     value={selectedStaff}
                     onChange={(e) => setSelectedStaff(e.target.value)}
@@ -732,7 +820,12 @@ const BookingPage = () => {
                   <>
                     <button
                       onClick={handleUpdateBooking}
-                      disabled={isLoading || !selectedDate || !selectedTime || !selectedStaff}
+                      disabled={
+                        isLoading ||
+                        !selectedDate ||
+                        !selectedTime ||
+                        !selectedStaff
+                      }
                       className="submit-button"
                     >
                       {isLoading ? "Đang xử lý..." : "Xác nhận dời lịch"}
@@ -746,7 +839,7 @@ const BookingPage = () => {
                         setSelectedStaff("");
                       }}
                       className="cancel-button"
-                      style={{ marginLeft: '10px' }}
+                      style={{ marginLeft: "10px" }}
                     >
                       Hủy dời lịch
                     </button>
@@ -754,15 +847,21 @@ const BookingPage = () => {
                 ) : (
                   <button
                     onClick={handleBooking}
-                    disabled={isLoading || !currentUser || !selectedService || !selectedDate || !selectedTime || !selectedStaff}
+                    disabled={
+                      isLoading ||
+                      !currentUser ||
+                      !selectedService ||
+                      !selectedDate ||
+                      !selectedTime ||
+                      !selectedStaff
+                    }
                     className="submit-button"
                   >
                     {!currentUser
                       ? "Vui lòng đăng nhập để đặt lịch"
                       : isLoading
-                        ? "Đang xử lý..."
-                        : "Xác nhận đặt lịch"
-                    }
+                      ? "Đang xử lý..."
+                      : "Xác nhận đặt lịch"}
                   </button>
                 )}
               </div>
@@ -777,12 +876,29 @@ const BookingPage = () => {
                     <div className="bookings-list">
                       {bookedAppointments.map((booking) => (
                         <div key={booking.id} className="booking-card">
-                          <p className="booking-detail"><strong>Dịch vụ:</strong> {booking.serviceName}</p>
-                          <p className="booking-detail"><strong>Ngày:</strong> {new Date(booking.date).toLocaleDateString("vi-VN")}</p>
-                          <p className="booking-detail"><strong>Giờ:</strong> {booking.time}</p>
-                          <p className="booking-detail"><strong>Bác sĩ:</strong> {booking.skinTherapistName}</p>
-                          <p className="booking-detail"><strong>Trạng thái:</strong> {booking.status === 'pending' ? 'Chờ xác nhận' : 'Đã hoàn thành'}</p>
-                          <p className="booking-detail"><strong>Giá:</strong> {booking.totalPrice?.toLocaleString('vi-VN')}đ</p>
+                          <p className="booking-detail">
+                            <strong>Dịch vụ:</strong> {booking.serviceName}
+                          </p>
+                          <p className="booking-detail">
+                            <strong>Ngày:</strong>{" "}
+                            {new Date(booking.date).toLocaleDateString("vi-VN")}
+                          </p>
+                          <p className="booking-detail">
+                            <strong>Giờ:</strong> {booking.time}
+                          </p>
+                          <p className="booking-detail">
+                            <strong>Bác sĩ:</strong> {booking.skinTherapistName}
+                          </p>
+                          <p className="booking-detail">
+                            <strong>Trạng thái:</strong>{" "}
+                            {booking.status === "pending"
+                              ? "Chờ xác nhận"
+                              : "Đã hoàn thành"}
+                          </p>
+                          <p className="booking-detail">
+                            <strong>Giá:</strong>{" "}
+                            {booking.totalPrice?.toLocaleString("vi-VN")}đ
+                          </p>
 
                           {checkBookingTime(booking.date, booking.time) ? (
                             <>
@@ -822,12 +938,30 @@ const BookingPage = () => {
           <div className="confirmation-container">
             <h3 className="confirmation-title">Thông tin đặt lịch</h3>
             <div className="booking-info">
-              <p className="booking-info-item"><strong>Dịch vụ:</strong> {services.find(s => s.id === parseInt(selectedService))?.serviceName}</p>
-              <p className="booking-info-item"><strong>Ngày:</strong> {new Date(selectedDate).toLocaleDateString("vi-VN")}</p>
-              <p className="booking-info-item"><strong>Giờ:</strong> {selectedTime}</p>
+              <p className="booking-info-item">
+                <strong>Dịch vụ:</strong>{" "}
+                {
+                  services.find((s) => s.id === parseInt(selectedService))
+                    ?.serviceName
+                }
+              </p>
+              <p className="booking-info-item">
+                <strong>Ngày:</strong>{" "}
+                {new Date(selectedDate).toLocaleDateString("vi-VN")}
+              </p>
+              <p className="booking-info-item">
+                <strong>Giờ:</strong> {selectedTime}
+              </p>
               {/* <p className="booking-info-item"><strong>Bác sĩ:</strong> {staffList.find(s => s.id === parseInt(selectedStaff))?.fullName}</p> */}
-              <p className="booking-info-item"><strong>Bác sĩ:</strong> {filteredStaffList.find(s => s.id === parseInt(selectedStaff))?.fullName}</p>
-              <p className="booking-info-item"><strong>Giá:</strong> {selectedServiceData?.price?.toLocaleString('vi-VN')}đ</p>
+              <p className="booking-info-item">
+                <strong>Bác sĩ:</strong>{" "}
+                {
+                  filteredStaffList.find(
+                    (s) => s.id === parseInt(selectedStaff)
+                  )?.fullName
+                }
+              </p>
+              {/* <p className="booking-info-item"><strong>Giá:</strong> {selectedServiceData?.price?.toLocaleString('vi-VN')}đ</p> */}
             </div>
 
             {/* QR Code section */}
@@ -869,10 +1003,7 @@ const BookingPage = () => {
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={handleQRScanned}
-                      className="qr-button"
-                    >
+                    <button onClick={handleQRScanned} className="qr-button">
                       Quét mã QR để thanh toán
                     </button>
                   )}
@@ -882,10 +1013,7 @@ const BookingPage = () => {
 
             {/* Cancel button */}
             <div className="cancel-container">
-              <button
-                onClick={handleCancel}
-                className="cancel-final-button"
-              >
+              <button onClick={handleCancel} className="cancel-final-button">
                 Hủy đặt lịch
               </button>
             </div>

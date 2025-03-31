@@ -1,33 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Form, Input, Button, DatePicker, message } from "antd";
-import userApi from "../api/userApi"; // Dùng userApi
+import userApi from "../api/userApi";
 import "../styles/registerPage.css";
 
 const RegisterPage = () => {
-  const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    dob: "",
+    password: "",
+  });
 
-  const handleRegister = async (values) => {
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
     try {
-      // Gọi userApi.register
-      const yearOfBirth = values.dob ? values.dob.format("YYYY-MM-DD") : null;
       const res = await userApi.register(
-        values.fullName,
-        yearOfBirth,
-        values.email,
-        values.password,
-        values.phone
+        formData.fullName,
+        formData.dob,
+        formData.email,
+        formData.password,
+        formData.phone
       );
 
-      message.success("Đăng ký thành công!");
+      alert("Đăng ký thành công!");
       console.log("Phản hồi API:", res.data);
-      setTimeout(() => navigate("/login"), 1000);
+      setTimeout(() => navigate("/login"), 800);
     } catch (error) {
       console.error("Lỗi API:", error.response?.data);
-      message.error(error.response?.data || "Đăng ký thất bại!");
+      alert("Đăng ký thất bại!");
     } finally {
       setLoading(false);
     }
@@ -35,71 +43,59 @@ const RegisterPage = () => {
 
   return (
     <div className="register-container">
-      <div className="register-box">
+      <form className="register-box" onSubmit={handleSubmit}>
         <h2>Đăng Ký</h2>
-        <Form form={form} layout="vertical" onFinish={handleRegister}>
-          <Form.Item
-            label="Họ và Tên"
-            name="fullName"
-            rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
-          >
-            <Input placeholder="Họ và tên" />
-          </Form.Item>
+        <p className="back-home-link">
+          <Link to="/">← Quay về trang chủ</Link>
+        </p>
 
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Vui lòng nhập email!" },
-              { type: "email", message: "Email không hợp lệ!" }
-            ]}
-          >
-            <Input placeholder="Email" />
-          </Form.Item>
+        <input
+          type="text"
+          name="fullName"
+          placeholder="Họ và tên"
+          value={formData.fullName}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="tel"
+          name="phone"
+          placeholder="Số điện thoại"
+          value={formData.phone}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="date"
+          name="dob"
+          value={formData.dob}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Mật khẩu"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? "Đang đăng ký..." : "Đăng Ký"}
+        </button>
 
-          <Form.Item
-            label="Số điện thoại"
-            name="phone"
-            rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }]}
-          >
-            <Input placeholder="Số điện thoại" />
-          </Form.Item>
-
-          <Form.Item
-            label="Ngày sinh"
-            name="dob"
-            rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
-          >
-            <DatePicker
-              format="DD/MM/YYYY"
-              placeholder="Chọn ngày sinh"
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Mật khẩu"
-            name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-          >
-            <Input.Password placeholder="Mật khẩu" />
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              className="register-button"
-            >
-              Đăng Ký
-            </Button>
-          </Form.Item>
-        </Form>
         <p className="login-link">
           Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
         </p>
-      </div>
+      </form>
     </div>
   );
 };
