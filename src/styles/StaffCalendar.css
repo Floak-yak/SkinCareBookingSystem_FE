@@ -215,8 +215,6 @@
     }
 }
 
-
-
 /* Modal styles */
 .modal-overlay {
     position: fixed;
@@ -295,4 +293,30 @@
 .completed-message {
     color: #dd6b20;
     font-weight: bold;
+}
+
+.spa-calendar {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.booking-event {
+    background-color: #4299e1;
+    /* Màu xanh mặc định */
+}
+
+.modal {
+    min-width: 280px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
