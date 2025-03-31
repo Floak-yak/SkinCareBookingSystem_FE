@@ -59,6 +59,7 @@ const BookingPage = () => {
   const [orderCode, setOrderCode] = useState("");
   const [resultTransaction, setResultTransaction] = useState("");
   const [transactionId, setTransactionId] = useState("");
+  const [allBooking, setAllBooking] = useState([]);
 
   let latestId = null;
 
@@ -232,6 +233,8 @@ const BookingPage = () => {
           const response = await bookingApi.getAllBookings();
           console.log("Bookings response:", response); // For debugging
 
+          setAllBooking(response.data);
+
           if (response.data) {
             // Transform the API response to match our local format
             const transformedBookings = response.data.map((booking) => {
@@ -265,10 +268,10 @@ const BookingPage = () => {
                 email: booking.user?.email || "",
                 status: (() => {
                   switch (booking.status) {
-                    case -1: return "cancel";      // BookingStatus.Cancel
-                    case 0: return "pending";      // BookingStatus.Pending
-                    case 1: return "completed";    // BookingStatus.Completed
-                    case 2: return "waiting";      // Sửa "Waitting" → "Waiting" (nếu cần)
+                    case -1: return -1;      // BookingStatus.Cancel
+                    case 0: return 0;      // BookingStatus.Pending
+                    case 1: return 1;    // BookingStatus.Completed
+                    case 2: return 2;      // Sửa "Waitting" → "Waiting" (nếu cần)
                     default: return "unknown";     // Xử lý giá trị không xác định
                   }
                 })(),
@@ -300,30 +303,26 @@ const BookingPage = () => {
     // }, [currentUser, staffList]);
   }, [currentUser]);
 
-  // Kiểm tra xem thời gian đã được đặt chưa
-  // const isTimeSlotBooked = (date, time, staffId) => {
-  //   if (!staffId) return false;
-  //   return bookedAppointments.some(
-  //     (appointment) =>
-  //       appointment.date === date &&
-  //       appointment.time === time &&
-  //       appointment.skinTherapistId === parseInt(staffId)
-  //   );
-  // };
-  const isTimeSlotBooked = (date, time, staffId) => {
-    if (!staffId || !bookedAppointments) return false;
+  const isTimeSlotBooked = (selectedDate, selectedTime, selectedStaff) => {
+    return allBooking.some(booking => {
+      // Tách ngày và giờ từ trường date
+      const [bookingDate, bookingTime] = booking.date.split('T');
+      const formattedTime = bookingTime.substring(0, 5); // Lấy HH:mm từ chuỗi ISO
 
-    // Chuyển đổi date về cùng định dạng (nếu cần)
-    const formattedDate = new Date(date).toISOString().split('T')[0];
+      // Tìm ID của bác sĩ từ danh sách staffList
+      const therapist = staffList.find(
+        s => s.fullName === booking.skintherapistName
+      );
 
-    return bookedAppointments.some(appointment =>
-      appointment.date === formattedDate &&
-      appointment.time === time &&
-      (appointment.skinTherapistId === parseInt(staffId) ||
-        appointment.skinTherapistName === staffList.find(s => s.id === parseInt(staffId))?.fullName)
-    );
+      // So sánh với các giá trị đang chọn
+      return (
+        bookingDate === selectedDate &&
+        formattedTime === selectedTime &&
+        therapist?.id === parseInt(selectedStaff) &&
+        (booking.status === 0 || booking.status === 2)
+      );
+    });
   };
-
   // Sửa lại hàm kiểm tra thời gian
   const checkBookingTime = (bookingDate, bookingTime) => {
     try {
@@ -1222,7 +1221,7 @@ const BookingPage = () => {
           )}
         </>
         {/* )}
-         </div> */}
+        </div> */}
       </div>
     </div >
   );

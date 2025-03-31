@@ -4,7 +4,7 @@
 
 /* Base Styles */
 .booking-history-container {
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 0 auto;
     padding: 2rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -285,6 +285,7 @@
 .booking-table {
     width: 100%;
     border-collapse: separate;
+    /* table-layout: fixed; */
     border-spacing: 0;
     min-width: 1000px;
     font-family: 'Inter', sans-serif;
@@ -300,7 +301,7 @@
 
 .booking-table th {
     padding: 18px 24px;
-    text-align: left;
+    text-align: center;
     font-weight: 600;
     letter-spacing: 0.5px;
     position: relative;
@@ -328,6 +329,7 @@
 }
 
 .booking-table td {
+    height: 50px;
     padding: 16px 24px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.03);
     vertical-align: middle;
@@ -511,6 +513,36 @@
     border-radius: 0 0 12px 0;
 }
 
+/* Style cho hàng trống */
+.table-row.empty td {
+    color: #999;
+    font-style: italic;
+    background-color: #fafafa;
+}
+
+.status-badge.empty {
+    background-color: transparent;
+    border: 1px dashed #ddd;
+    color: #999;
+}
+
+.empty-action {
+    color: #999;
+    font-style: italic;
+}
+
+/* Đảm bảo chiều cao tối thiểu */
+.table-row:not(.empty) {
+    min-height: 60px;
+}
+
+/* Tắt hover cho hàng trống */
+.table-row.empty:hover {
+    background-color: inherit !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 /* Responsive cho mobile */
 @media (max-width: 768px) {
 
@@ -682,4 +714,129 @@
         height: 30px;
         font-size: 0.8rem;
     }
+}
+
+/* Container chính của modal */
+.ant-modal {
+    max-width: 90% !important;
+    /* Giới hạn chiều rộng tối đa */
+}
+
+/* Nội dung trong modal */
+.ant-modal-content {
+    border-radius: 12px !important;
+    padding: 24px !important;
+    background: #f8f9fa !important;
+}
+
+/* Tiêu đề modal */
+.ant-modal-header {
+    background: transparent !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+}
+
+.ant-modal-title {
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    color: #2d3436 !important;
+    text-align: center !important;
+}
+
+/* Phần thân modal */
+.ant-modal-body {
+    padding: 20px 0 !important;
+}
+
+/* Container QR code */
+.qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Style cho QR code */
+.qr-code {
+    padding: 12px;
+    background: white !important;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+/* Thông tin thanh toán */
+.payment-info {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    background: #f1f3f5;
+    border-radius: 6px;
+}
+
+.payment-info p {
+    margin: 8px 0;
+    font-size: 0.9rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+.payment-info p:first-child {
+    color: #2b8a3e;
+}
+
+.payment-info p:last-child {
+    color: #1864ab;
+}
+
+/* Nút hành động */
+.ant-modal-footer {
+    border-top: none !important;
+    padding-top: 0 !important;
+    margin-top: 20px !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 1rem !important;
+}
+
+.ant-btn {
+    min-width: 120px !important;
+    border-radius: 6px !important;
+    padding: 8px 20px !important;
+    height: auto !important;
+}
+
+/* Nút đóng */
+.ant-btn-default {
+    border: 1px solid #ced4da !important;
+    color: #495057 !important;
+}
+
+/* Nút xác nhận */
+.ant-btn-primary {
+    background: #4dabf7 !important;
+    border-color: #4dabf7 !important;
+    transition: all 0.3s ease !important;
+}
+
+.ant-btn-primary:hover {
+    background: #339af0 !important;
+    transform: translateY(-1px);
+}
+
+/* Loading spinner */
+.ant-spin {
+    min-height: 250px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.ant-spin-text {
+    color: #4dabf7 !important;
+    margin-top: 12px !important;
+    font-size: 1rem !important;
 }

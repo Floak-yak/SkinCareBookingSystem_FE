@@ -4,6 +4,10 @@ import bookingApi from "../api/bookingApi";
 import { toast, ToastContainer } from "react-toastify";
 import "../styles/BookingHistory.css";
 import { FiCalendar, FiClock, FiUser, FiDollarSign, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import transactionApi from "../api/transactionApi";
+import { message, Modal, Spin, Button } from 'antd';
+import { Link } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
 
 export default function BookingHistory() {
 
@@ -12,6 +16,11 @@ export default function BookingHistory() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
     const navigate = useNavigate();
+    const [qrCode, setQrCode] = useState("");
+    const [orderCode, setOrderCode] = useState("");
+    const [transactionId, setTransactionId] = useState("");
+    const [showQRModal, setShowQRModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleRescheduleClick = (booking) => {
         navigate('/booking', {
@@ -142,39 +151,135 @@ export default function BookingHistory() {
         return dateA - dateB; // Sắp xếp tăng dần theo ngày và giờ
     });
 
+    const handlePayLater = () => {
+        return (
+            <Link to="/">Thanh Toán Sau</Link>
+        );
+    }
+
+    const handleQRScanned = async () => {
+        if (!orderCode) {
+            message.error("Không có giao dịch nào được tạo.");
+            return;
+        }
+        try {
+            const { data } = await transactionApi.checkTransaction(orderCode);
+            console.log("Respone data OrderCode: ", data);
+            // Nếu data là string, lấy luôn giá trị đó, nếu là object thì lấy data.status
+            const status = typeof data === "string" ? data : data.status;
+
+            if (status === "PAID") {
+                window.location.href = `${window.location.origin}/success.html?transactionId=${transactionId}`;
+            } else if (status === "CANCEL") {
+                window.location.href = `${window.location.origin}/cancel.html?transactionId=${transactionId}`;
+            } else if (status === "PENDING") {
+                Modal.confirm({
+                    title: "Giao dịch đang chờ xử lý",
+                    content:
+                        "Giao dịch của bạn đang ở trạng thái PENDING. Bạn có muốn thanh toán sau không?",
+                    okText: "Thanh toán sau",
+                    cancelText: "Thử lại",
+                    onOk: () => {
+                        handlePayLater();
+                    },
+                    onCancel: () => {
+                        message.info("Vui lòng thử xác nhận lại giao dịch sau ít phút.");
+                    },
+                });
+            } else {
+                message.error("Trạng thái giao dịch không xác định!");
+            }
+        } catch (error) {
+            console.error(
+                "Lỗi xác nhận giao dịch:",
+                error.response?.data || error.message
+            );
+            message.error("Xác nhận thanh toán thất bại!");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handlePaymentLate = async (booking) => {
+        try {
+            setIsLoading(true);
+            const respone = await transactionApi.getByBookingId(booking.id);
+            const data = respone.data;
+            if (data.qrCode) {
+                setQrCode(data.qrCode);
+                setOrderCode(data.orderCode);
+                setTransactionId(data.id);
+                setShowQRModal(true);
+            } else {
+                throw new Error("Không tìm thấy mã QR");
+            }
+        } catch (error) {
+            console.error("Error handling booking:", error);
+            toast.error("Có lỗi xảy ra khi xử lý lịch đặt!");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const QRPaymentModal = () => (
+        <Modal
+            title="Quét mã QR thanh toán"
+            open={showQRModal}
+            onCancel={() => setShowQRModal(false)}
+            footer={[
+                <Button key="cancel" onClick={() => setShowQRModal(false)}>
+                    Đóng
+                </Button>,
+                <Button
+                    key="confirm"
+                    type="primary"
+                    onClick={handleQRScanned}
+                    loading={isLoading}
+                >
+                    Đã quét mã
+                </Button>
+            ]}
+        >
+            {isLoading ? (
+                <Spin tip="Đang tải mã QR..." />
+            ) : (
+                qrCode && (
+                    <div className="qr-container">
+                        <QRCodeSVG
+                            value={qrCode}
+                            size={220}
+                            level="H"
+                            includeMargin={true}
+                            className="qr-code"
+                        />
+                        <div className="payment-info">
+                            <p>Mã đơn hàng: {orderCode}</p>
+                            <p>Mã giao dịch: {transactionId}</p>
+                        </div>
+                    </div>
+                )
+            )}
+        </Modal>
+    );
+
     const handleDeleteBooking = async (booking) => {
         try {
-            const canReschedule = checkBookingTime(booking.date, booking.time);
+            if (window.confirm("Bạn có chắc chắn muốn hủy lịch này không?")) {
+                await bookingApi.cancelBooking(booking.id, currentUser.userId);
 
-            if (canReschedule) {
-                // // Đánh dấu là đang dời lịch và lưu thông tin booking hiện tại
-                // setIsRescheduling(true);
-                // setSelectedService(booking.serviceId?.toString() || "");
-                // setSelectedStaff(booking.skinTherapistId?.toString() || "");
-                // setSelectedCategory(booking.categoryId?.toString() || "");
-                // setCurrentBookingId(booking.id);
-                // // Hiển thị form đặt lịch để chọn thời gian mới
-                // setBookingConfirmed(false);
-                // window.scrollTo(0, 0);
-                // toast.info("Vui lòng chọn thời gian mới cho lịch đặt của bạn");
-            } else {
-                // Xử lý hủy lịch
-                if (window.confirm("Bạn có chắc chắn muốn hủy lịch này không?")) {
-                    await bookingApi.cancelBooking(booking.id, currentUser.userId);
+                // Cập nhật state sau khi hủy
+                const updatedAppointments = bookedAppointments.filter(
+                    (appointment) => appointment.id !== booking.id
+                );
+                setBookedAppointments(updatedAppointments);
+                localStorage.setItem(
+                    "bookedAppointments",
+                    JSON.stringify(updatedAppointments)
+                );
 
-                    // Cập nhật state sau khi hủy
-                    const updatedAppointments = bookedAppointments.filter(
-                        (appointment) => appointment.id !== booking.id
-                    );
-                    setBookedAppointments(updatedAppointments);
-                    localStorage.setItem(
-                        "bookedAppointments",
-                        JSON.stringify(updatedAppointments)
-                    );
-
-                    toast.success("Hủy lịch thành công");
-                }
+                toast.success("Hủy lịch thành công");
             }
+            // }
         } catch (error) {
             console.error("Error handling booking:", error);
             toast.error("Có lỗi xảy ra khi xử lý lịch đặt!");
@@ -233,9 +338,11 @@ export default function BookingHistory() {
                                 className="action-button cancel">
                                 Hủy lịch
                             </button>
-                            <button className="action-button view">
+                            <button onClick={() => handlePaymentLate(booking)}
+                                className="action-button view">
                                 Thanh Toán
                             </button>
+                            <QRPaymentModal />
                         </>
                     )}
                     {/* {booking.status === "paid" && (
@@ -273,7 +380,7 @@ export default function BookingHistory() {
                         </tr>
                     </thead>
                     <tbody>
-                        {bookings.map(booking => (
+                        {/* {bookings.map(booking => (
                             <tr key={booking.id} className={`table-row ${booking.status}`}>
                                 <td>{booking.serviceName}</td>
                                 <td>{new Date(booking.date).toLocaleDateString("vi-VN")}</td>
@@ -281,10 +388,6 @@ export default function BookingHistory() {
                                 <td>{booking.skinTherapistName || "Chưa xác định"}</td>
                                 <td>{booking.totalPrice?.toLocaleString("vi-VN")}đ</td>
                                 <td>
-                                    {/* <span className={`status-badge ${booking.status}`}>
-                                        {booking.status === "pending" ? "Chưa thanh toán" :
-                                            booking.status === "paid" ? "Đã thanh toán" : "Đã xử lý"}
-                                    </span> */}
                                     <span className={`status-badge ${booking.status}`}>
                                         {booking.status === "pending"
                                             ? "Chưa thanh toán"
@@ -314,10 +417,17 @@ export default function BookingHistory() {
                                         </>
                                     )}
                                     {(booking.status === "pending") && (
-                                        <button onClick={() => handleDeleteBooking(booking)}
-                                            className="table-button cancel">
-                                            Hủy
-                                        </button>
+                                        <>
+                                            <button onClick={() => handlePaymentLate(booking)}
+                                                className="table-button view">
+                                                Payment
+                                            </button>
+                                            <QRPaymentModal />
+                                            <button onClick={() => handleDeleteBooking(booking)}
+                                                className="table-button cancel">
+                                                Hủy
+                                            </button>
+                                        </>
                                     )}
                                     {(booking.status === "completed") && (
                                         <button className="table-button view">
@@ -326,40 +436,94 @@ export default function BookingHistory() {
                                     )}
                                 </td>
                             </tr>
-                        ))}
+                        ))} */}
+                        {/* Tạo mảng 5 phần tử và map qua */}
+                        {Array.from({ length: 5 }).map((_, index) => {
+                            const booking = bookings[index];
+
+                            return (
+                                <tr
+                                    key={booking?.id || `empty-${index}`}
+                                    className={`table-row ${booking?.status || 'empty'}`}
+                                >
+                                    {/* Các cột dữ liệu */}
+                                    <td>{booking?.serviceName || '-'}</td>
+                                    <td>{booking ? new Date(booking.date).toLocaleDateString("vi-VN") : '-'}</td>
+                                    <td>{booking?.time || '-'}</td>
+                                    <td>{booking?.skinTherapistName || '-'}</td>
+                                    <td>{booking?.totalPrice?.toLocaleString("vi-VN") + 'đ' || '-'}</td>
+
+                                    {/* Cột trạng thái */}
+                                    <td>
+                                        {booking ? (
+                                            <span className={`status-badge ${booking.status}`}>
+                                                {booking.status === "pending" ? "Chưa thanh toán"
+                                                    : booking.status === "waiting" ? "Đang chờ"
+                                                        : booking.status === "completed" ? "Đã hoàn thành"
+                                                            : booking.status === "cancel" ? "Đã hủy"
+                                                                : "Không xác định"}
+                                            </span>
+                                        ) : (
+                                            <span className="status-badge empty">-</span>
+                                        )}
+                                    </td>
+
+                                    {/* Cột thao tác */}
+                                    <td>
+                                        {booking ? (
+                                            <>
+                                                {booking.status === "waiting" && (
+                                                    <>
+                                                        {checkBookingTime(booking.date, booking.time) && (
+                                                            <button
+                                                                onClick={() => handleRescheduleClick(booking)}
+                                                                className="table-button reschedule"
+                                                            >
+                                                                Dời lịch
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleDeleteBooking(booking)}
+                                                            className="table-button cancel"
+                                                        >
+                                                            Hủy
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {booking.status === "pending" && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handlePaymentLate(booking)}
+                                                            className="table-button view"
+                                                        >
+                                                            Payment
+                                                        </button>
+                                                        <QRPaymentModal />
+                                                        <button
+                                                            onClick={() => handleDeleteBooking(booking)}
+                                                            className="table-button cancel"
+                                                        >
+                                                            Hủy
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {booking.status === "completed" && (
+                                                    <button className="table-button view">
+                                                        Xem
+                                                    </button>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <span className="empty-action">-</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
-
-                {/* Phân trang */}
-                {/* <div className="pagination">
-                    <button
-                        className="pagination-button"
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                    >
-                        <FiChevronLeft />
-                    </button>
-
-                    <div className="page-numbers">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                            <button
-                                key={page}
-                                className={`page-number ${currentPage === page ? 'active' : ''}`}
-                                onClick={() => setCurrentPage(page)}
-                            >
-                                {page}
-                            </button>
-                        ))}
-                    </div>
-
-                    <button
-                        className="pagination-button"
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                    >
-                        <FiChevronRight />
-                    </button>
-                </div> */}
             </div>
         );
     };
