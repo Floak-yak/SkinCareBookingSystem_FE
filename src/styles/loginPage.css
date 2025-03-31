@@ -1,18 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Quicksand&display=swap");
 
-body {
-  margin: 0;
-  font-family: "Quicksand", sans-serif;
-  background: url("https://raw.githubusercontent.com/CiurescuP/LogIn-Form/main/bg.jpg")
-    no-repeat center center fixed;
-  background-size: cover;
-}
-
 .login-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0;
+  font-family: "Quicksand", sans-serif;
+  background: url("https://raw.githubusercontent.com/CiurescuP/LogIn-Form/main/bg.jpg") no-repeat center center fixed;
+  background-size: cover;
 }
 
 .login-box {
@@ -88,9 +84,11 @@ body {
   color: #f1f1f1;
   font-size: 14px;
 }
+
 .back-home-link a {
   color: #ffffffcc;
 }
+
 .forgot-password-link a,
 .register-link a {
   color: #00cec9;
