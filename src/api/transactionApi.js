@@ -19,6 +19,9 @@ const transactionApi = {
   // Xác nhận thanh toán giao dịch (checkout giao dịch)
   checkout: (transactionId) =>
     apiClient.get(`/Transaction/Checkout?transactionId=${transactionId}`),
+
+  getByBookingId: (bookingId) =>
+    apiClient.get(`/Transaction/GetTransactionByBookingId?bookingId=${bookingId}`),
 };
 
 export default transactionApi;
