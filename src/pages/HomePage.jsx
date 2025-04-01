@@ -7,7 +7,7 @@ import "../styles/HomePage.css";
 import { FaQuoteLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import AboutUs from "../components/AboutUs";
 import SpaGallery from "../components/SpaGallery";
-import serviceApi from "../api/servicesApi";
+import servicesApi from "../api/servicesApi";
 
 const HomePage = () => {
   const scrollRef = useRef(null);
@@ -18,13 +18,15 @@ const HomePage = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await serviceApi.getAllServices1();
+        const response = await servicesApi.getAllServices1();
         setServices(response.data);
         setLoading(false);
-      } catch (err) {
-        setError('Không thể tải thông tin dịch vụ');
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        setError(error.code === 'ERR_CONNECTION_REFUSED' 
+          ? 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.'
+          : 'Không thể tải dịch vụ. Vui lòng thử lại sau.');
         setLoading(false);
-        console.error('Error fetching services:', err);
       }
     };
 
@@ -42,8 +44,8 @@ const HomePage = () => {
     }
   };
 
-  if (loading) return <div>Đang tải...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div className="loading">Đang tải...</div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div>

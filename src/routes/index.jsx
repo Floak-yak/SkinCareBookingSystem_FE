@@ -24,6 +24,7 @@ import ManageServiceDetailsPage from "../pages/admin/ManageServiceDetailsPage";
 import ManagerOrders from "../pages/admin/ManagerOrders";
 import OrderHistory from "../pages/OrderHistory";
 import SurveyQuestionPage from "../pages/SurveyQuestionPage";
+import SurveyResultPage from "../pages/SurveyResultPage";
 import SurveyManagerPage from "../pages/admin/SurveyManagerPage";
 import BookingHistory from "../pages/BookingHistory";
 import StaffCalendar from "../pages/StaffCalendar";
@@ -64,6 +65,7 @@ const AppRoutes = () => {
       <Route path="/about" element={<AboutUs />} />
       <Route path="/order-history" element={<OrderHistory />} />
       <Route path="/survey" element={<SurveyQuestionPage />} />
+      <Route path="/survey-results" element={<SurveyResultPage />} />
       <Route path="/staff-calendar" element={<StaffCalendar />} />
 
       {/* admin page */}

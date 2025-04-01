@@ -14,23 +14,31 @@
     "@tiptap/starter-kit": "^2.11.5",
     "antd": "^5.23.0",
     "aos": "^2.3.4",
-    "axios": "^1.7.9",
+    "axios": "^1.8.4",
+    "bootstrap": "^5.3.3",
     "cra-template-pwa": "2.0.0",
     "html-to-text": "^9.0.5",
+    "http-proxy-middleware": "^3.0.3",
+    "https-browserify": "^1.0.0",
     "jwt-decode": "^4.0.0",
     "payos-checkout": "^1.0.9",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
+    "react-bootstrap": "^2.10.9",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
     "react-icons": "^5.5.0",
     "react-quill": "^2.0.0",
     "react-router-dom": "^7.1.1",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "react-slick": "^0.30.3",
     "react-toastify": "^11.0.3",
     "slick-carousel": "^1.8.1",
+
+    "swiper": "^11.2.6"
+
     "sweetalert2": "^11.17.2"
+
   },
   "scripts": {
     "dev": "react-scripts start",

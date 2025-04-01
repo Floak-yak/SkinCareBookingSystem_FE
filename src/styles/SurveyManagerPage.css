@@ -1,13 +1,18 @@
 .survey-manager-page {
-    max-width: 1000px;
-    margin: 0 auto;
+    max-width: 1200px;
+    margin: 30px auto;
     padding: 20px;
     font-family: 'Arial', sans-serif;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
   }
   
   .survey-manager-page h1 {
     text-align: center;
     margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 28px;
   }
   
   .survey-manager-page button {
@@ -25,64 +30,102 @@
     background-color: #0056b3;
   }
   
+  .tab-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+  }
+  
+  /* Table Styles */
+  .ant-table-thead > tr > th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+  }
+  
+  .ant-table-tbody > tr:hover > td {
+    background-color: #f0f7ff;
+  }
+  
+  .options-list {
+    padding-left: 20px;
+    margin: 0;
+  }
+  
+  .options-list li {
+    margin-bottom: 5px;
+  }
+  
+  /* Form Styles */
+  .ant-form-item-label > label {
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .ant-divider {
+    margin: 24px 0;
+  }
+  
+  /* Modal Styles */
+  .ant-modal-header {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 16px 24px;
+  }
+  
+  .ant-modal-title {
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .ant-modal-body {
+    padding: 24px;
+  }
+  
+  /* Card Styles */
+  .ant-card {
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .ant-card-head {
+    background-color: #f6f8fa;
+  }
+  
+  .ant-card-head-title {
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  /* List Styles */
+  .ant-list-item {
+    padding: 12px 24px;
+    transition: background-color 0.3s;
+  }
+  
+  .ant-list-item:hover {
+    background-color: #f6f8fa;
+  }
+  
+  .ant-list-item-meta-title {
+    color: #2c3e50;
+    font-weight: 500;
+  }
+  
+  /* Tag Styles */
+  .ant-tag {
+    padding: 4px 8px;
+    font-weight: 500;
+  }
+  
+  /* Legacy styles for compatibility */
   .questions-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
-  }
-  
-  .questions-table th,
-  .questions-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  .questions-table th {
-    background-color: #f2f2f2;
-  }
-  
-  .questions-table tr:hover {
-    background-color: #f1f1f1;
+    display: none; /* Hide in the new design */
   }
   
   .question-form {
-    border: 1px solid #ddd;
-    padding: 20px;
-    border-radius: 5px;
-  }
-  
-  .question-form h2 {
-    margin-bottom: 15px;
-  }
-  
-  .question-form form > div {
-    margin-bottom: 15px;
-  }
-  
-  .question-form label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .question-form input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-  }
-  
-  .question-form button {
-    padding: 10px 15px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .question-form button:hover {
-    background-color: #218838;
+    display: none; /* Hide in the new design */
   }
   
