@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, Button, Table, Form, Input, Select, Modal, message, Card, Divider, List, Space, Tag } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons';
+import { Tabs, Button, Table, Form, Input, Select, Modal, message, Card, Divider, List, Space, Tag, Alert, Collapse, Badge, Spin } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined, SaveOutlined, SearchOutlined } from '@ant-design/icons';
 import surveyApi from '../../api/surveyApi';
 import servicesApi from '../../api/servicesApi';
 import '../../styles/SurveyManagerPage.css';
 
-const { TabPane } = Tabs;
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -23,10 +22,20 @@ const SurveyManagerPage = () => {
   const [selectedResult, setSelectedResult] = useState(null);
   const [resultForm] = Form.useForm();
   const [showResultModal, setShowResultModal] = useState(false);
+  const [selectedResultId, setSelectedResultId] = useState(null);
+  const [showManageServicesModal, setShowManageServicesModal] = useState(false);
   
   // State for services recommendation
   const [skinCareServices, setSkinCareServices] = useState([]);
   const [resultServicesModalVisible, setResultServicesModalVisible] = useState(false);
+  
+  // Add this state for the debug modal and info
+  const [isDebugModalVisible, setIsDebugModalVisible] = useState(false);
+  const [debugInfo, setDebugInfo] = useState({
+    loading: false,
+    data: null,
+    error: null
+  });
   
   // Load data when component mounts
   useEffect(() => {
@@ -85,12 +94,22 @@ const SurveyManagerPage = () => {
   // Fetch survey results
   const fetchResults = async () => {
     try {
+      setLoading(true);
       const response = await surveyApi.getAllResults();
       if (response.data) {
-        setSurveyResults(response.data);
+        console.log('Fetched raw results:', response.data);
+        
+        // Process the results data using our helper function
+        const processedResults = processResultsData(response.data);
+        console.log('Processed results with recommendations:', processedResults);
+        
+        setSurveyResults(processedResults);
       }
     } catch (err) {
       console.error('Error fetching results:', err);
+      message.error('Failed to load survey results');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,14 +118,26 @@ const SurveyManagerPage = () => {
     try {
       const response = await servicesApi.getAllServices();
       if (response.data) {
+        // Handle different response structures
         const services = Array.isArray(response.data) 
           ? response.data 
           : (response.data.data || []);
-          
-        setSkinCareServices(services);
+        
+        // Filter out any invalid service entries and ensure all have proper data
+        const validServices = services
+          .filter(service => service && service.id)
+          .map(service => ({
+            ...service,
+            serviceName: service.serviceName || service.name || `Service ${service.id}`,
+            serviceDescription: service.serviceDescription || service.description || "",
+            price: typeof service.price === 'number' ? service.price : 0
+          }));
+        
+        setSkinCareServices(validServices);
       }
     } catch (err) {
       console.error('Error fetching services:', err);
+      message.error('Failed to load services. Please try again later.');
     }
   };
 
@@ -167,7 +198,7 @@ const SurveyManagerPage = () => {
             nextQuestionId: opt.nextQuestionId
           }))
         };
-        
+        console.log('Request body for updateDatabaseQuestion:', questionData);
         if (selectedQuestion) {
           await surveyApi.updateDatabaseQuestion(selectedQuestion.id, questionData);
           message.success('Question updated successfully');
@@ -265,39 +296,293 @@ const SurveyManagerPage = () => {
   };
 
   // Manage recommended services for a result
-  const handleManageResultServices = (result) => {
-    setSelectedResult(result);
-    setResultServicesModalVisible(true);
+  const handleManageServices = (resultId) => {
+    setSelectedResultId(resultId);
+    setShowManageServicesModal(true);
+  };
+
+  // Process API results to ensure proper data structure
+  const processResultsData = (results) => {
+    if (!results) return [];
+    
+    return results.map(result => {
+      // Handle recommendedServices if they exist
+      let processedServices = [];
+      if (result.recommendedServices && Array.isArray(result.recommendedServices)) {
+        processedServices = result.recommendedServices
+          .map(item => {
+            // Check if we have a direct service item (instead of recommendation)
+            const isDirectService = item.serviceName !== undefined && !item.service;
+            
+            if (isDirectService) {
+              // This is a direct service object, not a recommendation
+              return {
+                id: item.id || 0,
+                serviceId: item.id, // Use the item ID as the service ID
+                priority: 1,
+                service: {
+                  id: item.id || 0,
+                  name: item.serviceName || item.name || `Service ${item.id}`,
+                  description: item.serviceDescription || item.description || "",
+                  price: typeof item.price === 'number' ? item.price : 0
+                }
+              };
+            } else {
+              // Regular recommendation object with service property
+              const serviceId = item.serviceId || item.id;
+              
+              // Process service object to ensure valid data
+              let serviceData = null;
+              
+              if (item.service) {
+                // Only include services with valid data
+                serviceData = {
+                  id: item.service.id || 0,
+                  name: item.service.name || item.service.serviceName || `Service ${serviceId}`,
+                  description: item.service.description || item.service.serviceDescription || "",
+                  price: typeof item.service.price === 'number' ? item.service.price : 0
+                };
+              } else if (serviceId) {
+                // Create minimal service data if missing
+                serviceData = {
+                  id: serviceId,
+                  name: `Service ${serviceId}`,
+                  description: "",
+                  price: 0
+                };
+              }
+              
+              return {
+                id: item.id || 0,
+                serviceId: serviceId, // Use item.id as fallback
+                priority: item.priority || 1,
+                service: serviceData
+              };
+            }
+          })
+          .filter(item => item.serviceId > 0 && item.service !== null); // Keep only valid items
+      }
+      
+      // Return processed result
+      return {
+        ...result,
+        recommendedServices: processedServices
+      };
+    });
   };
 
   // Add a service recommendation
   const addServiceRecommendation = async (serviceId) => {
     try {
-      if (!selectedResult) return;
+      if (!selectedResult) {
+        message.error('No survey result selected.');
+        return;
+      }
       
-      await surveyApi.addRecommendedService({
+      if (!serviceId) {
+        message.error('Invalid service selected.');
+        return;
+      }
+
+      message.loading({ content: 'Adding service recommendation...', key: 'addRecommendation' });
+      
+      const data = {
         surveyResultId: selectedResult.id,
         serviceId: serviceId,
         priority: 1
-      });
+      };
       
-      message.success('Service recommendation added');
-      fetchResults();
+      // Log the request for debugging
+      console.log('Adding recommendation:', data);
+      
+      const response = await surveyApi.addRecommendedService(data);
+
+      if (response.status === 200) {
+        message.success({ 
+          content: 'Service recommendation added successfully.', 
+          key: 'addRecommendation',
+          duration: 2
+        });
+        
+        // First, get the updated list of all recommendations
+        await surveyApi.checkRecommendations();
+        
+        // Then fetch all results data
+        const resultsResponse = await surveyApi.getAllResults();
+        if (resultsResponse.data) {
+          // Process the results to ensure proper data structure
+          const processedResults = processResultsData(resultsResponse.data);
+          setSurveyResults(processedResults);
+          
+          // Update the selected result
+          if (selectedResult) {
+            const freshResult = processedResults.find(r => r.id === selectedResult.id);
+            if (freshResult) {
+              console.log('Updated selected result with fresh data:', freshResult);
+              setSelectedResult(freshResult);
+            }
+          }
+        }
+      } else {
+        throw new Error('Server returned an unsuccessful status code');
+      }
     } catch (err) {
       console.error('Error adding service recommendation:', err);
-      message.error('Failed to add service recommendation');
+      message.error({ 
+        content: 'Failed to add service recommendation. Please try again.', 
+        key: 'addRecommendation',
+        duration: 3
+      });
     }
   };
 
   // Remove a service recommendation
-  const removeServiceRecommendation = async (recommendationId) => {
+  const removeServiceRecommendation = async (serviceId) => {
+    if (!serviceId) {
+      message.error('Invalid service ID');
+      return;
+    }
+    
+    // Make sure serviceId is a number
+    const idToDelete = Number(serviceId);
+    if (isNaN(idToDelete)) {
+      message.error(`Invalid service ID format: ${serviceId}`);
+      return;
+    }
+    
+    // Debug logging
+    console.log("Starting deletion process");
+    console.log("Selected result:", selectedResult);
+    
+    // First verify if this ID exists in the recommendations
+    if (selectedResult?.recommendedServices) {
+      // Check both id and serviceId to see what's in the data
+      const allIds = selectedResult.recommendedServices.map(r => r.id);
+      const allServiceIds = selectedResult.recommendedServices.map(r => r.serviceId);
+      console.log("All recommendation IDs in selected result:", allIds);
+      console.log("All service IDs in selected result:", allServiceIds);
+      
+      const targetRec = selectedResult.recommendedServices.find(r => r.serviceId === idToDelete);
+      
+      if (targetRec) {
+        console.log("Found recommendation to delete (by service ID):", targetRec);
+      } else {
+        // If recommendation ID matches but service ID doesn't, we found the problem
+        const matchingIdRec = selectedResult.recommendedServices.find(r => r.id === idToDelete);
+        if (matchingIdRec) {
+          const errorMsg = `Cannot delete using recommendation ID (${idToDelete}). You need to use service ID (${matchingIdRec.serviceId})`;
+          console.error(errorMsg);
+          message.error(errorMsg);
+          return;
+        }
+        
+        console.warn(`Warning: Service with ID ${idToDelete} not found in current selected result`);
+      }
+    }
+    
+    console.log(`Proceeding to delete service ID: ${idToDelete}`);
+    
     try {
-      await surveyApi.deleteRecommendedService(recommendationId);
-      message.success('Service recommendation removed');
-      fetchResults();
+      message.loading({ content: 'Removing recommendation...', key: 'removeRecommendation' });
+      
+      const response = await surveyApi.deleteRecommendedService(idToDelete);
+      
+      // Log the delete response
+      console.log("Delete response:", response);
+      
+      if (response && response.data && response.data.success) {
+        message.success({ 
+          content: response.data.message || 'Service recommendation removed successfully', 
+          key: 'removeRecommendation',
+          duration: 2
+        });
+        
+        // First, get the updated list of all recommendations
+        await surveyApi.checkRecommendations();
+        
+        // Then fetch all results data
+        const resultsResponse = await surveyApi.getAllResults();
+        if (resultsResponse.data) {
+          // Process the results to ensure proper data structure
+          const processedResults = processResultsData(resultsResponse.data);
+          setSurveyResults(processedResults);
+          
+          // Update the selected result
+          if (selectedResult) {
+            const freshResult = processedResults.find(r => r.id === selectedResult.id);
+            if (freshResult) {
+              console.log('Updated selected result with fresh data:', freshResult);
+              setSelectedResult(freshResult);
+            }
+          }
+        }
+      } else {
+        throw new Error(response?.data?.message || 'Server returned an unsuccessful response');
+      }
     } catch (err) {
       console.error('Error removing service recommendation:', err);
-      message.error('Failed to remove service recommendation');
+      message.error({ 
+        content: err.message || 'Failed to remove service recommendation. Please try again.', 
+        key: 'removeRecommendation',
+        duration: 3 
+      });
+    }
+  };
+
+  // Function to handle managing services for a survey result
+  const handleManageResultServices = async (record) => {
+    // Ensure record has the necessary properties before setting state
+    if (!record || !record.id) {
+      console.error('Invalid record passed to handleManageResultServices:', record);
+      message.error('Invalid data. Please try again.');
+      return;
+    }
+    
+    try {
+      // Show loading state
+      message.loading({ content: 'Loading recommendations...', key: 'loadingResult' });
+      
+      // Get fresh data for this result to ensure we have the latest recommendations
+      const response = await surveyApi.getAllResults();
+      if (response.data) {
+        // Process the results with our helper function
+        const processedResults = processResultsData(response.data);
+        
+        // Find the selected result with the processed data
+        const updatedResult = processedResults.find(r => r.id === record.id);
+        
+        if (updatedResult) {
+          console.log('Setting selected result with processed data:', updatedResult);
+          
+          // Check if recommendedServices is properly populated
+          if (updatedResult.recommendedServices && updatedResult.recommendedServices.length > 0) {
+            console.log('Recommendation IDs in selected result:', 
+              updatedResult.recommendedServices.map(r => `ID: ${r.id}, Service ID: ${r.serviceId}`).join(', '));
+          } else {
+            console.log('No recommendations found for this result');
+          }
+          
+          // Set the processed result in state
+          setSelectedResult(updatedResult);
+          setResultServicesModalVisible(true);
+          
+          message.success({ 
+            content: `Loaded ${updatedResult.recommendedServices?.length || 0} recommendations`, 
+            key: 'loadingResult', 
+            duration: 2 
+          });
+        } else {
+          throw new Error('Result not found in refreshed data');
+        }
+      } else {
+        throw new Error('Failed to refresh data');
+      }
+    } catch (error) {
+      console.error('Error loading result details:', error);
+      message.error({ 
+        content: 'Failed to load result details. Please try again.', 
+        key: 'loadingResult' 
+      });
     }
   };
 
@@ -416,293 +701,509 @@ const SurveyManagerPage = () => {
     },
   ];
 
+  // Add this function to render debug information
+  const renderDebugInfo = () => {
+    if (debugInfo.loading) {
+      return <Spin tip="Loading recommendation data..." />;
+    }
+    
+    if (debugInfo.error) {
+      return <Alert type="error" message="Error" description={debugInfo.error} />;
+    }
+    
+    if (!debugInfo.data || debugInfo.data.totalCount === 0) {
+      return <Alert type="info" message="No recommendations found in the database." />;
+    }
+    
+    const { totalCount, byResultId } = debugInfo.data;
+    
+    return (
+      <div className="debug-info">
+        <Alert 
+          type="info" 
+          message={`Total Recommendations: ${totalCount}`} 
+          description="Recommendations grouped by Survey Result ID"
+          showIcon
+        />
+        
+        <Collapse className="mt-3">
+          {Object.keys(byResultId).map(resultId => (
+            <Collapse.Panel 
+              key={resultId} 
+              header={`Result ID: ${resultId} - ${byResultId[resultId].length} recommendations`}
+            >
+              <List
+                dataSource={byResultId[resultId]}
+                renderItem={(rec, index) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={
+                        <div>
+                          <Badge status="processing" text={`Recommendation #${index + 1}`} />
+                          <Tag color="red">Rec ID: {rec.id}</Tag>
+                          {rec.serviceId && <Tag color="blue">Service ID: {rec.serviceId}</Tag>}
+                          {rec.priority && <Tag color="green">Priority: {rec.priority}</Tag>}
+                        </div>
+                      }
+                      description={
+                        <div>
+                          {rec.service ? (
+                            <div>
+                              <div><strong>Service Name:</strong> {rec.service.name || "Unknown"}</div>
+                              {rec.service.description && (
+                                <div><strong>Description:</strong> {rec.service.description.length > 100 ? 
+                                  `${rec.service.description.substring(0, 100)}...` : 
+                                  rec.service.description}
+                                </div>
+                              )}
+                              {rec.service.price && (
+                                <div><strong>Price:</strong> {rec.service.price} VND</div>
+                              )}
+                            </div>
+                          ) : (
+                            <Alert 
+                              type="warning" 
+                              message="Service data is missing" 
+                              description="This recommendation references a service that doesn't exist or wasn't returned by the API."
+                              showIcon
+                            />
+                          )}
+                        </div>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            </Collapse.Panel>
+          ))}
+        </Collapse>
+      </div>
+    );
+  };
+
+  const handleCheckRecommendations = async () => {
+    setIsDebugModalVisible(true);
+    setDebugInfo({
+      loading: true,
+      data: null,
+      error: null
+    });
+    
+    try {
+      const response = await surveyApi.checkRecommendations();
+      
+      if (response.data && response.data.data) {
+        // Process and format the data for better readability
+        const recommendations = response.data.data;
+        const byResult = {};
+        
+        recommendations.forEach(rec => {
+          const resultId = rec.surveyResultId;
+          if (!byResult[resultId]) {
+            byResult[resultId] = [];
+          }
+          byResult[resultId].push(rec);
+        });
+        
+        setDebugInfo({
+          loading: false,
+          data: {
+            totalCount: recommendations.length,
+            byResultId: byResult
+          },
+          error: null
+        });
+      } else {
+        setDebugInfo({
+          loading: false,
+          data: { totalCount: 0, byResultId: {} },
+          error: null
+        });
+      }
+    } catch (error) {
+      console.error("Error checking recommendations:", error);
+      setDebugInfo({
+        loading: false,
+        data: null,
+        error: error.message || "Failed to check recommendations"
+      });
+    }
+  };
+
   return (
     <div className="survey-manager-page">
       <h1>Survey Management System</h1>
       
-      <Tabs defaultActiveKey="questions">
-        <TabPane tab="Survey Questions" key="questions">
-          <div className="tab-header">
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />} 
-              onClick={handleAddQuestion}
-            >
-              Add New Question
-            </Button>
-          </div>
-          
-          <Table 
-            columns={questionColumns} 
-            dataSource={questions} 
-            rowKey="id" 
-            loading={loading}
-            pagination={{ pageSize: 10 }}
-          />
-          
-          <Modal
-            title={selectedQuestion ? "Edit Question" : "Add New Question"}
-            visible={showQuestionModal}
-            onCancel={() => setShowQuestionModal(false)}
-            footer={null}
-            width={700}
-          >
-            <Form
-              form={questionForm}
-              layout="vertical"
-              onFinish={handleSaveQuestion}
-            >
-              <Form.Item
-                name="questionId"
-                label="Question ID"
-                rules={[{ required: true, message: 'Please enter a question ID' }]}
-              >
-                <Input placeholder="e.g., Q1, Q2, RESULT_1, etc." />
-              </Form.Item>
-              
-              <Form.Item
-                name="questionText"
-                label="Question Text"
-                rules={[{ required: true, message: 'Please enter the question text' }]}
-              >
-                <TextArea rows={4} placeholder="Enter the question text" />
-              </Form.Item>
-              
-              <Divider>Options</Divider>
-              
-              <Form.List name="options">
-                {(fields, { add, remove }) => (
-                  <>
-                    {fields.map(({ key, name, ...restField }) => (
-                      <div key={key} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'optionText']}
-                          style={{ marginRight: 8, width: '60%' }}
-                          rules={[{ required: true, message: 'Option text required' }]}
-                        >
-                          <Input placeholder="Option text" />
-                        </Form.Item>
-                        
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'nextQuestionId']}
-                          style={{ width: '30%' }}
-                          rules={[{ required: true, message: 'Next step required' }]}
-                        >
-                          <Input placeholder="Next question ID" />
-                        </Form.Item>
-                        
-                        {fields.length > 1 && (
-                          <Button 
-                            type="text" 
-                            danger 
-                            icon={<DeleteOutlined />} 
-                            onClick={() => remove(name)} 
-                            style={{ marginLeft: 8 }}
-                          />
-                        )}
-                      </div>
-                    ))}
-                    
-                    <Form.Item>
-                      <Button 
-                        type="dashed" 
-                        onClick={() => add()} 
-                        block 
-                        icon={<PlusOutlined />}
-                      >
-                        Add Option
-                      </Button>
-                    </Form.Item>
-                  </>
-                )}
-              </Form.List>
-              
-              <Form.Item style={{ textAlign: 'right', marginTop: 20 }}>
-                <Button 
-                  style={{ marginRight: 8 }} 
-                  onClick={() => setShowQuestionModal(false)}
-                >
-                  Cancel
-                </Button>
+      <Tabs defaultActiveKey="questions" items={[
+        {
+          key: "questions",
+          label: "Survey Questions",
+          children: (
+            <>
+              <div className="tab-header">
                 <Button 
                   type="primary" 
-                  htmlType="submit" 
-                  icon={<SaveOutlined />}
+                  icon={<PlusOutlined />} 
+                  onClick={handleAddQuestion}
                 >
-                  Save Question
+                  Add New Question
                 </Button>
-              </Form.Item>
-            </Form>
-          </Modal>
-        </TabPane>
-        
-        <TabPane tab="Survey Results" key="results">
-          <div className="tab-header">
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />} 
-              onClick={() => {
-                setSelectedResult(null);
-                resultForm.resetFields();
-                setShowResultModal(true);
-              }}
-            >
-              Add New Result
-            </Button>
-          </div>
-          
-          <Table 
-            columns={resultColumns} 
-            dataSource={surveyResults} 
-            rowKey="id" 
-            pagination={{ pageSize: 10 }}
-          />
-          
-          <Modal
-            title={selectedResult ? "Edit Survey Result" : "Add New Survey Result"}
-            visible={showResultModal}
-            onCancel={() => setShowResultModal(false)}
-            footer={null}
-            width={700}
-          >
-            <Form
-              form={resultForm}
-              layout="vertical"
-              onFinish={handleSaveResult}
-            >
-              <Form.Item
-                name="resultId"
-                label="Result ID"
-                rules={[{ required: true, message: 'Please enter a result ID' }]}
-              >
-                <Input placeholder="e.g., RESULT_1, RESULT_DRY_SKIN, etc." />
-              </Form.Item>
-              
-              <Form.Item
-                name="skinType"
-                label="Skin Type"
-                rules={[{ required: true, message: 'Please enter the skin type' }]}
-              >
-                <Select placeholder="Select skin type">
-                  <Option value="Oily">Oily Skin</Option>
-                  <Option value="Dry">Dry Skin</Option>
-                  <Option value="Combination">Combination Skin</Option>
-                  <Option value="Normal">Normal Skin</Option>
-                  <Option value="Sensitive">Sensitive Skin</Option>
-                  <Option value="Acne-Prone">Acne-Prone Skin</Option>
-                  <Option value="Aging">Aging Skin</Option>
-                </Select>
-              </Form.Item>
-              
-              <Form.Item
-                name="resultText"
-                label="Result Description"
-                rules={[{ required: true, message: 'Please enter the result description' }]}
-              >
-                <TextArea rows={4} placeholder="Detailed description of the skin analysis result" />
-              </Form.Item>
-              
-              <Form.Item
-                name="recommendationText"
-                label="General Recommendations"
-                rules={[{ required: true, message: 'Please enter recommendations' }]}
-              >
-                <TextArea rows={4} placeholder="General skin care recommendations" />
-              </Form.Item>
-              
-              <Form.Item style={{ textAlign: 'right', marginTop: 20 }}>
-                <Button 
-                  style={{ marginRight: 8 }} 
-                  onClick={() => setShowResultModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="primary" 
-                  htmlType="submit" 
-                  icon={<SaveOutlined />}
-                >
-                  Save Result
-                </Button>
-              </Form.Item>
-            </Form>
-          </Modal>
-          
-          <Modal
-            title="Manage Recommended Services"
-            visible={resultServicesModalVisible}
-            onCancel={() => setResultServicesModalVisible(false)}
-            footer={null}
-            width={800}
-          >
-            {selectedResult && (
-              <div>
-                <Card title="Current Recommendations" style={{ marginBottom: 16 }}>
-                  {selectedResult.recommendedServices?.length > 0 ? (
-                    <List
-                      itemLayout="horizontal"
-                      dataSource={selectedResult.recommendedServices}
-                      renderItem={item => (
-                        <List.Item
-                          actions={[
-                            <Button 
-                              danger 
-                              icon={<DeleteOutlined />} 
-                              onClick={() => removeServiceRecommendation(item.id)}
-                            >
-                              Remove
-                            </Button>
-                          ]}
-                        >
-                          <List.Item.Meta
-                            title={item.skincareService.serviceName}
-                            description={`Price: ${item.skincareService.price} VND`}
-                          />
-                        </List.Item>
-                      )}
-                    />
-                  ) : (
-                    <div>No services recommended yet</div>
-                  )}
-                </Card>
-                
-                <Card title="Available Services">
-                  <List
-                    itemLayout="horizontal"
-                    dataSource={skinCareServices}
-                    renderItem={service => (
-                      <List.Item
-                        actions={[
-                          <Button 
-                            type="primary" 
-                            icon={<PlusOutlined />} 
-                            onClick={() => addServiceRecommendation(service.id)}
-                          >
-                            Add
-                          </Button>
-                        ]}
-                      >
-                        <List.Item.Meta
-                          title={service.serviceName}
-                          description={
-                            <>
-                              <div>{service.serviceDescription}</div>
-                              <div>Price: {service.price} VND</div>
-                            </>
-                          }
-                        />
-                      </List.Item>
-                    )}
-                    pagination={{ pageSize: 5 }}
-                  />
-                </Card>
               </div>
-            )}
-          </Modal>
-        </TabPane>
-      </Tabs>
+              
+              <Table 
+                columns={questionColumns} 
+                dataSource={questions} 
+                rowKey="id" 
+                loading={loading}
+                pagination={{ pageSize: 10 }}
+              />
+              
+              <Modal
+                title={selectedQuestion ? "Edit Question" : "Add New Question"}
+                open={showQuestionModal}
+                onCancel={() => setShowQuestionModal(false)}
+                footer={null}
+                width={700}
+              >
+                <Form
+                  form={questionForm}
+                  layout="vertical"
+                  onFinish={handleSaveQuestion}
+                >
+                  <Form.Item
+                    name="questionId"
+                    label="Question ID"
+                    rules={[{ required: true, message: 'Please enter a question ID' }]}
+                  >
+                    <Input placeholder="e.g., Q1, Q2, RESULT_1, etc." />
+                  </Form.Item>
+                  
+                  <Form.Item
+                    name="questionText"
+                    label="Question Text"
+                    rules={[{ required: true, message: 'Please enter the question text' }]}
+                  >
+                    <TextArea rows={4} placeholder="Enter the question text" />
+                  </Form.Item>
+                  
+                  <Divider>Options</Divider>
+                  
+                  <Form.List name="options">
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map(({ key, name, ...restField }) => (
+                          <div key={key} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'optionText']}
+                              style={{ marginRight: 8, width: '60%' }}
+                              rules={[{ required: true, message: 'Option text required' }]}
+                            >
+                              <Input placeholder="Option text" />
+                            </Form.Item>
+                            
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'nextQuestionId']}
+                              style={{ width: '30%' }}
+                              rules={[{ required: true, message: 'Next step required' }]}
+                            >
+                              <Input placeholder="Next question ID" />
+                            </Form.Item>
+                            
+                            {fields.length > 1 && (
+                              <Button 
+                                type="text" 
+                                danger 
+                                icon={<DeleteOutlined />} 
+                                onClick={() => remove(name)} 
+                                style={{ marginLeft: 8 }}
+                              />
+                            )}
+                          </div>
+                        ))}
+                        
+                        <Form.Item>
+                          <Button 
+                            type="dashed" 
+                            onClick={() => add()} 
+                            block 
+                            icon={<PlusOutlined />}
+                          >
+                            Add Option
+                          </Button>
+                        </Form.Item>
+                      </>
+                    )}
+                  </Form.List>
+                  
+                  <Form.Item style={{ textAlign: 'right', marginTop: 20 }}>
+                    <Button 
+                      style={{ marginRight: 8 }} 
+                      onClick={() => setShowQuestionModal(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="primary" 
+                      htmlType="submit" 
+                      icon={<SaveOutlined />}
+                    >
+                      Save Question
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </Modal>
+            </>
+          )
+        },
+        {
+          key: "results",
+          label: "Survey Results",
+          children: (
+            <>
+              <div className="tab-header">
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />} 
+                  onClick={() => {
+                    setSelectedResult(null);
+                    resultForm.resetFields();
+                    setShowResultModal(true);
+                  }}
+                >
+                  Add New Result
+                </Button>
+              </div>
+              
+              <Table 
+                columns={resultColumns} 
+                dataSource={surveyResults} 
+                rowKey="id" 
+                pagination={{ pageSize: 10 }}
+              />
+              
+              <Modal
+                title={selectedResult ? "Edit Survey Result" : "Add New Survey Result"}
+                open={showResultModal}
+                onCancel={() => setShowResultModal(false)}
+                footer={null}
+                width={700}
+              >
+                <Form
+                  form={resultForm}
+                  layout="vertical"
+                  onFinish={handleSaveResult}
+                >
+                  <Form.Item
+                    name="resultId"
+                    label="Result ID"
+                    rules={[{ required: true, message: 'Please enter a result ID' }]}
+                  >
+                    <Input placeholder="e.g., RESULT_1, RESULT_DRY_SKIN, etc." />
+                  </Form.Item>
+                  
+                  <Form.Item
+                    name="skinType"
+                    label="Skin Type"
+                    rules={[{ required: true, message: 'Please enter the skin type' }]}
+                  >
+                    <Select placeholder="Select skin type">
+                      <Option value="Oily">Oily Skin</Option>
+                      <Option value="Dry">Dry Skin</Option>
+                      <Option value="Combination">Combination Skin</Option>
+                      <Option value="Normal">Normal Skin</Option>
+                      <Option value="Sensitive">Sensitive Skin</Option>
+                      <Option value="Acne-Prone">Acne-Prone Skin</Option>
+                      <Option value="Aging">Aging Skin</Option>
+                    </Select>
+                  </Form.Item>
+                  
+                  <Form.Item
+                    name="resultText"
+                    label="Result Description"
+                    rules={[{ required: true, message: 'Please enter the result description' }]}
+                  >
+                    <TextArea rows={4} placeholder="Detailed description of the skin analysis result" />
+                  </Form.Item>
+                  
+                  <Form.Item
+                    name="recommendationText"
+                    label="General Recommendations"
+                    rules={[{ required: true, message: 'Please enter recommendations' }]}
+                  >
+                    <TextArea rows={4} placeholder="General skin care recommendations" />
+                  </Form.Item>
+                  
+                  <Form.Item style={{ textAlign: 'right', marginTop: 20 }}>
+                    <Button 
+                      style={{ marginRight: 8 }} 
+                      onClick={() => setShowResultModal(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="primary" 
+                      htmlType="submit" 
+                      icon={<SaveOutlined />}
+                    >
+                      Save Result
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </Modal>
+              
+              <Modal
+                title="Manage Recommended Services"
+                open={resultServicesModalVisible}
+                onCancel={() => setResultServicesModalVisible(false)}
+                footer={null}
+                width={800}
+              >
+                {selectedResult && (
+                  <div>
+                    <Card title="Current Recommendations" style={{ marginBottom: 16 }}>
+                      <Button 
+                        onClick={handleCheckRecommendations}
+                        style={{ display: 'none', marginBottom: 16, marginRight: 8 }}
+                        type="primary"
+                        ghost
+                        icon={<SearchOutlined />}
+                      >
+                        View All Recommendations
+                      </Button>
+
+                      <Button 
+                        onClick={async () => {
+                          try {
+                            await surveyApi.getRawRecommendations();
+                            message.info('Check console for raw data');
+                          } catch (err) {
+                            console.error('Debug check failed:', err);
+                            message.error('Failed to get raw recommendations');
+                          }
+                        }}
+                        style={{ display: 'none', marginBottom: 16 }}
+                      >
+                        Get Raw
+                      </Button>
+
+                      {selectedResult.recommendedServices?.length > 0 ? (
+                        <List
+                          itemLayout="horizontal"
+                          dataSource={selectedResult.recommendedServices}
+                          renderItem={(item) => {
+                            if (!item || !item.service) {
+                              return null;
+                            }
+                            
+                            const service = item.service;
+                            const serviceId = item.serviceId || service.id;
+                            
+                            return (
+                              <List.Item
+                                actions={[
+                                  <Button 
+                                    danger 
+                                    icon={<DeleteOutlined />} 
+                                    onClick={() => {
+                                      Modal.confirm({
+                                        title: 'Delete Service',
+                                        content: (
+                                          <div>
+                                            <p>Are you sure you want to delete this service recommendation?</p>
+                                            <p>Service: {service.name}</p>
+                                            <p>Service ID: {serviceId}</p>
+                                          </div>
+                                        ),
+                                        okText: 'Delete',
+                                        okType: 'danger',
+                                        cancelText: 'Cancel',
+                                        onOk: () => {
+                                          removeServiceRecommendation(serviceId);
+                                        }
+                                      });
+                                    }}
+                                  >
+                                    Delete
+                                  </Button>
+                                ]}
+                              >
+                                <List.Item.Meta
+                                  title={
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                      <span style={{ marginRight: '10px' }}>{service.name}</span>
+                                      <Tag color="blue">ID: {serviceId}</Tag>
+                                    </div>
+                                  }
+                                  description={
+                                    <>
+                                      {service.description && <div>{service.description}</div>}
+                                      {service.price > 0 && <div>Price: {service.price.toLocaleString()} VND</div>}
+                                    </>
+                                  }
+                                />
+                              </List.Item>
+                            );
+                          }}
+                        />
+                      ) : (
+                        <div>No services recommended yet</div>
+                      )}
+                    </Card>
+                    
+                    <Card title="Available Services">
+                      <List
+                        itemLayout="horizontal"
+                        dataSource={(skinCareServices || [])
+                          .filter(service => service && service.id && service.serviceName)}
+                        renderItem={(service) => (
+                          <List.Item
+                            actions={[
+                              <Button 
+                                type="primary" 
+                                icon={<PlusOutlined />} 
+                                onClick={() => addServiceRecommendation(service.id)}
+                              >
+                                Add
+                              </Button>
+                            ]}
+                          >
+                            <List.Item.Meta
+                              title={<span>{service.serviceName}</span>}
+                              description={
+                                <>
+                                  {service.serviceDescription && <div>{service.serviceDescription}</div>}
+                                  {service.price > 0 && <div>Price: {service.price.toLocaleString()} VND</div>}
+                                </>
+                              }
+                            />
+                          </List.Item>
+                        )}
+                        pagination={{ pageSize: 5 }}
+                      />
+                    </Card>
+                  </div>
+                )}
+              </Modal>
+            </>
+          )
+        }
+      ]} />
+      
+      <Modal
+        title="Recommendation Data Debug"
+        open={isDebugModalVisible}
+        onCancel={() => setIsDebugModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setIsDebugModalVisible(false)}>
+            Close
+          </Button>
+        ]}
+        width={800}
+      >
+        {renderDebugInfo()}
+      </Modal>
     </div>
   );
 };

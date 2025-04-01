@@ -64,7 +64,16 @@ const ManageServicesPage = () => {
         })
       );
 
-      setServices(servicesWithImage);
+      // Validate services and log any invalid entries
+      const validServices = servicesWithImage.filter((service) => {
+        if (!service.serviceName) {
+          console.warn("Invalid service entry:", service);
+          return false;
+        }
+        return true;
+      });
+
+      setServices(validServices);
     } catch (error) {
       message.error("Lỗi khi tải danh sách dịch vụ!");
     }
@@ -115,11 +124,20 @@ const ManageServicesPage = () => {
   // Xóa dịch vụ
   const handleDelete = async (id) => {
     try {
-      await servicesApi.deleteService(id);
-      message.success("Xóa dịch vụ thành công!");
-      fetchServices();
+      const response = await servicesApi.deleteService(id);
+      if (response.data && response.data.success) {
+        message.success("Xóa dịch vụ thành công!");
+        fetchServices();
+      } else {
+        message.error(response.data?.message || "Lỗi khi xóa dịch vụ!");
+      }
     } catch (error) {
-      message.error("Lỗi khi xóa dịch vụ!");
+      console.error("Error deleting service:", error);
+      const errorMsg = error.response?.data?.message || "Lỗi khi xóa dịch vụ!";
+      message.error(errorMsg);
+      if (errorMsg.includes("bookings")) {
+        message.warning("Không thể xóa dịch vụ này vì đã có lịch hẹn sử dụng dịch vụ này!");
+      }
     }
   };
 
@@ -190,28 +208,31 @@ const ManageServicesPage = () => {
       title: "Tên Dịch Vụ",
       dataIndex: "serviceName",
       key: "serviceName",
+      render: (text) => text || "N/A",
     },
     {
       title: "Mô Tả",
       dataIndex: "serviceDescription",
       key: "serviceDescription",
+      render: (text) => text || "N/A",
     },
     {
       title: "Giá",
       dataIndex: "price",
       key: "price",
-      render: (price) => `${price?.toLocaleString()} VND`,
+      render: (price) => (price ? `${price.toLocaleString()} VND` : "N/A"),
     },
     {
       title: "Thời Gian (phút)",
       dataIndex: "workTime",
       key: "workTime",
+      render: (time) => (time ? `${time} phút` : "N/A"),
     },
     {
       title: "Hình Ảnh",
       key: "image",
       render: (_, record) => {
-        if (!record.image) return "No image";
+        if (!record || !record.image) return "No image";
         const ext = record.image.fileExtension?.replace(".", "") || "jpeg";
         return (
           <img
@@ -225,24 +246,31 @@ const ManageServicesPage = () => {
     {
       title: "Hành Động",
       key: "actions",
-      render: (_, record) => (
-        <>
-          <Button onClick={() => handleEdit(record)} style={{ marginRight: 8 }}>
-            Sửa
-          </Button>
-          <Popconfirm
-            title="Xác nhận xóa dịch vụ?"
-            onConfirm={() => handleDelete(record.id)}
-          >
-            <Button danger style={{ marginRight: 8 }}>
-              Xóa
+      render: (_, record) => {
+        if (!record) return null;
+        return (
+          <>
+            <Button onClick={() => handleEdit(record)} style={{ marginRight: 8 }}>
+              Sửa
             </Button>
-          </Popconfirm>
-          <Button onClick={() => handleManageDetails(record.id)}>
-            Quản lý chi tiết
-          </Button>
-        </>
-      ),
+            <Popconfirm
+              title="Xác nhận xóa dịch vụ?"
+              description="Việc xóa dịch vụ này sẽ xóa tất cả các chi tiết liên quan. Bạn có chắc chắn muốn xóa không?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Có, xóa"
+              cancelText="Không"
+              okButtonProps={{ danger: true }}
+            >
+              <Button danger style={{ marginRight: 8 }}>
+                Xóa
+              </Button>
+            </Popconfirm>
+            <Button onClick={() => handleManageDetails(record.id)}>
+              Quản lý chi tiết
+            </Button>
+          </>
+        );
+      },
     },
   ];
 

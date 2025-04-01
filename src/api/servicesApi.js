@@ -1,9 +1,9 @@
 import apiClient from "./apiClient";
 
 const servicesApi = {
-  getAllServices: () =>
+  getAllServices: (page = 1, pageSize = 20) =>
     apiClient.get("/api/SkincareServices/GetServices", {
-      params: { page: 1, pageSize: 20 }
+      params: { page, pageSize }
     }),
 
   getAllServices1: () =>
@@ -11,7 +11,13 @@ const servicesApi = {
       params: { page: 1, pageSize: 8 }
     }),
 
-  getServiceById: (id) => apiClient.get(`/api/ServicesDetail/GetByService/${id}`),
+  getServiceById: (id) => apiClient.get(`/api/SkincareServices/GetServiceById`, {
+    params: { id }
+  }),
+
+  getServiceByName: (name) => apiClient.get(`/api/SkincareServices/GetServiceByName`, {
+    params: { name }
+  }),
 
   createService: (formData) =>
     apiClient.post("/api/SkincareServices/Create", formData, {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import { Form, Input, Button, message } from "antd";
 import useAuth from "../hooks/useAuth";
 import apiClient from "../api/apiClient";
@@ -11,7 +11,10 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectPath = searchParams.get("redirect") || "/";
+  const location = useLocation();
+  
+  // Check both the query param and the state for redirect path
+  const redirectPath = searchParams.get("redirect") || location.state?.from || "/";
 
   const handleLogin = async (values) => {
     setLoading(true);
@@ -59,11 +62,12 @@ const LoginPage = () => {
 
       message.success(`Chào mừng, ${userData.fullName}!`);
 
-      //setTimeout(() => navigate(redirectPath), 500);
-
       setTimeout(() => {
         if (role === "Manager") {
           navigate("/admin/user");
+        } else if (redirectPath && redirectPath !== '/') {
+          // Redirect to the page that user was trying to access
+          navigate(redirectPath);
         } else {
           navigate("/");
         }

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Spin, Modal, Button } from "antd";
+import { Spin, Modal, Button, Checkbox } from "antd";
 import { RocketOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import servicesApi from "../api/servicesApi";
+import surveyApi from "../api/surveyApi";
 import "../styles/services.css";
 import useAuth from "../hooks/useAuth";
 
@@ -15,11 +16,90 @@ const Services = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showGoToTop, setShowGoToTop] = useState(false);
-  const [showPopup, setShowPopup] = useState(
-    localStorage.getItem("hideTestReminder") !== "true"
-  );
+  const [showPopup, setShowPopup] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
 
+  // Check if we should show the survey popup when user auth state changes
+  useEffect(() => {
+    // Skip if already checking or user data isn't loaded
+    if (checkingStatus) return;
+    
+    const checkSurveyStatus = async () => {
+      try {
+        setCheckingStatus(true);
+        
+        // First check if user has explicitly asked not to be reminded
+        const dontRemind = localStorage.getItem("hideTestReminder");
+        if (dontRemind === "true") {
+          console.log("User opted out of survey reminders");
+          return;
+        }
+
+        // Check local storage for a record of completed survey
+        const hasTakenSurvey = localStorage.getItem("hasCompletedSurvey");
+        if (hasTakenSurvey === "true") {
+          console.log("User has completed survey according to local storage");
+          return;
+        }
+
+        // Only check survey history if user is logged in
+        if (user && user.token) {
+          try {
+            console.log("User is logged in, checking survey history");
+            // Try the user history endpoint first
+            try {
+              const historyResponse = await surveyApi.getUserSurveyHistory();
+              
+              // If user has survey history, don't show the popup and record this
+              if (historyResponse.data && historyResponse.data.length > 0) {
+                console.log("User has completed survey before. Not showing popup.");
+                localStorage.setItem("hasCompletedSurvey", "true");
+                return;
+              }
+            } catch (historyError) {
+              console.warn("Could not fetch survey history directly:", historyError);
+              
+              // Fallback: try to verify eligibility which is a less restricted endpoint
+              try {
+                const eligibilityResponse = await surveyApi.verifySurveyEligibility();
+                if (eligibilityResponse.data && eligibilityResponse.data.hasTakenSurvey) {
+                  console.log("User has taken survey according to eligibility check");
+                  localStorage.setItem("hasCompletedSurvey", "true");
+                  return;
+                }
+              } catch (eligibilityError) {
+                console.warn("Could not verify survey eligibility:", eligibilityError);
+              }
+            }
+          } catch (error) {
+            // Only log the error, don't disrupt user experience
+            console.warn("Survey status check failed:", error);
+            
+            // If we get a 401, token is invalid or expired - don't show popup
+            if (error.response && error.response.status === 401) {
+              return;
+            }
+          }
+        }
+
+        // If we passed all checks, show the popup
+        console.log("Showing survey prompt popup");
+        setShowPopup(true);
+      } catch (error) {
+        console.error("Error checking survey status:", error);
+      } finally {
+        setCheckingStatus(false);
+      }
+    };
+
+    // Only run if we have definitive information about the user's authentication state
+    if (user !== undefined) {
+      checkSurveyStatus();
+    }
+  }, [user]);
+
+  // Fetch services data
   useEffect(() => {
     const fetchServices = async () => {
       setLoading(true);
@@ -95,15 +175,10 @@ const Services = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleClosePopup = () => 
-    {
-      setShowPopup(false);
+  const handleClosePopup = () => {
+    setShowPopup(false);
     if (dontShowAgain) {
       localStorage.setItem("hideTestReminder", "true");
-      
-    }
-    else {
-      localStorage.setItem("hideTestReminder", "false");
     }
   };
   
@@ -148,27 +223,20 @@ const Services = () => {
         >
           <p>Hãy làm bài test da để nhận tư vấn tốt nhất cho bạn!</p>
           <div style={{ marginTop: "15px" }}>
-          {/* Checkbox "Không nhắc lại" */}
-          <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-            <input 
-              type="checkbox" 
-              id="dontShowAgainCheckbox" 
-              checked={dontShowAgain}
-              onChange={(e) => setDontShowAgain(e.target.checked)}
-              style={{ marginRight: "8px", cursor: "pointer" }}
-            />
-            <label htmlFor="dontShowAgainCheckbox" style={{ cursor: "pointer", fontSize: "14px", color: "#555" }}>
-              Không nhắc lại
-            </label>
-          </div>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+              <Checkbox 
+                checked={dontShowAgain}
+                onChange={(e) => setDontShowAgain(e.target.checked)}
+              >
+                Không nhắc lại
+              </Checkbox>
+            </div>
 
-          {/* Nút hành động */}
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-            <Button onClick={handleClosePopup}>Bỏ qua</Button>
-            <Button type="primary" onClick={handleStartTest}>Bắt đầu</Button>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <Button onClick={handleClosePopup}>Bỏ qua</Button>
+              <Button type="primary" onClick={handleStartTest}>Bắt đầu</Button>
+            </div>
           </div>
-        </div>
-
         </Modal>
       )}
 

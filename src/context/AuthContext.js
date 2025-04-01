@@ -60,7 +60,9 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("currentUser");
     localStorage.removeItem("token");
+    localStorage.removeItem("hasCompletedSurvey"); // Reset survey completion status
     localStorage.setItem("hideTestReminder", "false");
+    console.log("User logged out. Survey status reset.");
     setUser(null);
   };
 
