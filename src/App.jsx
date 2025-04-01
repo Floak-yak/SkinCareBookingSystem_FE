@@ -34,7 +34,7 @@ const App = () => {
       <CartProvider>
         <Router>
           <LayoutWrapper />
-          {/* <ToastContainer position="bottom-right" autoClose={3000} /> */}
+          <ToastContainer position="bottom-right" autoClose={3000} />
         </Router>
       </CartProvider>
     </AuthProvider>
