@@ -245,11 +245,12 @@ const Services = () => {
         <p>Khám phá các dịch vụ chăm sóc da chuyên nghiệp của chúng tôi.</p>
       </div>
 
-      <div className="survey-banner" onClick={handleSkinCheck}>
+      <div 
+        className="survey-banner" 
+        onClick={handleSkinCheck} 
+        style={{ backgroundImage: "url('/images/a.png')" }}
+      >
         <div className="banner-content">
-          <div className="banner-icon">
-            <RocketOutlined />
-          </div>
           <h2>Khám Phá Làn Da Của Bạn</h2>
           <p>Chỉ mất 2 phút để hiểu rõ làn da của bạn và nhận tư vấn liệu trình phù hợp từ chuyên gia.</p>
           <div className="banner-features">
@@ -268,16 +269,7 @@ const Services = () => {
           </div>
           <button className="start-survey-btn">
             Bắt đầu ngay
-            <ArrowRightOutlined className="btn-icon" />
           </button>
-        </div>
-        <div className="banner-image-container">
-          <img 
-            src="/images/skin-survey-banner.jpg" 
-            alt="Khám phá làn da của bạn" 
-            className="banner-image" 
-          />
-          <div className="image-overlay"></div>
         </div>
       </div>
 
@@ -309,10 +301,20 @@ const Services = () => {
                   </p>
                 </div>
                 <div className="service-actions">
-                  <button className="book-service-btn" onClick={handleBooking}>
+                  <button className="book-service-btn" onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(user ? "/booking" : "/login?redirect=/booking");
+                  }}>
                     Đặt lịch
                   </button>
-                  <a href={`/servicesDetail/${service.id}`} className="view-details-btn">
+                  <a 
+                    href="#" 
+                    className="view-details-btn" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(`/servicesDetail/${service.id}`);
+                    }}
+                  >
                     Xem chi tiết
                   </a>
                 </div>

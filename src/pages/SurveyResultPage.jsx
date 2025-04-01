@@ -227,7 +227,7 @@ const SurveyResultPage = () => {
             className="consultation-btn"
             onClick={handleBookConsultation}
           >
-            Đặt Lịch Tư Vấn
+            Đặt Lịch Ngay
           </button>
         </div>
       </div>
