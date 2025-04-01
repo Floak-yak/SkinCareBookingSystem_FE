@@ -27,6 +27,8 @@ import SurveyQuestionPage from "../pages/SurveyQuestionPage";
 import SurveyManagerPage from "../pages/admin/SurveyManagerPage";
 import BookingHistory from "../pages/BookingHistory";
 import StaffCalendar from "../pages/StaffCalendar";
+import VerifySuccess from "../components/VerifySuccess";
+import VerifyFail from "../components/VerifyFail";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -78,6 +80,10 @@ const AppRoutes = () => {
         element={<ManageServiceDetailsPage />}
       />
       <Route path="/admin/survey-manager" element={<SurveyManagerPage />} />
+
+      {/* xác thực tài khoản */}
+      <Route path="/verify-success" element={<VerifySuccess />} />
+      <Route path="/verify-fail" element={<VerifyFail />} />
     </Routes>
   );
 };

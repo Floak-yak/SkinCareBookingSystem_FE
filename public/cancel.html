@@ -45,7 +45,6 @@
       <p>
         <a href="/" class="btn">Bấm vào đây nếu không chuyển tự động</a>
       </p>
-      <div id="api-result" style="margin-top: 10px; font-size: 14px; color: #666;"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -58,13 +57,9 @@
           .get(`https://localhost:7101/api/Transaction/Cancel?transactionId=${transactionId}`)
           .then((response) => {
             console.log("Hủy giao dịch thành công:", response.data);
-            document.getElementById("api-result").textContent =
-              "Hủy giao dịch trên server thành công!";
           })
           .catch((error) => {
             console.error("Lỗi khi hủy giao dịch:", error);
-            document.getElementById("api-result").textContent =
-              "Có lỗi xảy ra khi hủy giao dịch!";
           });
       } else {
         document.getElementById("api-result").textContent =

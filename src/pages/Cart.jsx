@@ -8,7 +8,7 @@ import productApi from "../api/productApi";
 import transactionApi from "../api/transactionApi";
 import "../styles/cart.css";
 
-const Cart = () => {
+const Cart = () => { 
   const navigate = useNavigate();
   const { cart, dispatch } = useContext(CartContext);
   const { user } = useAuth();
@@ -56,7 +56,7 @@ const Cart = () => {
     0
   );
 
-  // Khi nhấn "Thanh toán": tạo giao dịch, lấy mã QR từ createPaymentResult và định danh transactionId
+  // Khi nhấn "Thanh toán": tạo giao dịch, lấy mã QR từ createPaymentResult
   const handleCheckout = async () => {
     if (!user || !user.userId) {
       message.error("Bạn cần đăng nhập trước khi thanh toán!");
@@ -80,11 +80,11 @@ const Cart = () => {
     try {
       setLoading(true);
       const res = await productApi.checkOut(checkoutData);
-      console.log("✅ Tạo giao dịch thành công:", res.data);
+      console.log("Tạo giao dịch thành công:", res.data);
       // Lấy thông tin từ createPaymentResult
       const createPaymentResult = res.data.createPaymentResult;
       const qr = createPaymentResult?.qrCode;
-      // Lấy transactionId từ response (BE mới đã trả về trường này riêng)
+      // Lấy transactionId từ response
       const txId = res.data.transactionId;
       if (qr && txId) {
         setQrCodeUrl(qr);
@@ -95,7 +95,7 @@ const Cart = () => {
       }
     } catch (error) {
       console.error(
-        "❌ Lỗi khi tạo giao dịch:",
+        "Lỗi khi tạo giao dịch:",
         error.response?.data || error.message
       );
       message.error("Thanh toán thất bại!");
@@ -104,7 +104,7 @@ const Cart = () => {
     }
   };
 
-  // Xác nhận thanh toán: chỉ gọi API checkTransaction và chuyển trang tương ứng dựa trên kết quả
+  // Xác nhận thanh toán và chuyển trang tương ứng dựa trên kết quả
   const handleConfirmPayment = async () => {
     if (!transactionId) {
       message.error("Không có giao dịch nào được tạo.");
@@ -114,7 +114,7 @@ const Cart = () => {
       setLoading(true);
       const { data } = await transactionApi.checkTransaction(transactionId);
       console.log("Response data:", data);
-      // Nếu data là string, lấy luôn giá trị đó, nếu là object thì lấy data.status
+      // Lấy kết quả giao dịch từ response
       const status = typeof data === "string" ? data : data.status;
 
       if (status === "SUCCESS") {
@@ -140,7 +140,7 @@ const Cart = () => {
       }
     } catch (error) {
       console.error(
-        "❌ Lỗi xác nhận giao dịch:",
+        "Lỗi xác nhận giao dịch:",
         error.response?.data || error.message
       );
       message.error("Xác nhận thanh toán thất bại!");
@@ -158,10 +158,12 @@ const Cart = () => {
     window.location.href = `${window.location.origin}/cancel.html?transactionId=${transactionId}`;
   };
 
-  // Thanh toán sau: ẩn khối QR code, cho phép hoàn tất thanh toán sau
+  // Thanh toán sau: ẩn modal, thông báo cho người dùng và xóa luôn sản phẩm khỏi giỏ
   const handlePayLater = () => {
     setQrCodeVisible(false);
-    message.info("Bạn chọn thanh toán sau. Vui lòng hoàn tất sau.");
+    message.info("Bạn chọn thanh toán sau. Giỏ hàng của bạn sẽ được xóa.");
+    // Xóa toàn bộ sản phẩm khỏi giỏ hàng
+    dispatch({ type: "CLEAR_CART" });
   };
 
   return (

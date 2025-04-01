@@ -50,7 +50,6 @@
       <p>
         <a href="/" class="btn">Bấm vào đây nếu không chuyển tự động</a>
       </p>
-      <div id="api-result"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -63,13 +62,9 @@
           .get(`https://localhost:7101/api/Transaction/Checkout?transactionId=${transactionId}`)
           .then((response) => {
             console.log("Thanh toán thành công:", response.data);
-            document.getElementById("api-result").textContent =
-              "Giao dịch đã được xác nhận trên server!";
           })
           .catch((error) => {
             console.error("Lỗi khi xác nhận giao dịch:", error);
-            document.getElementById("api-result").textContent =
-              "Có lỗi xảy ra khi xác nhận giao dịch!";
           });
       } else {
         document.getElementById("api-result").textContent =

@@ -5,12 +5,14 @@ import { message, Modal, Spin, Button } from "antd";
 import { toast, ToastContainer } from "react-toastify";
 import transactionApi from "../api/transactionApi";
 import useAuth from "../hooks/useAuth";
-import "../styles/BookingHistory.css"; // Xài chung CSS 
+import "../styles/BookingHistory.css"; 
 
+// Helper chuyển đổi trạng thái thành text (UI hiện đại)
 const getStatusText = (status) => {
   if (status === 0 || status === "PENDING") return "Chưa thanh toán";
-  if (status === 1 || status === "SUCCESS") return "Đã thanh toán";
-  if (status === -1 || status === "CANCEL" || status === "CANCELLED") return "Đã hủy";
+  if (status === 1 || status === "PAID") return "Đã thanh toán";
+  if (status === -1 || status === "CANCEL" || status === "CANCELLED")
+    return "Đã hủy";
   return "Không xác định";
 };
 
@@ -23,11 +25,12 @@ const OrderHistory = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
+  // Lấy danh sách đơn hàng của user
   const fetchOrders = async () => {
     if (user && user.userId) {
       try {
         const response = await transactionApi.getByUserId(user.userId);
-        // Chỉ lấy đơn hàng mua sản phẩm
+        // Lọc ra các đơn hàng mua sản phẩm (không phải booking service)
         const productOrders = response.data.filter(
           (order) => order.bookingType === "Order's transaction"
         );
@@ -44,18 +47,21 @@ const OrderHistory = () => {
 
   // Tách đơn hàng theo trạng thái
   const pendingOrders = orders.filter(
-    (order) => order.tranctionStatus === 0 || order.tranctionStatus === "PENDING"
+    (order) =>
+      order.tranctionStatus === 0 || order.tranctionStatus === "PENDING"
   );
   const completedOrders = orders.filter(
-    (order) => order.tranctionStatus !== 0 && order.tranctionStatus !== "PENDING"
+    (order) =>
+      order.tranctionStatus !== 0 && order.tranctionStatus !== "PENDING"
   );
 
-  // Thanh toán lại
+  // Khi nhấn "Thanh toán lại" cho đơn hàng Pending
   const handlePayAgain = async (order) => {
     const txId = order.transactionId || order.id;
     try {
       setIsLoading(true);
       const response = await transactionApi.getById(txId);
+      // Lấy trực tiếp trường qrCode từ response.data (BE đã trả về)
       const qr = response.data.qrCode;
       if (qr) {
         setQrCode(qr);
@@ -80,7 +86,9 @@ const OrderHistory = () => {
       return;
     }
     try {
-      const { data } = await transactionApi.checkTransaction(currentTransactionId);
+      const { data } = await transactionApi.checkTransaction(
+        currentTransactionId
+      );
       const status = typeof data === "string" ? data : data.status;
       if (status === "SUCCESS") {
         window.location.href = `${window.location.origin}/success.html?transactionId=${currentTransactionId}`;
@@ -89,11 +97,13 @@ const OrderHistory = () => {
       } else if (status === "PENDING") {
         Modal.confirm({
           title: "Giao dịch đang chờ xử lý",
-          content: "Giao dịch của bạn đang ở trạng thái PENDING. Bạn có muốn thanh toán sau không?",
+          content:
+            "Giao dịch của bạn đang ở trạng thái PENDING. Bạn có muốn thanh toán sau không?",
           okText: "Thanh toán sau",
           cancelText: "Thử lại",
           onOk: () => handlePayLater(),
-          onCancel: () => toast.info("Vui lòng thử xác nhận lại giao dịch sau ít phút."),
+          onCancel: () =>
+            toast.info("Vui lòng thử xác nhận lại giao dịch sau ít phút."),
         });
       } else {
         toast.error("Trạng thái giao dịch không xác định!");
@@ -113,10 +123,18 @@ const OrderHistory = () => {
     window.location.href = `${window.location.origin}/cancel.html?transactionId=${currentTransactionId}`;
   };
 
-  // Thanh toán sau: ẩn modal và thông báo
+  // Thanh toán sau: ẩn modal và thông báo cho người dùng
   const handlePayLater = () => {
     setQrModalVisible(false);
     toast.info("Bạn chọn thanh toán sau. Vui lòng hoàn tất sau.");
+  };
+
+  // Đóng modal (không thực hiện hành động)
+  const handleCloseQrModal = () => {
+    setQrModalVisible(false);
+    setQrCode("");
+    setCurrentTransactionId("");
+    setOrderCode("");
   };
 
   return (
@@ -129,7 +147,6 @@ const OrderHistory = () => {
 
       {orders.length === 0 ? (
         <div className="empty-state">
-          <img src="/images/empty-order.svg" alt="No orders" className="empty-image" />
           <h3>Bạn chưa có đơn hàng nào</h3>
           <p>Hãy mua sắm ngay để có được những ưu đãi tốt nhất!</p>
           <button className="primary-button">Mua sắm ngay</button>
@@ -144,14 +161,18 @@ const OrderHistory = () => {
                   <div key={order.id} className="booking-card pending">
                     <div className="booking-header">
                       <h4 className="service-name">Mã đơn: {order.id}</h4>
-                      <span className={`status-badge pending`}>
+                      <span className="status-badge pending">
                         {getStatusText(order.tranctionStatus)}
                       </span>
                     </div>
                     <div className="booking-details">
                       <div className="detail-item">
                         <FiCalendar className="detail-icon" />
-                        <span>{new Date(order.createdDate).toLocaleDateString("vi-VN")}</span>
+                        <span>
+                          {new Date(order.createdDate).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                        </span>
                       </div>
                       <div className="detail-item">
                         <FiDollarSign className="detail-icon" />
@@ -168,7 +189,11 @@ const OrderHistory = () => {
                       <button
                         className="action-button cancel"
                         onClick={() =>
-                          window.location.href = `${window.location.origin}/cancel.html?transactionId=${order.transactionId || order.id}`
+                          (window.location.href = `${
+                            window.location.origin
+                          }/cancel.html?transactionId=${
+                            order.transactionId || order.id
+                          }`)
                         }
                       >
                         Hủy đơn hàng
@@ -185,39 +210,63 @@ const OrderHistory = () => {
               <h3 className="section-title">Lịch sử đơn hàng</h3>
             </div>
             <div className="bookings-grid">
-              {completedOrders.map((order) => (
-                <div key={order.id} className="booking-card completed">
-                  <div className="booking-header">
-                    <h4 className="service-name">Mã đơn: {order.id}</h4>
-                    <span className={`status-badge completed`}>
-                      {getStatusText(order.tranctionStatus)}
-                    </span>
-                  </div>
-                  <div className="booking-details">
-                    <div className="detail-item">
-                      <FiCalendar className="detail-icon" />
-                      <span>{new Date(order.createdDate).toLocaleDateString("vi-VN")}</span>
+              {completedOrders.map((order) => {
+                // Kiểm tra xem có phải đã hủy hay không
+                const isCancelled =
+                  order.tranctionStatus === -1 ||
+                  order.tranctionStatus === "CANCEL"
+                return (
+                  <div
+                    key={order.id}
+                    className={`booking-card ${
+                      isCancelled ? "cancel" : "completed"
+                    }`}
+                  >
+                    <div className="booking-header">
+                      <h4 className="service-name">Mã đơn: {order.id}</h4>
+                      <span
+                        className={`status-badge ${
+                          isCancelled ? "cancel" : "completed"
+                        }`}
+                      >
+                        {getStatusText(order.tranctionStatus)}
+                      </span>
                     </div>
-                    <div className="detail-item">
-                      <FiDollarSign className="detail-icon" />
-                      <span>{order.totalMoney.toLocaleString()} VND</span>
+                    <div className="booking-details">
+                      <div className="detail-item">
+                        <FiCalendar className="detail-icon" />
+                        <span>
+                          {new Date(order.createdDate).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                        </span>
+                      </div>
+                      <div className="detail-item">
+                        <FiDollarSign className="detail-icon" />
+                        <span>{order.totalMoney.toLocaleString()} VND</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal hiển thị mã QR thanh toán lại */}
+      {/* Modal hiển thị form thanh toán lại (theo UI của Cart) */}
       {qrModalVisible && (
         <Modal
-          title="Quét mã QR thanh toán"
+          title="Quét mã QR thanh toán lại"
           open={qrModalVisible}
-          onCancel={() => setQrModalVisible(false)}
+          onCancel={handleCloseQrModal}
           footer={[
-            <Button key="confirm" type="primary" onClick={handleConfirmPayment} loading={isLoading}>
+            <Button
+              key="confirm"
+              type="primary"
+              onClick={handleConfirmPayment}
+              loading={isLoading}
+            >
               Xác nhận thanh toán
             </Button>,
             <Button key="cancel" danger onClick={handleCancelPayment}>
