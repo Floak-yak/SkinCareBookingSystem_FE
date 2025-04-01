@@ -303,7 +303,7 @@
 }
 
 .time-slot-button-selected::after {
-  content: "✓";
+  /* content: "✓"; */
   position: absolute;
   right: 5px;
   top: 5px;

@@ -11,7 +11,7 @@ const StaffCalendar = () => {
     const [events, setEvents] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedEvent, setSelectedEvent] = useState(null); // State để lưu sự kiện được chọn
+    const [selectedEvent, setSelectedEvent] = useState(null);
 
     // Load user từ localStorage
     useEffect(() => {
@@ -20,37 +20,34 @@ const StaffCalendar = () => {
     }, []);
 
     // Fetch bookings
+    const fetchBookings = async () => {
+        try {
+            const res = await bookingApi.getAllBookings();
+            const filtered = res.data.filter(booking =>
+                booking.skintherapistName?.toLowerCase() === currentUser.fullName.toLowerCase()
+                && (booking.status === 0 || booking.status === 2)
+            );
+
+            setEvents(filtered.map(booking => ({
+                id: booking.id,
+                title: booking.serviceName,
+                start: booking.date,
+                end: new Date(new Date(booking.date).getTime() + 3600000),
+                // color: booking.status === 1 ? '#38a169' : '#dd6b20',
+                status: booking.status,
+                skintherapistName: booking.skintherapistName,
+                extendedProps: {
+                    customer: booking.user?.fullName || 'Khách',
+                    phone: booking.user?.phoneNumber
+                }
+            })));
+        } catch (error) {
+            console.error('Lỗi tải lịch:', error);
+        }
+    };
+
     useEffect(() => {
         if (!currentUser) return;
-
-        const fetchBookings = async () => {
-            try {
-                const res = await bookingApi.getAllBookings();
-                const filtered = res.data.filter(booking =>
-                    booking.skintherapistName?.toLowerCase() === currentUser.fullName.toLowerCase()
-                    && (booking.status === 0 || booking.status === 2)
-                );
-
-                console.log("filtered: ", filtered);
-
-                setEvents(filtered.map(booking => ({
-                    id: booking.id,
-                    title: `${booking.serviceName}`,
-                    start: booking.date,
-                    end: new Date(new Date(booking.date).getTime() + 3600000),
-                    // color: booking.status === 1 ? '#38a169' : '#dd6b20',
-                    status: booking.status,
-                    skintherapistName: booking.skintherapistName,
-                    extendedProps: {
-                        customer: booking.user?.fullName || 'Khách',
-                        phone: booking.user?.phoneNumber
-                    }
-                })));
-            } catch (error) {
-                console.error('Lỗi tải lịch:', error);
-            }
-        };
-
         fetchBookings();
     }, [currentUser]);
 
@@ -66,12 +63,8 @@ const StaffCalendar = () => {
             console.log("therapistId: ", therapistId);
             const scheduleResponse = await scheduleApi.getByTherapistId(therapistId);
             console.log("scheduleRes: ", scheduleResponse);
-            // const scheduleLogId = scheduleResponse.data.scheduleLog; // Giả định API trả về scheduleLogId
 
-            // Tìm scheduleLog dựa trên dateWork và timeStartShift
-            // Chuẩn hóa eventStartTime về định dạng ISO (loại bỏ múi giờ nếu cần)
             const eventStartTime = new Date(selectedEvent.start);
-            // Điều chỉnh về giờ địa phương GMT+0700 nếu API không dùng UTC
             const eventStartTimeLocal = eventStartTime.toLocaleString('sv', { timeZone: 'Asia/Bangkok' }).replace(' ', 'T');
 
             console.log("eventStartTimeLocal: ", eventStartTimeLocal);
@@ -85,12 +78,11 @@ const StaffCalendar = () => {
             console.log("matchingDay: ", matchingDay);
 
             if (matchingDay) {
-                // Tìm scheduleLog trong ngày đó (thường chỉ có 1 log, nhưng vẫn kiểm tra cho chắc)
                 const matchingLog = matchingDay.scheduleLogs.find(log =>
                     log.timeStartShift === eventStartTimeLocal
                 );
                 if (matchingLog) {
-                    scheduleLogId = matchingLog.id; // Ví dụ: 18
+                    scheduleLogId = matchingLog.id;
                 }
                 console.log("matchingLog: ", matchingLog);
             }
@@ -100,22 +92,14 @@ const StaffCalendar = () => {
             }
 
             // Bước 2: Gọi API checkout với scheduleLogId
-            const bookingId = selectedEvent.id; // ID của đặt lịch từ selectedEvent
-            console.log("selectedEvent: ", selectedEvent);
+            const bookingId = selectedEvent.id;
+            console.log("selectedEvent: ", bookingId);
             console.log("therapistId: ", therapistId);
             console.log("scheduleLogId: ", scheduleLogId);
             await bookingApi.CheckOut(therapistId, scheduleLogId);
 
-            // Cập nhật trạng thái sự kiện trong UI
-            setEvents((prevEvents) =>
-                prevEvents.map((event) =>
-                    event.id === bookingId
-                        ? { ...event, extendedProps: { ...event.extendedProps, status: 1 } } // Cập nhật status thành 2 (Đã hoàn thành)
-                        : event
-                )
-            );
+            await fetchBookings();
 
-            // Đóng modal sau khi thành công
             setIsModalOpen(false);
             alert("Checkout thành công!");
         } catch (error) {
@@ -123,8 +107,6 @@ const StaffCalendar = () => {
             alert("Đã có lỗi xảy ra khi checkout. Vui lòng thử lại.");
         }
     };
-
-    console.log("check: ", events);
 
     if (!currentUser) return <div className="login-message">Vui lòng đăng nhập</div>;
 
@@ -167,10 +149,10 @@ const StaffCalendar = () => {
                                 },
                                 dayGridMonth: {
                                     titleFormat: { year: 'numeric', month: 'long' },
-                                    dayMaxEvents: 3, // Giới hạn số sự kiện hiển thị trong 1 ô ngày
-                                    dayMaxEventRows: 3, // Giới hạn số hàng sự kiện
-                                    moreLinkClick: "popover", // Hiển thị popover khi có nhiều sự kiện
-                                    dayCellClassNames: 'fixed-day-cell' // Class để cố định kích thước ô ngày
+                                    dayMaxEvents: 3,
+                                    dayMaxEventRows: 3,
+                                    moreLinkClick: "popover",
+                                    dayCellClassNames: 'fixed-day-cell'
                                 }
                             }}
                             slotMinTime="09:00:00"
