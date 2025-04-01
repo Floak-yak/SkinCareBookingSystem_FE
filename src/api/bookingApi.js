@@ -16,7 +16,7 @@ const bookingApi = {
     apiClient.delete(`/api/Booking/Cancel?bookingId=${bookingId}&userId=${userId}`),
 
     // Cập nhật ngày giờ và nhân viên của booking
-    updateBookingDate: (bookingData) => apiClient.put("/Booking/Update", {
+    updateBookingDate: (bookingData) => apiClient.put("api/Booking/Update", {
         bookingId: bookingData.bookingId,
         date: bookingData.date,
         time: bookingData.time,
