@@ -1,83 +1,47 @@
-import { useState } from "react";
-import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
-import { Form, Input, Button, message } from "antd";
+import React, { useState } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import apiClient from "../api/apiClient";
+import userApi from "../api/userApi";
 import { jwtDecode } from "jwt-decode";
 import "../styles/loginPage.css";
 
 const LoginPage = () => {
   const { login } = useAuth();
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const location = useLocation();
-  
-  // Check both the query param and the state for redirect path
-  const redirectPath = searchParams.get("redirect") || location.state?.from || "/";
+  const redirectPath = searchParams.get("redirect") || "/";
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (values) => {
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
     try {
-      const response = await apiClient.post("/api/User/Login", {
-        email: values.email,
-        password: values.password,
-      });
+      const response = await userApi.login(formData.email, formData.password);
 
-      // => FE lấy token, userId
       const { token, userId } = response.data;
-      if (!token) {
-        message.error("Phản hồi từ server không hợp lệ!");
-        return;
-      }
+      if (!token) throw new Error("Token không hợp lệ!");
 
-      // Decode token để lấy thông tin user
-      const decodedToken = jwtDecode(token);
-      console.log("Decoded Token:", decodedToken);
-
-      // Tuỳ các claim mà bạn đã set
-      const fullName =
-        decodedToken[
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-        ];
-      const email =
-        decodedToken[
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-        ];
-      const role =
-        decodedToken[
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-        ];
-
+      const decoded = jwtDecode(token);
       const userData = {
-        token, // JWT
-        userId, 
-        fullName,
-        email,
-        role,
+        token,
+        userId,
+        fullName: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+        email: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+        role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
       };
 
-      // Gọi hàm login trong AuthContext => lưu localStorage, setUser
       login(userData);
 
-      message.success(`Chào mừng, ${userData.fullName}!`);
-
       setTimeout(() => {
-        if (role === "Manager") {
-          navigate("/admin/user");
-        } else if (redirectPath && redirectPath !== '/') {
-          // Redirect to the page that user was trying to access
-          navigate(redirectPath);
-        } else {
-          navigate("/");
-        }
+        navigate(userData.role === "Manager" ? "/admin/user" : redirectPath);
       }, 500);
-
     } catch (error) {
-      const errorMsg =
-        error.response?.data?.message ||
-        "Sai email hoặc mật khẩu! Vui lòng thử lại.";
-      message.error(errorMsg);
+      alert("Sai email hoặc mật khẩu!");
     } finally {
       setLoading(false);
     }
@@ -85,39 +49,41 @@ const LoginPage = () => {
 
   return (
     <div className="login-container">
-      <div className="login-box">
+      <form className="login-box" onSubmit={handleSubmit}>
         <h2>Đăng Nhập</h2>
-        <Form className="login-form" onFinish={handleLogin}>
-          <Form.Item
-            name="email"
-            rules={[{ required: true, message: "Vui lòng nhập email!" }]}
-          >
-            <Input placeholder="Email" />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-          >
-            <Input.Password placeholder="Mật khẩu" />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              className="login-button"
-            >
-              Đăng Nhập
-            </Button>
-          </Form.Item>
-        </Form>
+        <p className="back-home-link">
+          <Link to="/">← Quay về trang chủ</Link>
+        </p>
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Mật khẩu"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Đang đăng nhập..." : "Đăng Nhập"}
+        </button>
+
         <p className="forgot-password-link">
           <Link to="/forgot-password">Quên mật khẩu?</Link>
         </p>
         <p className="register-link">
           Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
         </p>
-      </div>
+      </form>
     </div>
   );
 };

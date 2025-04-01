@@ -26,6 +26,10 @@ import OrderHistory from "../pages/OrderHistory";
 import SurveyQuestionPage from "../pages/SurveyQuestionPage";
 import SurveyResultPage from "../pages/SurveyResultPage";
 import SurveyManagerPage from "../pages/admin/SurveyManagerPage";
+import BookingHistory from "../pages/BookingHistory";
+import StaffCalendar from "../pages/StaffCalendar";
+import VerifySuccess from "../components/VerifySuccess";
+import VerifyFail from "../components/VerifyFail";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -52,6 +56,7 @@ const AppRoutes = () => {
       <Route path="/staff/approve-blogs" element={<ApproveBlog />} />
       <Route path="/services" element={<Services />} />
       <Route path="/booking" element={<Booking />} />
+      <Route path="/booking-history" element={<BookingHistory />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/servicesDetail/:id" element={<ServiceDetail />} />
       <Route path="/products" element={<ProductPage />} />
@@ -61,7 +66,8 @@ const AppRoutes = () => {
       <Route path="/order-history" element={<OrderHistory />} />
       <Route path="/survey" element={<SurveyQuestionPage />} />
       <Route path="/survey-results" element={<SurveyResultPage />} />
-        
+      <Route path="/staff-calendar" element={<StaffCalendar />} />
+
       {/* admin page */}
       <Route path="/admin/product" element={<ManageProductsPage />} />
       <Route path="/admin/user" element={<ManageUsersPage />} />
@@ -76,6 +82,10 @@ const AppRoutes = () => {
         element={<ManageServiceDetailsPage />}
       />
       <Route path="/admin/survey-manager" element={<SurveyManagerPage />} />
+
+      {/* xác thực tài khoản */}
+      <Route path="/verify-success" element={<VerifySuccess />} />
+      <Route path="/verify-fail" element={<VerifyFail />} />
     </Routes>
   );
 };

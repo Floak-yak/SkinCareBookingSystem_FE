@@ -134,6 +134,12 @@ const Header = () => {
           <Link to="/staff/approve-blogs">Duyệt bài</Link>
         </>
       );
+    } else if (role === "SkinTherapist") {
+      return (
+        <>
+          <Link to="/staff-calendar">Calendar</Link>
+        </>
+      );
     } else {
       // Role = "Customer" hoặc chưa login
       return (
@@ -145,6 +151,7 @@ const Header = () => {
           <Link to="/survey">Kiểm tra loại da</Link>
           <Link to="/contact">Liên hệ</Link>
           <Link to="/about">Về chúng tôi</Link>
+          <Link to="/booking-history">Lịch sử Booking</Link>
         </>
       );
     }

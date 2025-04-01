@@ -5,6 +5,10 @@
   "dependencies": {
     "@ant-design/icons": "^5.5.2",
     "@emailjs/browser": "^4.4.1",
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
     "@hookform/resolvers": "^3.10.0",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
@@ -23,14 +27,18 @@
     "react-bootstrap": "^2.10.9",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
-    "react-icons": "^5.4.0",
+    "react-icons": "^5.5.0",
     "react-quill": "^2.0.0",
     "react-router-dom": "^7.1.1",
     "react-scripts": "^5.0.1",
     "react-slick": "^0.30.3",
     "react-toastify": "^11.0.3",
     "slick-carousel": "^1.8.1",
+
     "swiper": "^11.2.6"
+
+    "sweetalert2": "^11.17.2"
+
   },
   "scripts": {
     "dev": "react-scripts start",

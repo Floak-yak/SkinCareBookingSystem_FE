@@ -1,41 +1,123 @@
 .card-spa {
     background-color: #fff8f0;
-    border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 18px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
     text-align: center;
-    padding: 15px;
-    margin: 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 0;
+    margin: 12px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     width: 300px;
     flex: 0 0 auto;
-    /* Ngăn card co lại */
     overflow: hidden;
     text-decoration: none;
+    position: relative;
+    border: 1px solid rgba(244, 162, 97, 0.2);
 }
 
 .card-spa:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    border-color: rgba(244, 162, 97, 0.4);
+}
+
+.card-spa::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(244, 162, 97, 0.1) 0%, rgba(255, 255, 255, 0) 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.card-spa:hover::before {
+    opacity: 1;
 }
 
 .card-spa img {
-    height: 180px;
-    width: 270px;
+    height: 200px;
+    width: 100%;
     object-fit: cover;
-    transition: filter 0.3s ease;
+    transition: all 0.5s ease;
+    border-bottom: 1px solid #f0e6d9;
 }
 
-.card-spa img:hover {
-    filter: brightness(0.9);
+.card-spa:hover img {
+    filter: brightness(0.95) contrast(1.05);
+    transform: scale(1.05);
 }
 
 .card-spa-body {
+    padding: 1.8rem 1.5rem;
     text-align: center;
-    padding: 1.5rem;
+    position: relative;
+    z-index: 2;
 }
 
 .card-spa-title {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    color: #333;
+    font-size: 1.3rem;
+    margin-bottom: 1.2rem;
+    color: #2a2a2a;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+}
+
+.card-spa-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 2px;
+    background: #f4a261;
+    transition: all 0.3s ease;
+}
+
+.card-spa:hover .card-spa-title::after {
+    width: 80px;
+    background: #e76f51;
+}
+
+/* Thêm nút Xem chi tiết ẩn */
+.card-spa-body::after {
+    /* content: 'Xem chi tiết →'; */
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #f4a261;
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.card-spa:hover .card-spa-body::after {
+    opacity: 1;
+    bottom: 25px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-spa {
+        width: 260px;
+        margin: 10px;
+    }
+
+    .card-spa img {
+        height: 170px;
+    }
+
+    .card-spa-body {
+        padding: 1.4rem 1.2rem;
+    }
+
+    .card-spa-title {
+        font-size: 1.15rem;
+    }
 }

@@ -1,99 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand&display=swap");
+
 .login-container {
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: calc(90vh - 200px);
+  justify-content: center;
+  margin: 0;
+  font-family: "Quicksand", sans-serif;
+  background: url("https://raw.githubusercontent.com/CiurescuP/LogIn-Form/main/bg.jpg") no-repeat center center fixed;
+  background-size: cover;
 }
 
-/* Hộp đăng nhập */
 .login-box {
-  background: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  width: 350px;
-  max-width: 90%;
+  width: 380px;
+  background-color: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(6px);
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  padding: 40px 30px;
+  color: #fff;
   text-align: center;
 }
 
-/* Tiêu đề */
 .login-box h2 {
+  font-size: 32px;
+  font-weight: 700;
   margin-bottom: 20px;
-  color: #f9b37a;
-  font-size: 1.8em;
-  font-weight: bold;
-  border-bottom: 2px solid #f9b37a;
-  padding-bottom: 10px;
-  font-family: serif;
+  color: #fff;
 }
 
-/* Form đăng nhập (Ant Design) */
-.login-form .ant-input,
-.login-form .ant-input-password {
-  border-radius: 8px;
-  height: 40px;
+.login-box input[type="email"],
+.login-box input[type="password"] {
+  width: 90%;
+  height: 30px;
+  margin: 10px 0;
+  padding: 10px 15px;
+  font-size: 15px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  transition: 0.3s;
 }
 
-/* Nút đăng nhập */
-.login-button {
+.login-box input::placeholder {
+  color: #ccc;
+}
+
+.login-box input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(129, 236, 174, 0.5);
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.login-box button[type="submit"] {
   width: 100%;
-  border-radius: 8px;
-  background: #f9b37a;
-  /* Màu chủ đạo */
+  margin: 10px 0;
+  height: 44px;
+  border-radius: 10px;
+  background-color: #82ccdd;
   border: none;
-  height: 40px;
-  font-size: 1em;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
   transition: background-color 0.3s ease;
-  font-family: serif;
 }
 
-.login-button:hover,
-.login-button:focus {
-  background: #e08865;
-  /* Màu đậm hơn khi hover/focus */
-  border: none;
+.login-box button:hover {
+  background-color: #60a3bc;
 }
 
-.forgot-password-link {
-  margin-top: 10px;
-  text-align: center;
-  font-family: serif;
+.back-home-link {
+  text-align: right;
+  margin-bottom: 15px;
+  font-size: 14px;
 }
 
-.forgot-password-link a {
-  color: #f9b37a;
+.forgot-password-link,
+.register-link {
+  margin-top: 12px;
+  color: #f1f1f1;
+  font-size: 14px;
+}
+
+.back-home-link a {
+  color: #ffffffcc;
+}
+
+.forgot-password-link a,
+.register-link a {
+  color: #00cec9;
   text-decoration: none;
   transition: color 0.3s;
 }
 
-.forgot-password-link a:hover {
-  color: #e08865;
+.forgot-password-link a:hover,
+.register-link a:hover,
+.back-home-link a:hover {
+  color: #55efc4;
 }
 
-/* Đoạn liên kết "Chưa có tài khoản? Đăng ký ngay" */
-.register-link {
-  margin-top: 15px;
-  color: #555;
-  font-family: serif;
-}
-
-.register-link a {
-  color: #f9b37a;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.register-link a:hover {
-  color: #e08865;
-}
-
-/* Responsive: Màn hình nhỏ */
 @media (max-width: 480px) {
   .login-box {
-    padding: 20px;
+    width: 90%;
+    padding: 30px 20px;
   }
 
   .login-box h2 {
-    font-size: 1.5em;
+    font-size: 26px;
   }
 }

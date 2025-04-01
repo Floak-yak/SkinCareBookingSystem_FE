@@ -1,16 +1,20 @@
-/* CSS */
 .hero {
     position: relative;
     height: 100vh;
-    background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+    min-height: 600px;
+    background: linear-gradient(135deg, rgba(94, 80, 63, 0.4) 0%, rgba(23, 22, 20, 0.7) 100%),
         url('https://edbeauty.net/wp-content/uploads/2018/03/duong-trang-face-2.jpg');
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
+    /* Hiệu ứng parallax */
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     color: #fff;
+    overflow: hidden;
+    animation: fadeIn 1.5s ease-in-out;
 }
 
 .hero-overlay {
@@ -19,168 +23,150 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(94, 80, 63, 0.3);
-    /* Màu beige trong suốt */
+    background: linear-gradient(135deg, rgba(148, 121, 89, 0.3) 0%, rgba(64, 54, 42, 0.6) 100%);
 }
 
 .hero-content {
     position: relative;
-    z-index: 1;
-    max-width: 800px;
-    padding: 20px;
+    z-index: 2;
+    max-width: 900px;
+    padding: 30px;
+    animation: slideUp 1s ease-out 0.5s both;
 }
 
 h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 3.5rem;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-size: 4rem;
+    margin-bottom: 25px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    line-height: 1.2;
+    letter-spacing: 1px;
+    font-weight: 700;
 }
 
 p {
     font-family: 'Poppins', sans-serif;
-    font-size: 1.2rem;
-    margin-bottom: 30px;
-    line-height: 1.6;
+    font-size: 1.3rem;
+    margin-bottom: 40px;
+    line-height: 1.8;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .cta-button {
     display: inline-block;
-    padding: 15px 40px;
-    background-color: #f8be8e;
+    padding: 18px 50px;
+    background-color: #e8a87c;
     color: #fff;
     text-decoration: none;
-    border-radius: 30px;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     border: 2px solid transparent;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
 }
 
 .cta-button:hover {
-    background-color: transparent;
-    border-color: #fff;
-    transform: translateY(-3px);
+    background-color: #d89a6e;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    h1 {
-        font-size: 2.5rem;
-    }
-
-    p {
-        font-size: 1rem;
-    }
-
-    .cta-button {
-        padding: 12px 30px;
-    }
+.cta-button:active {
+    transform: translateY(-2px);
 }
 
-/* .hero {
-    height: 80vh;
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url('https://images.unsplash.com/photo-1540555700478-4be289fbecef');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: white;
-}
-
-.hero-content {
-    max-width: 800px;
-    padding: 0 20px;
-}
-
-.hero-content h1 {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-}
-
-.cta-button {
-    background: #863948;
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-} */
-
-/* .hero-section {
-    height: calc(100vh - 100px);
-    background: url('https://sor.vn/wp-content/uploads/2021/01/tuyet-chieu-cham-soc-da-dinh-cao-cua-cac-hot-girl-nhat-ban-nhat-ban-1.jpg');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    margin: "0px";
-    overflow: "hidden";
-}
-
-.hero-content {
-    max-width: 800px;
-    margin-left: 45%;
-    z-index: 2;
-    text-align: center;
-}
-
-.hero-content h1 {
-    font-size: 3em;
-    color: #4a4a4a;
-    margin-bottom: 20px;
-    font-weight: 600;
-    margin-left: 30px;
-}
-
-.hero-content p {
-    font-size: 1.2em;
-    color: #666;
-    line-height: 1.6;
-    margin-bottom: 30px;
-}
-
-.book-now {
-    background-color: #98c3a1;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    margin-left: 50px;
-    font-size: 1.1em;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.book-now:hover {
-    background-color: #7ba884;
-} */
-
-/* Floating flowers animation
-.hero-section::before {
+.cta-button::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('https://cdn.sforum.vn/sforum/wp-content/uploads/2021/06/7-1.jpg') repeat;
-    animation: floatFlowers 20s linear infinite;
-    opacity: 0.3;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+    transform: translateY(-100%);
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-@keyframes floatFlowers {
+.cta-button:hover::after {
+    transform: translateY(0);
+}
+
+/* Animation */
+@keyframes fadeIn {
     from {
-        background-position: 0 0;
+        opacity: 0;
     }
 
     to {
-        background-position: 100% 100%;
+        opacity: 1;
     }
-} */
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Particles effect */
+.particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    h1 {
+        font-size: 3.2rem;
+    }
+
+    p {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        background-attachment: scroll;
+        min-height: 500px;
+    }
+
+    h1 {
+        font-size: 2.8rem;
+    }
+
+    p {
+        font-size: 1rem;
+        margin-bottom: 30px;
+    }
+
+    .cta-button {
+        padding: 15px 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero-content {
+        padding: 20px;
+    }
+}
