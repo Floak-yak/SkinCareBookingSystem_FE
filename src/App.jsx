@@ -33,13 +33,8 @@ const App = () => {
     <AuthProvider>
       <CartProvider>
         <Router>
-          <Header />
-          <main className="main-content">
-            <AppRoutes />
-          </main>
-          <Footer />
-          <ToastContainer position="bottom-right" autoClose={3000} />
           <LayoutWrapper />
+          <ToastContainer position="bottom-right" autoClose={3000} />
         </Router>
       </CartProvider>
     </AuthProvider>

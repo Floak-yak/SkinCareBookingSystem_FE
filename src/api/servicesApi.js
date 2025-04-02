@@ -6,9 +6,9 @@ const servicesApi = {
       params: { page, pageSize }
     }),
 
-  getAllServices1: () =>
+  getAllServices1: (page = 1, pageSize = 8) =>
     apiClient.get("/api/SkincareServices/GetServices", {
-      params: { page: 1, pageSize: 8 }
+      params: { page, pageSize}
     }),
 
   getServiceById: (id) => apiClient.get(`/api/SkincareServices/GetServiceById`, {

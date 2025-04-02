@@ -7,7 +7,8 @@ import "../styles/HomePage.css";
 import { FaQuoteLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import AboutUs from "../components/AboutUs";
 import SpaGallery from "../components/SpaGallery";
-import servicesApi from "../api/servicesApi";
+import serviceApi from "../api/servicesApi";
+import imageApi from "../api/imageApi"; // Import imageApi để lấy ảnh dựa trên imageId
 
 const HomePage = () => {
   const scrollRef = useRef(null);
@@ -18,15 +19,28 @@ const HomePage = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await servicesApi.getAllServices1();
-        setServices(response.data);
+        const response = await serviceApi.getAllServices1();
+        let servicesData = response.data || [];
+        // Với mỗi dịch vụ có imageId mà image null, gọi API để lấy chi tiết ảnh
+        const updatedServices = await Promise.all(
+          servicesData.map(async (service) => {
+            if (service.imageId && !service.image) {
+              try {
+                const imageRes = await imageApi.getImageById(service.imageId);
+                service.image = imageRes.data; // Giả sử trả về object { bytes, fileExtension, ... }
+              } catch (error) {
+                console.error("Error fetching image for service id", service.id, error);
+              }
+            }
+            return service;
+          })
+        );
+        setServices(updatedServices);
         setLoading(false);
-      } catch (error) {
-        console.error('Error fetching services:', error);
-        setError(error.code === 'ERR_CONNECTION_REFUSED' 
-          ? 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.'
-          : 'Không thể tải dịch vụ. Vui lòng thử lại sau.');
+      } catch (err) {
+        setError("Không thể tải thông tin dịch vụ");
         setLoading(false);
+        console.error("Error fetching services:", err);
       }
     };
 
@@ -44,42 +58,40 @@ const HomePage = () => {
     }
   };
 
-  if (loading) return <div className="loading">Đang tải...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (loading) return <div>Đang tải...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div>
-      <Hero></Hero>
-
-      <AboutUs></AboutUs>
-
+      <Hero />
+      <AboutUs />
       <h1 className="highlighted-title">Dịch Vụ Nổi Bật</h1>
-
       <div className="container_Card">
         <button className="scroll-button left" onClick={() => scroll("left")}>
           <FaChevronLeft />
         </button>
-
         <div className="row" ref={scrollRef}>
           {services.map((service) => (
             <CardSpa
               key={service.id}
               id={service.id}
               serviceName={service.serviceName}
-              image={service.image ? `data:image/jpeg;base64,${service.image}` : 'https://img.freepik.com/free-photo/woman-getting-treatment-spa_23-2149157871.jpg'}
+              image={
+                service.image && service.image.bytes
+                  ? `data:image/${service.image.fileExtension.replace(".", "")};base64,${service.image.bytes}`
+                  : "https://img.freepik.com/free-photo/woman-getting-treatment-spa_23-2149157871.jpg"
+              }
             />
           ))}
         </div>
-
         <button className="scroll-button right" onClick={() => scroll("right")}>
           <FaChevronRight />
         </button>
-
-        <a href="/Services" className="btn-primary">Xem Thêm</a>
+        <a href="/Services" className="btn-primary">
+          Xem Thêm
+        </a>
       </div>
-
-      <DoctorProfiles></DoctorProfiles>
-
+      <DoctorProfiles />
       {/* Testimonials Section */}
       <section className="testimonials">
         <h2>Khách Hàng Nói Gì Về Chúng Tôi</h2>
@@ -93,11 +105,6 @@ const HomePage = () => {
               <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Customer" />
               <div>
                 <h4>Nguyễn Thị A</h4>
-                {/* <div className="stars">
-                  {[...Array(5)].map((_, i) => (
-                    <FaStar key={i} />
-                  ))}
-                </div> */}
               </div>
             </div>
           </div>
@@ -110,11 +117,6 @@ const HomePage = () => {
               <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="Customer" />
               <div>
                 <h4>Trần Thị B</h4>
-                {/* <div className="stars">
-                  {[...Array(5)].map((_, i) => (
-                    <FaStar key={i} />
-                  ))}
-                </div> */}
               </div>
             </div>
           </div>
@@ -127,23 +129,16 @@ const HomePage = () => {
               <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Customer" />
               <div>
                 <h4>Lê Thị C</h4>
-                {/* <div className="stars">
-                  {[...Array(5)].map((_, i) => (
-                    <FaStar key={i} />
-                  ))}
-                </div> */}
               </div>
             </div>
           </div>
         </div>
       </section>
-
       {/* Gallery Section */}
       <section className="gallery-text">
         <h2>Không Gian Spa</h2>
       </section>
-
-      <SpaGallery></SpaGallery>
+      <SpaGallery />
     </div>
   );
 };

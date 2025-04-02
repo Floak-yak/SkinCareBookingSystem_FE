@@ -62,7 +62,7 @@ export default function BookingHistory() {
         const fetchBookings = async () => {
             try {
                 const response = await bookingApi.getAllBookings();
-                console.log("Bookings response:", response); // For debugging
+                console.log("Bookings response:", response);
 
                 if (response.data) {
                     const transformedBookings = response.data.map((booking) => {
@@ -99,12 +99,8 @@ export default function BookingHistory() {
                         };
                     });
 
-                    console.log("Transformed bookings:", transformedBookings); // For debugging
+                    console.log("Transformed bookings:", transformedBookings);
 
-                    // Filter bookings for current user
-                    // const userBookings = transformedBookings.filter(
-                    //     (booking) => booking.userId === currentUser.userId
-                    // );
                     const userBookings =
                         currentUser && currentUser.userId
                             ? transformedBookings.filter((booking) => booking.userId === currentUser.userId)
@@ -132,7 +128,6 @@ export default function BookingHistory() {
             const now = new Date();
             const [hours, minutes] = bookingTime.split(":").map(Number);
 
-            // Tạo datetime chính xác của lịch hẹn
             const bookingDateTime = new Date(bookingDate);
             bookingDateTime.setHours(hours, minutes, 0, 0);
 
@@ -165,7 +160,6 @@ export default function BookingHistory() {
         try {
             const { data } = await transactionApi.checkTransaction(orderCode);
             console.log("Respone data OrderCode: ", data);
-            // Nếu data là string, lấy luôn giá trị đó, nếu là object thì lấy data.status
             const status = typeof data === "string" ? data : data.status;
 
             if (status === "PAID") {
@@ -265,11 +259,13 @@ export default function BookingHistory() {
     const handleDeleteBooking = async (booking) => {
         try {
             if (window.confirm("Bạn có chắc chắn muốn hủy lịch này không?")) {
-                await bookingApi.cancelBooking(booking.id, currentUser.userId);
+                setIsLoading(true);
+                const response = await bookingApi.cancelBooking(booking.id, currentUser.userId);
 
-                // Cập nhật state sau khi hủy
-                const updatedAppointments = bookedAppointments.filter(
-                    (appointment) => appointment.id !== booking.id
+                const updatedAppointments = bookedAppointments.map((appointment) =>
+                    appointment.id === booking.id
+                        ? { ...appointment, status: response.data?.status || "cancel" }
+                        : appointment
                 );
                 setBookedAppointments(updatedAppointments);
                 localStorage.setItem(
@@ -283,12 +279,12 @@ export default function BookingHistory() {
         } catch (error) {
             console.error("Error handling booking:", error);
             toast.error("Có lỗi xảy ra khi xử lý lịch đặt!");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const pendingAppointments = sortedAppointments.filter(booking => booking.status === "pending");
-    const paidAppointments = sortedAppointments.filter(booking => booking.status === "paid" || booking.status === "completed");
-    const completedAppointments = sortedAppointments.filter(booking => booking.status === "completed");
 
     const BookingCard = ({ booking }) => {
         const canReschedule = checkBookingTime(booking.date, booking.time);
@@ -298,8 +294,11 @@ export default function BookingHistory() {
                 <div className="booking-header">
                     <h4 className="service-name">{booking.serviceName}</h4>
                     <span className={`status-badge ${booking.status}`}>
-                        {booking.status === "pending" ? "Chưa thanh toán" :
-                            booking.status === "paid" ? "Đã thanh toán" : "Đã hoàn thành"}
+                        {booking.status === "pending" ? "Chưa thanh toán"
+                            : booking.status === "waiting" ? "Đang chờ"
+                                : booking.status === "completed" ? "Đã hoàn thành"
+                                    : booking.status === "cancel" ? "Đã hủy"
+                                        : "Không xác định"}
                     </span>
                 </div>
 
@@ -326,11 +325,6 @@ export default function BookingHistory() {
                 </div>
 
                 <div className="booking-actions">
-                    {/* {canReschedule && booking.status === "pending" && (
-                        <button className="action-button reschedule">
-                            Dời lịch
-                        </button>
-                    )} */}
                     {booking.status === "pending" && (
                         <>
                             <button
@@ -345,11 +339,6 @@ export default function BookingHistory() {
                             <QRPaymentModal />
                         </>
                     )}
-                    {/* {booking.status === "paid" && (
-                        <button className="action-button view">
-                            Xem chi tiết
-                        </button>
-                    )} */}
                 </div>
             </div>
         );
@@ -380,64 +369,6 @@ export default function BookingHistory() {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* {bookings.map(booking => (
-                            <tr key={booking.id} className={`table-row ${booking.status}`}>
-                                <td>{booking.serviceName}</td>
-                                <td>{new Date(booking.date).toLocaleDateString("vi-VN")}</td>
-                                <td>{booking.time}</td>
-                                <td>{booking.skinTherapistName || "Chưa xác định"}</td>
-                                <td>{booking.totalPrice?.toLocaleString("vi-VN")}đ</td>
-                                <td>
-                                    <span className={`status-badge ${booking.status}`}>
-                                        {booking.status === "pending"
-                                            ? "Chưa thanh toán"
-                                            : booking.status === "waiting"
-                                                ? "Đang chờ"
-                                                : booking.status === "completed"
-                                                    ? "Đã hoàn thành"
-                                                    : booking.status === "cancel"
-                                                        ? "Đã hủy"
-                                                        : "Không xác định"}
-                                    </span>
-
-                                </td>
-                                <td>
-                                    {booking.status === "waiting" && (
-                                        <>
-                                            {checkBookingTime(booking.date, booking.time) && (
-                                                <button onClick={() => handleRescheduleClick(booking)}
-                                                    className="table-button reschedule">
-                                                    Dời lịch
-                                                </button>
-                                            )}
-                                            <button onClick={() => handleDeleteBooking(booking)}
-                                                className="table-button cancel">
-                                                Hủy
-                                            </button>
-                                        </>
-                                    )}
-                                    {(booking.status === "pending") && (
-                                        <>
-                                            <button onClick={() => handlePaymentLate(booking)}
-                                                className="table-button view">
-                                                Payment
-                                            </button>
-                                            <QRPaymentModal />
-                                            <button onClick={() => handleDeleteBooking(booking)}
-                                                className="table-button cancel">
-                                                Hủy
-                                            </button>
-                                        </>
-                                    )}
-                                    {(booking.status === "completed") && (
-                                        <button className="table-button view">
-                                            Xem
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))} */}
-                        {/* Tạo mảng 5 phần tử và map qua */}
                         {Array.from({ length: 5 }).map((_, index) => {
                             const booking = bookings[index];
 
@@ -446,14 +377,11 @@ export default function BookingHistory() {
                                     key={booking?.id || `empty-${index}`}
                                     className={`table-row ${booking?.status || 'empty'}`}
                                 >
-                                    {/* Các cột dữ liệu */}
                                     <td>{booking?.serviceName || '-'}</td>
                                     <td>{booking ? new Date(booking.date).toLocaleDateString("vi-VN") : '-'}</td>
                                     <td>{booking?.time || '-'}</td>
                                     <td>{booking?.skinTherapistName || '-'}</td>
                                     <td>{booking?.totalPrice?.toLocaleString("vi-VN") + 'đ' || '-'}</td>
-
-                                    {/* Cột trạng thái */}
                                     <td>
                                         {booking ? (
                                             <span className={`status-badge ${booking.status}`}>
@@ -467,8 +395,6 @@ export default function BookingHistory() {
                                             <span className="status-badge empty">-</span>
                                         )}
                                     </td>
-
-                                    {/* Cột thao tác */}
                                     <td>
                                         {booking ? (
                                             <>
@@ -507,12 +433,6 @@ export default function BookingHistory() {
                                                             Hủy
                                                         </button>
                                                     </>
-                                                )}
-
-                                                {booking.status === "completed" && (
-                                                    <button className="table-button view">
-                                                        Xem
-                                                    </button>
                                                 )}
                                             </>
                                         ) : (

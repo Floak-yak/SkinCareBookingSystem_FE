@@ -51,23 +51,20 @@
     <script>
       const params = new URLSearchParams(window.location.search);
       const transactionId = params.get("transactionId");
+      console.log("transactionId:", transactionId);
 
       if (transactionId) {
         axios
-          .get(`https://localhost:7101/api/Transaction/Cancel?transactionId=${transactionId}`)
+          .put(`https://localhost:7101/api/Transaction/Cancel?transactionId=${transactionId}`)
           .then((response) => {
             console.log("Hủy giao dịch thành công:", response.data);
           })
           .catch((error) => {
             console.error("Lỗi khi hủy giao dịch:", error);
           });
-      } else {
-        document.getElementById("api-result").textContent =
-          "Không tìm thấy transactionId trong URL.";
-      }
-
+      } 
       setTimeout(function () {
-        window.location.href = "/";
+        window.location.href = "/order-history";
       }, 5000);
     </script>
   </body>
