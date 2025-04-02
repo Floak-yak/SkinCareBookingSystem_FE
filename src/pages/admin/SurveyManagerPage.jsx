@@ -36,12 +36,17 @@ const SurveyManagerPage = () => {
     data: null,
     error: null
   });
+
+  // State for skin types
+  const [skinTypes, setSkinTypes] = useState([]);
+  const [loadingSkinTypes, setLoadingSkinTypes] = useState(false);
   
   // Load data when component mounts
   useEffect(() => {
     fetchQuestions();
     fetchResults();
     fetchServices();
+    fetchSkinTypes();
   }, []);
 
   // Fetch questions from both file-based and database systems
@@ -138,6 +143,27 @@ const SurveyManagerPage = () => {
     } catch (err) {
       console.error('Error fetching services:', err);
       message.error('Failed to load services. Please try again later.');
+    }
+  };
+
+  // Fetch skin types from API
+  const fetchSkinTypes = async () => {
+    try {
+      setLoadingSkinTypes(true);
+      const response = await surveyApi.getAllResults(); // Gọi API
+      if (response.data) {
+        // Lấy danh sách loại da từ response
+        const types = response.data.map((result) => ({
+          value: result.skinType,
+          label: result.skinType,
+        }));
+        setSkinTypes(types);
+      }
+    } catch (error) {
+      console.error('Error fetching skin types:', error);
+      message.error('Failed to load skin types. Please try again.');
+    } finally {
+      setLoadingSkinTypes(false);
     }
   };
 
@@ -1006,16 +1032,14 @@ const SurveyManagerPage = () => {
                   <Form.Item
                     name="skinType"
                     label="Skin Type"
-                    rules={[{ required: true, message: 'Please enter the skin type' }]}
+                    rules={[{ required: true, message: 'Please select a skin type' }]}
                   >
-                    <Select placeholder="Select skin type">
-                      <Option value="Oily">Oily Skin</Option>
-                      <Option value="Dry">Dry Skin</Option>
-                      <Option value="Combination">Combination Skin</Option>
-                      <Option value="Normal">Normal Skin</Option>
-                      <Option value="Sensitive">Sensitive Skin</Option>
-                      <Option value="Acne-Prone">Acne-Prone Skin</Option>
-                      <Option value="Aging">Aging Skin</Option>
+                    <Select placeholder="Select skin type" loading={loadingSkinTypes}>
+                      {skinTypes.map((type) => (
+                        <Option key={type.value} value={type.value}>
+                          {type.label}
+                        </Option>
+                      ))}
                     </Select>
                   </Form.Item>
                   
