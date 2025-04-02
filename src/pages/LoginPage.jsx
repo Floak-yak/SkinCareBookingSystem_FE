@@ -30,15 +30,27 @@ const LoginPage = () => {
       const userData = {
         token,
         userId,
-        fullName: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
-        email: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
-        role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+        fullName:
+          decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+        email:
+          decoded[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ],
+        role: decoded[
+          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ],
       };
 
       login(userData);
 
       setTimeout(() => {
-        navigate(userData.role === "Manager" ? "/admin/user" : redirectPath);
+        navigate(
+          userData.role === "Manager"
+            ? "/admin/user"
+            : userData.role === "SkinTherapist"
+            ? "/staff-calendar"
+            : redirectPath
+        );
       }, 500);
     } catch (error) {
       alert("Sai email hoặc mật khẩu!");
