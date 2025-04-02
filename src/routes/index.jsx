@@ -27,6 +27,7 @@ import SurveyQuestionPage from "../pages/SurveyQuestionPage";
 import SurveyManagerPage from "../pages/admin/SurveyManagerPage";
 import BookingHistory from "../pages/BookingHistory";
 import StaffCalendar from "../pages/StaffCalendar";
+import SpecialistList from "../pages/SkintherapistList";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -63,6 +64,7 @@ const AppRoutes = () => {
       <Route path="/order-history" element={<OrderHistory />} />
       <Route path="/survey" element={<SurveyQuestionPage />} />
       <Route path="/staff-calendar" element={<StaffCalendar />} />
+      <Route path="/skintherapistList" element={<SpecialistList />} />
 
       {/* admin page */}
       <Route path="/admin/product" element={<ManageProductsPage />} />

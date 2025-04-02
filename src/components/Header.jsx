@@ -144,6 +144,7 @@ const Header = () => {
           <Link to="/contact">Liên hệ</Link>
           <Link to="/about">Về chúng tôi</Link>
           <Link to="/booking-history">Lịch sử Booking</Link>
+          <Link to="/skintherapistList">Chuyen vien</Link>
         </>
       );
     }
