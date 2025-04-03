@@ -27,118 +27,142 @@ const ServiceDetail = () => {
 
       setLoading(true);
       try {
-        console.log('Fetching service details for ID:', id);
+        console.log("Fetching service details for ID:", id);
         let serviceInfo = null;
-        
+
         // First, try to get the main service data by ID
         try {
           // For numeric IDs, use the standard lookup
-          console.log(`Making API request to: https://localhost:7101/api/SkincareServices/GetServiceById?id=${id}`);
+          console.log(
+            `Making API request to: https://localhost:7101/api/SkincareServices/GetServiceById?id=${id}`
+          );
           const serviceResponse = await servicesApi.getServiceById(id);
-          console.log('Main service response:', serviceResponse);
-          
+          console.log("Main service response:", serviceResponse);
+
           // Check if we have valid data in the response
           if (serviceResponse?.data) {
             // Sometimes the data may be directly in the response.data object
-            if (serviceResponse.data.id || serviceResponse.data.serviceName || serviceResponse.data.name) {
-              console.log('Service found directly in response.data:', serviceResponse.data);
+            if (
+              serviceResponse.data.id ||
+              serviceResponse.data.serviceName ||
+              serviceResponse.data.name
+            ) {
+              console.log(
+                "Service found directly in response.data:",
+                serviceResponse.data
+              );
               serviceInfo = {
                 ...serviceResponse.data,
-                price: typeof serviceResponse.data.price === 'number' 
-                  ? serviceResponse.data.price 
-                  : 0
+                price:
+                  typeof serviceResponse.data.price === "number"
+                    ? serviceResponse.data.price
+                    : 0,
               };
             }
             // Check if the data is nested in response.data.data (common pattern in APIs)
             else if (serviceResponse.data.data) {
-              console.log('Service found in response.data.data:', serviceResponse.data.data);
+              console.log(
+                "Service found in response.data.data:",
+                serviceResponse.data.data
+              );
               serviceInfo = {
                 ...serviceResponse.data.data,
-                price: typeof serviceResponse.data.data.price === 'number' 
-                  ? serviceResponse.data.data.price 
-                  : 0
+                price:
+                  typeof serviceResponse.data.data.price === "number"
+                    ? serviceResponse.data.data.price
+                    : 0,
               };
             }
             // If we have success flag but still can't find data in expected places
             else if (serviceResponse.data.success === false) {
-              console.error('Service not found by ID:', serviceResponse?.data);
+              console.error("Service not found by ID:", serviceResponse?.data);
               await tryFallbackApis();
             }
-            
+
             if (serviceInfo) {
-              console.log('Properly formatted service data with price:', serviceInfo);
+              console.log(
+                "Properly formatted service data with price:",
+                serviceInfo
+              );
               setServiceData(serviceInfo);
-              
+
               // Also fetch the image if available
               if (serviceInfo.imageId) {
                 fetchServiceImage(serviceInfo.imageId);
               }
             }
           } else {
-            console.error('Service response has no data:', serviceResponse);
+            console.error("Service response has no data:", serviceResponse);
             await tryFallbackApis();
           }
         } catch (serviceError) {
-          console.error('Error loading main service:', serviceError);
-          message.warning('Đang thử phương thức khác...');
+          console.error("Error loading main service:", serviceError);
+          message.warning("Đang thử phương thức khác...");
           await tryFallbackApis();
         }
-        
+
         // Helper function to try fallback APIs
         async function tryFallbackApis() {
           try {
-            console.log('Trying to use the existing service data to display available information');
-            
+            console.log(
+              "Trying to use the existing service data to display available information"
+            );
+
             // Since the fallback APIs are returning 404 errors, let's check if we already have some data
             // from the main API call that we can work with
             const mainResponse = await servicesApi.getServiceById(id);
-            
+
             if (mainResponse?.data) {
-              console.log('Re-checking main API response:', mainResponse.data);
-              
+              console.log("Re-checking main API response:", mainResponse.data);
+
               // The logs show we're getting data but incorrectly interpreting it as "not found"
               // Let's extract whatever data we can from the response
               let extractedData = null;
-              
+
               // Try to get data directly from response.data
-              if (mainResponse.data.id || mainResponse.data.serviceName || mainResponse.data.name) {
+              if (
+                mainResponse.data.id ||
+                mainResponse.data.serviceName ||
+                mainResponse.data.name
+              ) {
                 extractedData = mainResponse.data;
               }
               // If not there, check response.data.data
               else if (mainResponse.data.data) {
                 extractedData = mainResponse.data.data;
               }
-              
+
               if (extractedData) {
                 serviceInfo = {
                   ...extractedData,
-                  price: typeof extractedData.price === 'number' 
-                    ? extractedData.price 
-                    : 0
+                  price:
+                    typeof extractedData.price === "number"
+                      ? extractedData.price
+                      : 0,
                 };
-                
-                console.log('Extracted service data:', serviceInfo);
+
+                console.log("Extracted service data:", serviceInfo);
                 setServiceData(serviceInfo);
-                
+
                 if (serviceInfo.imageId) {
                   fetchServiceImage(serviceInfo.imageId);
                 }
-                
+
                 return; // Exit the fallback function since we found data
               }
             }
-            
+
             // If we couldn't extract data, inform the user
-            console.error('No service data could be extracted');
-            message.error('Không thể tìm thấy thông tin dịch vụ');
+            console.error("No service data could be extracted");
+            message.error("Không thể tìm thấy thông tin dịch vụ");
             setServiceData(null);
           } catch (fallbackError) {
-            console.error('Error in fallback approach:', fallbackError);
-            message.error('Không thể tải dữ liệu dịch vụ!');
+            console.error("Error in fallback approach:", fallbackError);
+            message.error("Không thể tải dữ liệu dịch vụ!");
             setServiceData(null);
           }
         }
-        
+
         // Once we have attempted to load the service data, get the steps if we haven't already
         if (serviceInfo !== null && steps.length === 0) {
           try {
@@ -146,24 +170,30 @@ const ServiceDetail = () => {
               // Use serviceInfo.id for detail links, or the original id parameter for direct service IDs
               serviceInfo.id || id
             );
-            console.log('Steps response:', stepsResponse);
-            
-            if (stepsResponse?.data?.success && Array.isArray(stepsResponse.data.data)) {
+            console.log("Steps response:", stepsResponse);
+
+            if (
+              stepsResponse?.data?.success &&
+              Array.isArray(stepsResponse.data.data)
+            ) {
               setSteps(stepsResponse.data.data);
               await fetchStepImages(stepsResponse.data.data);
             } else {
-              console.warn('No steps found or invalid steps data:', stepsResponse?.data);
+              console.warn(
+                "No steps found or invalid steps data:",
+                stepsResponse?.data
+              );
               setSteps([]);
             }
           } catch (stepsError) {
-            console.error('Error loading steps:', stepsError);
-            message.warning('Không thể tải các bước dịch vụ.');
+            console.error("Error loading steps:", stepsError);
+            message.warning("Không thể tải các bước dịch vụ.");
             setSteps([]);
           }
         }
       } catch (error) {
-        console.error('Error loading service details:', error);
-        message.error('Lỗi tải dữ liệu dịch vụ. Vui lòng thử lại!');
+        console.error("Error loading service details:", error);
+        message.error("Lỗi tải dữ liệu dịch vụ. Vui lòng thử lại!");
         setServiceData(null);
       } finally {
         setLoading(false);
@@ -176,12 +206,16 @@ const ServiceDetail = () => {
         steps.map(async (step) => {
           if (step.imageId) {
             try {
-              const response = await fetch(`https://localhost:7101/api/Image/GetImageById?imageId=${step.imageId}`);
+              const response = await fetch(
+                `https://localhost:7101/api/Image/GetImageById?imageId=${step.imageId}`
+              );
               const imageData = await response.json();
               console.log(`Ảnh bước ${step.id}:`, imageData);
 
               if (imageData?.bytes) {
-                imageDataMap[step.id] = `data:image/png;base64,${imageData.bytes}`;
+                imageDataMap[
+                  step.id
+                ] = `data:image/png;base64,${imageData.bytes}`;
               }
             } catch (error) {
               console.error(`Lỗi khi tải ảnh cho bước ${step.id}:`, error);
@@ -195,14 +229,14 @@ const ServiceDetail = () => {
     // Function to fetch main service image
     const fetchServiceImage = async (imageId) => {
       if (!imageId) return;
-      
+
       try {
         const response = await servicesApi.getImageById(imageId);
         if (response?.data?.bytes) {
           setMainServiceImage(`data:image/png;base64,${response.data.bytes}`);
         }
       } catch (error) {
-        console.error('Error loading service image:', error);
+        console.error("Error loading service image:", error);
       }
     };
 
@@ -214,12 +248,14 @@ const ServiceDetail = () => {
   }
 
   if (!serviceData) {
-    return <div className="service-error">Dịch vụ không tồn tại hoặc đã bị xoá.</div>;
+    return (
+      <div className="service-error">Dịch vụ không tồn tại hoặc đã bị xoá.</div>
+    );
   }
 
   // Log the service data for debugging
-  console.log('Rendering service data:', serviceData);
-  console.log('Steps data:', steps);
+  console.log("Rendering service data:", serviceData);
+  console.log("Steps data:", steps);
 
   const handleBooking = () => {
     if (user) {
@@ -280,18 +316,18 @@ const ServiceDetail = () => {
     // Check if price exists and is a valid number
     if (serviceData) {
       const price = serviceData.price;
-      
+
       // Make sure we log the price for debugging
-      console.log('Raw price data:', price, typeof price);
-      
+      console.log("Raw price data:", price, typeof price);
+
       // Handle all possible cases
       if (price === null || price === undefined) {
         return `0 VNĐ`;
-      } else if (typeof price === 'number') {
-        return `${price.toLocaleString('vi-VN')} VNĐ`;
-      } else if (typeof price === 'string' && !isNaN(Number(price))) {
+      } else if (typeof price === "number") {
+        return `${price.toLocaleString("vi-VN")} VNĐ`;
+      } else if (typeof price === "string" && !isNaN(Number(price))) {
         // If price is a numeric string, convert to number first
-        return `${Number(price).toLocaleString('vi-VN')} VNĐ`;
+        return `${Number(price).toLocaleString("vi-VN")} VNĐ`;
       } else {
         // Fallback
         return `0 VNĐ`;
@@ -321,9 +357,14 @@ const ServiceDetail = () => {
                     <div className="step-content">
                       <div className="step-image">
                         <img
-                          src={imageMap[step.id] || "/images/default-placeholder.png"}
+                          src={
+                            imageMap[step.id] ||
+                            "/images/default-placeholder.png"
+                          }
                           alt={step.title}
-                          onError={(e) => e.target.src = "/images/default-placeholder.png"}
+                          onError={(e) =>
+                            (e.target.src = "/images/default-placeholder.png")
+                          }
                         />
                       </div>
                       <div className="step-info">
@@ -338,20 +379,20 @@ const ServiceDetail = () => {
                 ))}
               </Carousel>
 
-              <Steps 
-                current={currentStep} 
+              <Steps
+                current={currentStep}
                 onChange={(index) => {
                   setCurrentStep(index);
                   carouselRef.current?.goTo(index);
-                }} 
+                }}
                 className="steps-progress"
               >
                 {steps.map((step, index) => (
-                  <Step 
-                    key={step.id} 
-                    title={`Bước ${index + 1}`} 
-                    description={step.title} 
-                    className="progress-step" 
+                  <Step
+                    key={step.id}
+                    title={`Bước ${index + 1}`}
+                    description={step.title}
+                    className="progress-step"
                   />
                 ))}
               </Steps>
@@ -361,12 +402,17 @@ const ServiceDetail = () => {
           <div className="service-benefits">
             <h2 className="section-title">Lợi Ích Của Liệu Trình</h2>
             <ul className="benefits-list">
-              {serviceData.benefits?.length > 0 ? (
+              {Array.isArray(serviceData.benefits) ? (
                 serviceData.benefits.map((benefit, index) => (
-                  <li key={index} className="benefit-item">{benefit}</li>
+                  <li key={index} className="benefit-item">
+                    {benefit}
+                  </li>
                 ))
               ) : (
-                <li className="benefit-item">Giúp làn da được chăm sóc toàn diện và chuyên nghiệp.</li>
+                <li className="benefit-item">
+                  {serviceData.benefits ||
+                    "Giúp làn da được chăm sóc toàn diện và chuyên nghiệp."}
+                </li>
               )}
             </ul>
           </div>
