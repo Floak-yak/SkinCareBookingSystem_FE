@@ -67,6 +67,7 @@ const AppRoutes = () => {
       <Route path="/survey" element={<SurveyQuestionPage />} />
       <Route path="/survey-results" element={<SurveyResultPage />} />
       <Route path="/staff-calendar" element={<StaffCalendar />} />
+      <Route path="/skintherapistList" element={<SpecialistList />} />
 
       {/* admin page */}
       <Route path="/admin/product" element={<ManageProductsPage />} />
