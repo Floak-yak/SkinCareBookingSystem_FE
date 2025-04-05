@@ -6,7 +6,7 @@ const servicesDetailApi = {
    * Endpoint: GET /api/ServicesDetail/GetAllDetails
    * @returns {Promise} - Danh sách tất cả chi tiết dịch vụ
    */
-  getAllDetails: () => apiClient.get("/ServicesDetail/GetAllDetails"),
+  getAllDetails: () => apiClient.get("/api/ServicesDetail/GetAllDetails"),
 
   /**
    * Lấy chi tiết dịch vụ theo ID
@@ -14,7 +14,7 @@ const servicesDetailApi = {
    * @param {number} id - ID của chi tiết dịch vụ
    * @returns {Promise} - Chi tiết dịch vụ theo ID
    */
-  getDetailById: (id) => apiClient.get(`/ServicesDetail/GetDetailById/${id}`),
+  getDetailById: (id) => apiClient.get(`/api/ServicesDetail/GetDetailById/${id}`),
 
   /**
    * Lấy tất cả chi tiết dịch vụ theo ServiceId
@@ -23,7 +23,7 @@ const servicesDetailApi = {
    * @returns {Promise} - Danh sách chi tiết dịch vụ theo ServiceId
    */
   getDetailsByServiceId: (serviceId) =>
-    apiClient.get(`/ServicesDetail/GetByService/${serviceId}`),
+    apiClient.get(`/api/ServicesDetail/GetByService/${serviceId}`),
 
   /**
    * Tạo mới chi tiết dịch vụ
@@ -31,7 +31,7 @@ const servicesDetailApi = {
    * @param {object} data - Dữ liệu chi tiết dịch vụ cần tạo
    * @returns {Promise} - Chi tiết dịch vụ vừa được tạo
    */
-  createDetail: (data) => apiClient.post("/ServicesDetail/Create", data),
+  createDetail: (data) => apiClient.post("/api/ServicesDetail/Create", data),
 
   /**
    * Cập nhật chi tiết dịch vụ
@@ -41,7 +41,7 @@ const servicesDetailApi = {
    * @returns {Promise} - Chi tiết dịch vụ vừa được cập nhật
    */
   updateDetail: (detailId, data) =>
-    apiClient.put(`/ServicesDetail/Update/${detailId}`, data),
+    apiClient.put(`/api/ServicesDetail/Update/${detailId}`, data),
 
   /**
    * Xóa chi tiết dịch vụ
@@ -50,7 +50,7 @@ const servicesDetailApi = {
    * @returns {Promise} - Kết quả xóa chi tiết dịch vụ
    */
   deleteDetail: (detailId) =>
-    apiClient.delete(`/ServicesDetail/Delete/${detailId}`),
+    apiClient.delete(`/api/ServicesDetail/Delete/${detailId}`),
 };
 
 export default servicesDetailApi;

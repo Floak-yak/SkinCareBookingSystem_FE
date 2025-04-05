@@ -1,0 +1,130 @@
+.survey-prompt-banner {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  max-width: 450px;
+  animation: slide-in 0.5s ease-out;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.survey-prompt-content {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  border-top: 4px solid #4a90e2;
+}
+
+.survey-prompt-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: #e1f0ff;
+  border-radius: 50%;
+  color: #4a90e2;
+  font-size: 1.2rem;
+}
+
+.survey-prompt-text h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.survey-prompt-text p {
+  color: #666;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.survey-prompt-actions {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.take-survey-button {
+  padding: 0.6rem 1.2rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.take-survey-button:hover {
+  background-color: #3a80d2;
+}
+
+.dont-ask-button {
+  padding: 0.6rem 1.2rem;
+  background-color: transparent;
+  color: #888;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.dont-ask-button:hover {
+  color: #555;
+  text-decoration: underline;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #888;
+  cursor: pointer;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.close-button:hover {
+  background-color: #f0f0f0;
+  color: #555;
+}
+
+@media (max-width: 576px) {
+  .survey-prompt-banner {
+    right: 1rem;
+    left: 1rem;
+    bottom: 1rem;
+    max-width: unset;
+  }
+  
+  .survey-prompt-actions {
+    flex-direction: column;
+  }
+} 

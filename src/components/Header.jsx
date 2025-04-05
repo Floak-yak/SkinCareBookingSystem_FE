@@ -42,14 +42,6 @@ const Header = () => {
       ),
     },
     {
-      key: "role",
-      label: (
-        <span>
-          <IdcardOutlined /> Vai trò: {role || "Chưa xác định"}
-        </span>
-      ),
-    },
-    {
       key: "email",
       label: (
         <span>
@@ -57,17 +49,9 @@ const Header = () => {
         </span>
       ),
     },
-    // {
-    //   key: "updateProfile",
-    //   label: (
-    //     <Link to="/update-profile" className="update-profile-btn">
-    //       <ProfileOutlined /> Chỉnh sửa thông tin
-    //     </Link>
-    //   ),
-    // },
     { type: "divider" },
 
-    // Chỉ hiển thị "Duyệt bài" nếu role = Staff
+    // Duyệt bài nếu role = Staff
     role === "Staff" && {
       key: "approve",
       label: (
@@ -77,7 +61,7 @@ const Header = () => {
       ),
     },
 
-    // Chỉ hiển thị "Trang Admin" nếu role = Manager
+    // Role = Manager
     role === "Manager" && {
       key: "adminPage",
       label: (
@@ -91,6 +75,22 @@ const Header = () => {
       label: (
         <Link to="/order-history" className="order-history-btn">
           <CheckCircleOutlined /> Lịch sử đặt hàng
+        </Link>
+      ),
+    },
+    role === "Customer" && {
+      key: "bookingHistory",
+      label: (
+        <Link to="/booking-history" className="booking-history-btn">
+          <CheckCircleOutlined /> Lịch sử đặt dịch vụ
+        </Link>
+      ),
+    },
+    role === "Customer" && {
+      key: "skinSurvey",
+      label: (
+        <Link to="/survey" className="skin-survey-btn">
+          <ProfileOutlined /> Kiểm tra loại da
         </Link>
       ),
     },
@@ -143,8 +143,6 @@ const Header = () => {
           <Link to="/survey">Kiểm tra loại da</Link>
           <Link to="/contact">Liên hệ</Link>
           <Link to="/about">Về chúng tôi</Link>
-          <Link to="/booking-history">Lịch sử Booking</Link>
-          <Link to="/skintherapistList">Chuyen vien</Link>
         </>
       );
     }
@@ -156,10 +154,10 @@ const Header = () => {
         SkinCare Booking
       </Link>
 
-      {/* 🟢 MENU CHÍNH */}
+      {/* MENU CHÍNH */}
       <nav className={`nav ${menuOpen ? "open" : ""}`}>{renderNavLinks()}</nav>
 
-      {/* 🛒 CART & USER */}
+      {/* CART & USER */}
 
       <div className="cart-auth">
         {(role === "Customer" || !role) && (
@@ -172,7 +170,7 @@ const Header = () => {
           </Link>
         )}
 
-        {/* 🔵 AVATAR USER */}
+        {/* AVATAR USER */}
         <div className="auth">
           {user ? (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
@@ -196,7 +194,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* 🔻 TOGGLE MENU */}
+      {/* TOGGLE MENU */}
       <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
         <MenuOutlined />
       </button>

@@ -24,10 +24,12 @@ import ManageServiceDetailsPage from "../pages/admin/ManageServiceDetailsPage";
 import ManagerOrders from "../pages/admin/ManagerOrders";
 import OrderHistory from "../pages/OrderHistory";
 import SurveyQuestionPage from "../pages/SurveyQuestionPage";
+import SurveyResultPage from "../pages/SurveyResultPage";
 import SurveyManagerPage from "../pages/admin/SurveyManagerPage";
 import BookingHistory from "../pages/BookingHistory";
 import StaffCalendar from "../pages/StaffCalendar";
-import SpecialistList from "../pages/SkintherapistList";
+import VerifySuccess from "../components/VerifySuccess";
+import VerifyFail from "../components/VerifyFail";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -63,6 +65,7 @@ const AppRoutes = () => {
       <Route path="/about" element={<AboutUs />} />
       <Route path="/order-history" element={<OrderHistory />} />
       <Route path="/survey" element={<SurveyQuestionPage />} />
+      <Route path="/survey-results" element={<SurveyResultPage />} />
       <Route path="/staff-calendar" element={<StaffCalendar />} />
       <Route path="/skintherapistList" element={<SpecialistList />} />
 
@@ -80,6 +83,10 @@ const AppRoutes = () => {
         element={<ManageServiceDetailsPage />}
       />
       <Route path="/admin/survey-manager" element={<SurveyManagerPage />} />
+
+      {/* xác thực tài khoản */}
+      <Route path="/verify-success" element={<VerifySuccess />} />
+      <Route path="/verify-fail" element={<VerifyFail />} />
     </Routes>
   );
 };

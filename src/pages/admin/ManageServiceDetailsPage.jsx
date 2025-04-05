@@ -216,7 +216,7 @@ const ManageServiceDetailsPage = () => {
   return (
     <div className="manage-service-details-container">
       <h2 className="manage-service-details-heading">
-        Quản Lý Chi Tiết Dịch Vụ (ID: {serviceId})
+        Quản Lý Chi Tiết Dịch Vụ
       </h2>
 
       <div className="manage-service-details-actions">

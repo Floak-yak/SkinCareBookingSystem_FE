@@ -1,83 +1,154 @@
-.survey-question-page {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    color: #333;
-  }
-  
-  .survey-question-page h2 {
-    font-size: 1.8em;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .survey-question-page .options {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .survey-question-page .options button {
-    padding: 12px 20px;
-    font-size: 1em;
-    cursor: pointer;
-    border: 2px solid #007bff;
-    background-color: #fff;
-    color: #007bff;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-  }
-  
-  .survey-question-page .options button:hover {
-    background-color: #007bff;
-    color: #fff;
-  }
-  
-  .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-  }
-  
-  .popup {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    text-align: center;
-    max-width: 90%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  .popup h2 {
-    margin-bottom: 15px;
-    font-size: 1.6em;
-  }
-  
-  .popup p {
-    margin-bottom: 20px;
-    font-size: 1.2em;
-  }
-  
-  .popup button {
-    padding: 10px 20px;
-    font-size: 1em;
-    cursor: pointer;
-    border: none;
-    background-color: #28a745;
-    color: #fff;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .popup button:hover {
-    background-color: #218838;
-  }
+.survey-question-page,
+.survey-result-page {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  margin: 40px auto;
+}
+
+/* Question Card Styles */
+.question-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.survey-question-page h3 {
+  font-size: 1.8em;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.option-button {
+  padding: 15px 20px !important;
+  font-size: 1.1em !important;
+  border: 2px solid #3498db !important;
+  background-color: #fff !important;
+  color: #3498db !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+  text-align: left !important;
+  height: auto !important;
+}
+
+.option-button:hover {
+  background-color: #3498db !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+}
+
+/* Results Page Styles */
+.survey-result-page .ant-result {
+  padding: 30px 0;
+}
+
+.result-card,
+.recommended-services-card {
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.result-card .ant-card-body {
+  padding: 30px;
+}
+
+.result-card h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.recommended-services-card .ant-list-item {
+  padding: 15px;
+  transition: background-color 0.3s;
+}
+
+.recommended-services-card .ant-list-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.recommended-services-card .ant-list-item-meta-title {
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.recommended-services-card .ant-avatar {
+  width: 60px;
+  height: 60px;
+}
+
+/* Legacy styles for the popup overlay */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.popup {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.popup h2 {
+  margin-bottom: 15px;
+  font-size: 1.6em;
+}
+
+.popup p {
+  margin-bottom: 20px;
+  font-size: 1.2em;
+}
+
+.popup button {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  background-color: #28a745;
+  color: #fff;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.popup button:hover {
+  background-color: #218838;
+}
   

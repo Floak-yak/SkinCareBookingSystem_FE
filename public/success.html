@@ -36,11 +36,6 @@
         text-decoration: none;
         border-radius: 5px;
       }
-      #api-result {
-        margin-top: 10px;
-        font-size: 14px;
-        color: #666;
-      }
     </style>
   </head>
   <body>
@@ -50,7 +45,6 @@
       <p>
         <a href="/" class="btn">Bấm vào đây nếu không chuyển tự động</a>
       </p>
-      <div id="api-result"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -60,24 +54,16 @@
 
       if (transactionId) {
         axios
-          .get(`https://localhost:7101/api/Transaction/Checkout?transactionId=${transactionId}`)
+          .put(`https://localhost:7101/api/Transaction/Checkout?transactionId=${transactionId}`)
           .then((response) => {
             console.log("Thanh toán thành công:", response.data);
-            document.getElementById("api-result").textContent =
-              "Giao dịch đã được xác nhận trên server!";
           })
           .catch((error) => {
             console.error("Lỗi khi xác nhận giao dịch:", error);
-            document.getElementById("api-result").textContent =
-              "Có lỗi xảy ra khi xác nhận giao dịch!";
           });
-      } else {
-        document.getElementById("api-result").textContent =
-          "Không tìm thấy transactionId trong URL.";
       }
-
       setTimeout(function () {
-        window.location.href = "/";
+        window.location.href = "/order-history";
       }, 5000);
     </script>
   </body>

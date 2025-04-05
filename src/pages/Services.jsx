@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Spin } from "antd";
+import { Spin, Modal, Button, Checkbox } from "antd";
+import { RocketOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import servicesApi from "../api/servicesApi";
+import surveyApi from "../api/surveyApi";
 import "../styles/services.css";
 import useAuth from "../hooks/useAuth";
 
@@ -13,15 +15,97 @@ const Services = () => {
   const [imageMap, setImageMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showGoToTop, setShowGoToTop] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
 
+  // Check if we should show the survey popup when user auth state changes
+  useEffect(() => {
+    // Skip if already checking or user data isn't loaded
+    if (checkingStatus) return;
+    
+    const checkSurveyStatus = async () => {
+      try {
+        setCheckingStatus(true);
+        
+        // First check if user has explicitly asked not to be reminded
+        const dontRemind = localStorage.getItem("hideTestReminder");
+        if (dontRemind === "true") {
+          console.log("User opted out of survey reminders");
+          return;
+        }
+
+        // Check local storage for a record of completed survey
+        const hasTakenSurvey = localStorage.getItem("hasCompletedSurvey");
+        if (hasTakenSurvey === "true") {
+          console.log("User has completed survey according to local storage");
+          return;
+        }
+
+        // Only check survey history if user is logged in
+        if (user && user.token) {
+          try {
+            console.log("User is logged in, checking survey history");
+            // Try the user history endpoint first
+            try {
+              const historyResponse = await surveyApi.getUserSurveyHistory();
+              
+              // If user has survey history, don't show the popup and record this
+              if (historyResponse.data && historyResponse.data.length > 0) {
+                console.log("User has completed survey before. Not showing popup.");
+                localStorage.setItem("hasCompletedSurvey", "true");
+                return;
+              }
+            } catch (historyError) {
+              console.warn("Could not fetch survey history directly:", historyError);
+              
+              // Fallback: try to verify eligibility which is a less restricted endpoint
+              try {
+                const eligibilityResponse = await surveyApi.verifySurveyEligibility();
+                if (eligibilityResponse.data && eligibilityResponse.data.hasTakenSurvey) {
+                  console.log("User has taken survey according to eligibility check");
+                  localStorage.setItem("hasCompletedSurvey", "true");
+                  return;
+                }
+              } catch (eligibilityError) {
+                console.warn("Could not verify survey eligibility:", eligibilityError);
+              }
+            }
+          } catch (error) {
+            // Only log the error, don't disrupt user experience
+            console.warn("Survey status check failed:", error);
+            
+            // If we get a 401, token is invalid or expired - don't show popup
+            if (error.response && error.response.status === 401) {
+              return;
+            }
+          }
+        }
+
+        // If we passed all checks, show the popup
+        console.log("Showing survey prompt popup");
+        setShowPopup(true);
+      } catch (error) {
+        console.error("Error checking survey status:", error);
+      } finally {
+        setCheckingStatus(false);
+      }
+    };
+
+    // Only run if we have definitive information about the user's authentication state
+    if (user !== undefined) {
+      checkSurveyStatus();
+    }
+  }, [user]);
+
+  // Fetch services data
   useEffect(() => {
     const fetchServices = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await servicesApi.getAllServices();
-        console.log("Dữ liệu API:", response.data);
-
         if (response.data?.success && Array.isArray(response.data.data)) {
           setServices(response.data.data);
           fetchServiceImages(response.data.data);
@@ -29,11 +113,9 @@ const Services = () => {
           setServices(response.data);
           fetchServiceImages(response.data);
         } else {
-          console.error("API không trả về mảng:", response.data);
           setError("Dữ liệu không hợp lệ.");
         }
       } catch (err) {
-        console.error("Lỗi tải dịch vụ:", err);
         setError("Không thể tải danh sách dịch vụ.");
       } finally {
         setLoading(false);
@@ -50,8 +132,6 @@ const Services = () => {
                 `https://localhost:7101/api/Image/GetImageById?imageId=${service.imageId}`
               );
               const imageData = await response.json();
-              console.log(`Ảnh dịch vụ ${service.id}:`, imageData);
-
               if (imageData?.bytes) {
                 imageDataMap[service.id] = `data:image/png;base64,${imageData.bytes}`;
               }
@@ -65,6 +145,17 @@ const Services = () => {
     };
 
     fetchServices();
+
+    const handleScroll = () => {
+      if (window.scrollY > 500) {
+        setShowGoToTop(true);
+      } else {
+        setShowGoToTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleBooking = (e) => {
@@ -73,8 +164,27 @@ const Services = () => {
   };
 
   const handleCardClick = (serviceId) => {
-    console.log(`Chuyển đến chi tiết dịch vụ ID: ${serviceId}`);
     navigate(`/servicesDetail/${serviceId}`);
+  };
+
+  const handleSkinCheck = () => {
+    navigate("/survey");
+  };
+
+  const handleGoToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    if (dontShowAgain) {
+      localStorage.setItem("hideTestReminder", "true");
+    }
+  };
+  
+  const handleStartTest = () => {
+    handleClosePopup();
+    navigate("/survey");
   };
 
   if (loading) {
@@ -95,7 +205,6 @@ const Services = () => {
     return <p className="no-services">Không có dịch vụ nào.</p>;
   }
 
-  // Chia dịch vụ thành 4 nhóm và đặt tên
   const categoryNames = ["Dịch vụ cơ bản", "Dịch vụ nâng cao", "Chăm sóc đặc biệt", "Dịch vụ VIP"];
   const groupedServices = [];
   for (let i = 0; i < services.length; i += 3) {
@@ -104,10 +213,66 @@ const Services = () => {
 
   return (
     <div className="services-page">
+      {showPopup && (
+        <Modal
+          title="Nhắc nhở làm bài test da"
+          open={showPopup}
+          footer={null}
+          onCancel={handleClosePopup}
+          centered
+        >
+          <p>Hãy làm bài test da để nhận tư vấn tốt nhất cho bạn!</p>
+          <div style={{ marginTop: "15px" }}>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+              <Checkbox 
+                checked={dontShowAgain}
+                onChange={(e) => setDontShowAgain(e.target.checked)}
+              >
+                Không nhắc lại
+              </Checkbox>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <Button onClick={handleClosePopup}>Bỏ qua</Button>
+              <Button type="primary" onClick={handleStartTest}>Bắt đầu</Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       <div className="services-header">
         <h1>Dịch Vụ Của Chúng Tôi</h1>
         <p>Khám phá các dịch vụ chăm sóc da chuyên nghiệp của chúng tôi.</p>
       </div>
+
+      <div 
+        className="survey-banner" 
+        onClick={handleSkinCheck} 
+        style={{ backgroundImage: "url('/images/a.png')" }}
+      >
+        <div className="banner-content">
+          <h2>Khám Phá Làn Da Của Bạn</h2>
+          <p>Chỉ mất 2 phút để hiểu rõ làn da của bạn và nhận tư vấn liệu trình phù hợp từ chuyên gia.</p>
+          <div className="banner-features">
+            <div className="feature-item">
+              <span className="feature-icon">✓</span>
+              <span>Phân tích chuyên sâu</span>
+            </div>
+            <div className="feature-item">
+              <span className="feature-icon">✓</span>
+              <span>Tư vấn cá nhân hóa</span>
+            </div>
+            <div className="feature-item">
+              <span className="feature-icon">✓</span>
+              <span>Giải pháp tối ưu</span>
+            </div>
+          </div>
+          <button className="start-survey-btn">
+            Bắt đầu ngay
+          </button>
+        </div>
+      </div>
+
       {groupedServices.map((group, index) => (
         <div key={index} className="service-category">
           <h2 className="category-title">{categoryNames[index] || `Nhóm ${index + 1}`}</h2>
@@ -136,10 +301,20 @@ const Services = () => {
                   </p>
                 </div>
                 <div className="service-actions">
-                  <button className="book-service-btn" onClick={handleBooking}>
+                  <button className="book-service-btn" onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(user ? "/booking" : "/login?redirect=/booking");
+                  }}>
                     Đặt lịch
                   </button>
-                  <a href={`/servicesDetail/${service.id}`} className="view-details-btn">
+                  <a 
+                    href="#" 
+                    className="view-details-btn" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(`/servicesDetail/${service.id}`);
+                    }}
+                  >
                     Xem chi tiết
                   </a>
                 </div>
@@ -148,6 +323,12 @@ const Services = () => {
           </div>
         </div>
       ))}
+
+      {showGoToTop && (
+        <div id="gototop" title="Lên đầu trang" onClick={handleGoToTop}>
+          <span className="arrow-up">↑</span>
+        </div>
+      )}
     </div>
   );
 };

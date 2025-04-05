@@ -53,12 +53,16 @@ export const AuthProvider = ({ children }) => {
   const login = (userData) => {
     localStorage.setItem("currentUser", JSON.stringify(userData));
     localStorage.setItem("token", userData.token);
+    localStorage.setItem("hideTestReminder", "false");
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem("currentUser");
     localStorage.removeItem("token");
+    localStorage.removeItem("hasCompletedSurvey"); // Reset survey completion status
+    localStorage.setItem("hideTestReminder", "false");
+    console.log("User logged out. Survey status reset.");
     setUser(null);
   };
 
