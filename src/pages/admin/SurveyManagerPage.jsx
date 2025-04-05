@@ -832,7 +832,7 @@ const SurveyManagerPage = () => {
 
   return (
     <div className="survey-manager-page">
-      <h1>Survey Management System</h1>
+      <h1>Hệ Thống Quản Lý Khảo Sát</h1>
       
       <Tabs defaultActiveKey="questions" items={[
         {
