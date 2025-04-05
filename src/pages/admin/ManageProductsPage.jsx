@@ -266,7 +266,25 @@ const ManageProductsPage = () => {
           setIsCreateModalVisible(false);
           setCreatePreview(null);
         }}
-        footer={null}
+        footer={[
+          <Button
+            key="back"
+            onClick={() => {
+              setIsCreateModalVisible(false);
+              setCreatePreview(null);
+            }}
+          >
+            Hủy
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={() => createForm.submit()}
+          >
+            Tạo sản phẩm
+          </Button>,
+        ]}
+        centered
       >
         <Form
           layout="vertical"
@@ -279,7 +297,7 @@ const ManageProductsPage = () => {
             name="productName"
             rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
           >
-            <Input />
+            <Input placeholder="Nhập tên sản phẩm" size="large" />
           </Form.Item>
 
           <Form.Item
@@ -287,7 +305,11 @@ const ManageProductsPage = () => {
             name="price"
             rules={[{ required: true, message: "Vui lòng nhập giá!" }]}
           >
-            <InputNumber style={{ width: "100%" }} />
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Nhập giá sản phẩm"
+              size="large"
+            />
           </Form.Item>
 
           <Form.Item
@@ -295,7 +317,7 @@ const ManageProductsPage = () => {
             name="categoryId"
             rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
           >
-            <Select placeholder="Chọn danh mục">
+            <Select placeholder="Chọn danh mục" size="large">
               {categories.map((cat) => (
                 <Option key={cat.id} value={cat.id}>
                   {cat.categoryName}
@@ -305,25 +327,27 @@ const ManageProductsPage = () => {
           </Form.Item>
 
           <Form.Item label="Ảnh sản phẩm" name="imageId">
-            <Button onClick={() => openImageManager("create")}>Chọn ảnh</Button>
+            <Button onClick={() => openImageManager("create")} size="large">
+              Chọn ảnh
+            </Button>
             {createPreview && (
-              <div style={{ marginTop: 8 }}>
+              <div style={{ marginTop: 16, textAlign: "center" }}>
                 <img
                   src={`data:image/${createPreview.fileExtension.replace(
                     ".",
                     ""
                   )};base64,${createPreview.bytes}`}
                   alt="preview"
-                  style={{ width: 100, height: 100, objectFit: "cover" }}
+                  style={{
+                    width: 150,
+                    height: 150,
+                    objectFit: "cover",
+                    borderRadius: 8,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                  }}
                 />
               </div>
             )}
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Tạo
-            </Button>
           </Form.Item>
         </Form>
       </Modal>

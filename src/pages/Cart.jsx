@@ -16,6 +16,7 @@ const Cart = () => {
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [transactionId, setTransactionId] = useState("");
+  const [orderCode, setOrderCode] = useState(""); 
 
   // Hàm giảm số lượng sản phẩm trong giỏ
   const handleDecrease = (e, id, currentQty) => {
@@ -52,11 +53,11 @@ const Cart = () => {
 
   // Tính tổng số tiền
   const totalPrice = cart.items.reduce(
-    (acc, item) => acc + ((item.price || 0) * item.quantity),
+    (acc, item) => acc + (item.price || 0) * item.quantity,
     0
   );
 
-  // Khi nhấn "Thanh toán": tạo giao dịch, lấy mã QR từ createPaymentResult và định danh transactionId
+  // Khi nhấn "Thanh toán": tạo giao dịch, lấy mã QR và lưu cả transactionId và orderCode
   const handleCheckout = async () => {
     if (!user || !user.userId) {
       message.error("Bạn cần đăng nhập trước khi thanh toán!");
@@ -80,14 +81,15 @@ const Cart = () => {
     try {
       setLoading(true);
       const res = await productApi.checkOut(checkoutData);
-      console.log("✅ Tạo giao dịch thành công:", res.data);
+      console.log("Tạo giao dịch thành công:", res.data);
       // Lấy thông tin từ createPaymentResult
       const createPaymentResult = res.data.createPaymentResult;
       const qr = createPaymentResult?.qrCode;
-      // Lấy transactionId từ response (BE mới đã trả về trường này riêng)
+      const order_Code = createPaymentResult?.orderCode; // Lấy orderCode từ kết quả thanh toán
       const txId = res.data.transactionId;
-      if (qr && txId) {
+      if (qr && order_Code && txId) {
         setQrCodeUrl(qr);
+        setOrderCode(order_Code);
         setTransactionId(txId);
         setQrCodeVisible(true);
       } else {
@@ -95,7 +97,7 @@ const Cart = () => {
       }
     } catch (error) {
       console.error(
-        "❌ Lỗi khi tạo giao dịch:",
+        "Lỗi khi tạo giao dịch:",
         error.response?.data || error.message
       );
       message.error("Thanh toán thất bại!");
@@ -104,17 +106,17 @@ const Cart = () => {
     }
   };
 
-  // Xác nhận thanh toán: chỉ gọi API checkTransaction và chuyển trang tương ứng dựa trên kết quả
+  // Xác nhận thanh toán: dùng orderCode để check trạng thái giao dịch
   const handleConfirmPayment = async () => {
-    if (!transactionId) {
+    if (!orderCode) {
       message.error("Không có giao dịch nào được tạo.");
       return;
     }
     try {
       setLoading(true);
-      const { data } = await transactionApi.checkTransaction(transactionId);
+      // Gọi API checkTransaction với orderCode
+      const { data } = await transactionApi.checkTransaction(orderCode);
       console.log("Response data:", data);
-      // Nếu data là string, lấy luôn giá trị đó, nếu là object thì lấy data.status
       const status = typeof data === "string" ? data : data.status;
 
       if (status === "SUCCESS") {
@@ -128,9 +130,7 @@ const Cart = () => {
             "Giao dịch của bạn đang ở trạng thái PENDING. Bạn có muốn thanh toán sau không?",
           okText: "Thanh toán sau",
           cancelText: "Thử lại",
-          onOk: () => {
-            handlePayLater();
-          },
+          onOk: () => handlePayLater(),
           onCancel: () => {
             message.info("Vui lòng thử xác nhận lại giao dịch sau ít phút.");
           },
@@ -140,7 +140,7 @@ const Cart = () => {
       }
     } catch (error) {
       console.error(
-        "❌ Lỗi xác nhận giao dịch:",
+        "Lỗi xác nhận giao dịch:",
         error.response?.data || error.message
       );
       message.error("Xác nhận thanh toán thất bại!");
@@ -149,7 +149,7 @@ const Cart = () => {
     }
   };
 
-  // Hủy thanh toán: chuyển hướng đến trang cancel.html
+  // Hủy thanh toán: sử dụng transactionId
   const handleCancelPayment = () => {
     if (!transactionId) {
       message.error("Không có giao dịch nào được tạo.");
@@ -158,10 +158,11 @@ const Cart = () => {
     window.location.href = `${window.location.origin}/cancel.html?transactionId=${transactionId}`;
   };
 
-  // Thanh toán sau: ẩn khối QR code, cho phép hoàn tất thanh toán sau
+  // Thanh toán sau: ẩn modal, thông báo cho người dùng và xóa sản phẩm khỏi giỏ
   const handlePayLater = () => {
     setQrCodeVisible(false);
-    message.info("Bạn chọn thanh toán sau. Vui lòng hoàn tất sau.");
+    message.info("Bạn chọn thanh toán sau. Giỏ hàng của bạn sẽ được xóa.");
+    dispatch({ type: "CLEAR_CART" });
   };
 
   return (
@@ -176,16 +177,45 @@ const Cart = () => {
             dataSource={cart.items}
             renderItem={(item) => (
               <List.Item
-                onClick={() => handleItemClick(item.id)}
+                onClick={() => navigate(`/products/${item.id}`)}
                 actions={[
-                  <Button onClick={(e) => handleDecrease(e, item.id, item.quantity)}>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // handleDecrease(e, item.id, item.quantity)
+                      dispatch({
+                        type: "UPDATE_ITEM",
+                        payload: { id: item.id, quantity: item.quantity - 1 },
+                      });
+                    }}
+                  >
                     -
                   </Button>,
-                  <span style={{ width: 30, textAlign: "center" }}>{item.quantity}</span>,
-                  <Button onClick={(e) => handleIncrease(e, item.id, item.quantity)}>
+                  <span style={{ width: 30, textAlign: "center" }}>
+                    {item.quantity}
+                  </span>,
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // handleIncrease(e, item.id, item.quantity)
+                      dispatch({
+                        type: "UPDATE_ITEM",
+                        payload: { id: item.id, quantity: item.quantity + 1 },
+                      });
+                    }}
+                  >
                     +
                   </Button>,
-                  <Button danger onClick={(e) => handleRemove(e, item.id)}>
+                  <Button
+                    danger
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch({
+                        type: "REMOVE_ITEM",
+                        payload: { id: item.id },
+                      });
+                    }}
+                  >
                     Xóa
                   </Button>,
                 ]}
@@ -195,7 +225,10 @@ const Cart = () => {
                     <img
                       src={
                         item.image && item.image.bytes
-                          ? `data:image/${item.image.fileExtension.replace(".", "")};base64,${item.image.bytes}`
+                          ? `data:image/${item.image.fileExtension.replace(
+                              ".",
+                              ""
+                            )};base64,${item.image.bytes}`
                           : "/images/default-placeholder.png"
                       }
                       alt={item.productName || "Không có tên"}
@@ -223,7 +256,11 @@ const Cart = () => {
               <strong>{totalPrice.toLocaleString()} VND</strong>
             </div>
             {!qrCodeVisible && (
-              <Button type="primary" onClick={handleCheckout} disabled={loading}>
+              <Button
+                type="primary"
+                onClick={handleCheckout}
+                disabled={loading}
+              >
                 {loading ? <Spin /> : "Thanh toán"}
               </Button>
             )}

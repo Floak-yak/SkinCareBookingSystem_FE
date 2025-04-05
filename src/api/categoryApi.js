@@ -1,31 +1,21 @@
 import apiClient from "./apiClient";
 
 const categoryApi = {
-  // Lấy danh sách categories
-  getAll: () => apiClient.get("/Category/GetCategories"),
-
-  // Lấy category theo ID
+  getAll: () => apiClient.get("/api/Category/GetCategories"),
+  
   getById: (categoryId) =>
-    apiClient.get(`/Category/GetCategoryById?categoryId=${categoryId}`),
+    apiClient.get(`/api/Category/GetCategoryById?categoryId=${categoryId}`),
 
-  // Tạo category (chỉ có tên)
   create: (categoryName) =>
-    apiClient.post(`/Category/Create?categoryName=${categoryName}`),
+    apiClient.post(`/api/Category/Create?categoryName=${categoryName}`),
 
-  // Tạo category kèm userId
   createWithUserId: (categoryName, userId) =>
-    apiClient.post(
-      `/Category/CreateUserId?categoryName=${categoryName}&userId=${userId}`
-    ),
+    apiClient.post(`/api/Category/CreateUserId?categoryName=${categoryName}&userId=${userId}`),
 
-  // Cập nhật category
   update: (categoryId, newCategoryName) =>
-    apiClient.put(
-      `/Category/UpdateCategory?categoryId=${categoryId}&newCategoryName=${newCategoryName}`
-    ),
+    apiClient.put(`/api/Category/UpdateCategory?categoryId=${categoryId}&newCategoryName=${newCategoryName}`),
 
-  // Xóa category
-  delete: (categoryId) => apiClient.delete(`/Category/${categoryId}`),
+  delete: (categoryId) => apiClient.delete(`/api/Category/${categoryId}`),
 };
 
 export default categoryApi;

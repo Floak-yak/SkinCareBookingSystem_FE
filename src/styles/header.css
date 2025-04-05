@@ -45,6 +45,7 @@
 .cart-auth {
   display: flex;
   gap: 15px;
+  align-items: center;
 }
 
 .auth button {

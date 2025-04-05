@@ -1,245 +1,213 @@
 import React, { useState, useEffect } from "react";
-import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  message,
-  Popconfirm,
-  Select,
-} from "antd";
-import { useNavigate } from "react-router-dom";
+import { Table, Button, Popconfirm, message, Modal, Form, Input, InputNumber } from "antd";
 import servicesApi from "../../api/servicesApi";
-import categoryApi from "../../api/categoryApi";
 import imageApi from "../../api/imageApi";
 import ImageManager from "../../components/ImageManager";
 import "../../styles/ManageServicesPage.css";
-
-const { Option } = Select;
+import { useNavigate } from "react-router-dom";
 
 const ManageServicesPage = () => {
-  const navigate = useNavigate();
-
-  // State
   const [services, setServices] = useState([]);
-  const [categories, setCategories] = useState([]);
-
-  // Modal Thêm/Sửa
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentService, setCurrentService] = useState(null);
-
-  // ImageManager
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+  const [detailService, setDetailService] = useState(null);
+  const [createForm] = Form.useForm();
+  const [editForm] = Form.useForm();
+  const [editingService, setEditingService] = useState(null);
+  const [createPreview, setCreatePreview] = useState(null);
+  const [editPreview, setEditPreview] = useState(null);
   const [isImageManagerVisible, setIsImageManagerVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-
-  // Form
-  const [form] = Form.useForm();
+  const [imageManagerTarget, setImageManagerTarget] = useState(null); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchServices();
-    fetchCategories();
   }, []);
 
-  // Lấy danh sách dịch vụ
   const fetchServices = async () => {
     try {
       const res = await servicesApi.getAllServices();
-      const rawServices = res.data || [];
-
-      // "Join" ảnh nếu chỉ trả về imageId
-      const servicesWithImage = await Promise.all(
-        rawServices.map(async (s) => {
-          if (!s.image && s.imageId) {
+      let servicesData = res.data || [];
+      // Với mỗi dịch vụ có image là null nhưng có imageId, gọi API để lấy chi tiết ảnh
+      await Promise.all(
+        servicesData.map(async (service) => {
+          if (!service.image && service.imageId) {
             try {
-              const imgRes = await imageApi.getImageById(s.imageId);
-              s.image = imgRes.data;
+              const imageRes = await imageApi.getImageById(service.imageId);
+              service.image = imageRes.data;
             } catch (err) {
-              console.error("Lỗi khi lấy ảnh:", err);
+              console.error("Lỗi khi tải ảnh cho dịch vụ", service.id, err);
             }
           }
-          return s;
         })
       );
-
-      setServices(servicesWithImage);
+      setServices(servicesData);
     } catch (error) {
       message.error("Lỗi khi tải danh sách dịch vụ!");
     }
   };
 
-  // Lấy danh mục
-  const fetchCategories = async () => {
+  const handleCreateService = async (values) => {
     try {
-      const resCat = await categoryApi.getAll();
-      setCategories(resCat.data.data || []);
+      // Giả sử BE update dịch vụ cũng yêu cầu multipart/form-data, bạn có thể chuyển payload thành FormData
+      const formData = new FormData();
+      formData.append("serviceName", values.serviceName);
+      formData.append("serviceDescription", values.serviceDescription);
+      formData.append("benefits", values.benefits);
+      formData.append("price", values.price);
+      formData.append("workTime", values.workTime);
+      formData.append("imageId", values.imageId || 0);
+
+      await servicesApi.createService(formData);
+      message.success("Tạo dịch vụ thành công!");
+      setIsCreateModalVisible(false);
+      createForm.resetFields();
+      setCreatePreview(null);
+      fetchServices();
     } catch (error) {
-      message.error("Lỗi khi tải danh mục!");
+      console.error("Lỗi khi tạo dịch vụ:", error);
+      message.error("Tạo dịch vụ thất bại!");
     }
   };
 
-  // Thêm dịch vụ
-  const handleAdd = () => {
-    setIsEditing(false);
-    setCurrentService(null);
-    setSelectedImage(null);
-    form.resetFields();
-    setIsModalVisible(true);
-  };
-
-  // Sửa dịch vụ
-  const handleEdit = (service) => {
-    setIsEditing(true);
-    setCurrentService(service);
-
-    if (service.image) {
-      setSelectedImage(service.image);
-    } else {
-      setSelectedImage(null);
-    }
-
-    form.setFieldsValue({
+  const openEditModal = (service) => {
+    setEditingService(service);
+    editForm.setFieldsValue({
       serviceName: service.serviceName,
       serviceDescription: service.serviceDescription,
-      categoryId: service.categoryId,
+      benefits: service.benefits,
       price: service.price,
       workTime: service.workTime,
-      imageId: service.imageId,
+      imageId: service.imageId || 0,
     });
-
-    setIsModalVisible(true);
+    setEditPreview(service.image || null);
+    setIsEditModalVisible(true);
   };
 
-  // Xóa dịch vụ
-  const handleDelete = async (id) => {
+  const handleUpdateService = async (values) => {
+    try {
+      const formData = new FormData();
+      formData.append("serviceName", values.serviceName);
+      formData.append("serviceDescription", values.serviceDescription);
+      formData.append("benefits", values.benefits);
+      formData.append("price", values.price);
+      formData.append("workTime", values.workTime);
+      formData.append("imageId", values.imageId || 0);
+
+      await servicesApi.updateService(editingService.id, formData);
+      message.success("Cập nhật dịch vụ thành công!");
+      setIsEditModalVisible(false);
+      editForm.resetFields();
+      setEditPreview(null);
+      fetchServices();
+    } catch (error) {
+      console.error("Lỗi khi cập nhật dịch vụ:", error);
+      message.error("Cập nhật dịch vụ thất bại!");
+    }
+  };
+
+  const handleDeleteService = async (id) => {
     try {
       await servicesApi.deleteService(id);
       message.success("Xóa dịch vụ thành công!");
       fetchServices();
     } catch (error) {
-      message.error("Lỗi khi xóa dịch vụ!");
+      console.error("Lỗi khi xóa dịch vụ:", error);
+      message.error("Xóa dịch vụ thất bại!");
     }
   };
 
-  // Lưu (Thêm/Cập nhật)
-  const handleOk = async () => {
-    try {
-      const values = await form.validateFields();
-      console.log("Dữ liệu form:", values);
-
-      // Nếu BE yêu cầu multipart/form-data, ta tạo FormData và append từng trường
-      const formData = new FormData();
-      formData.append("serviceName", values.serviceName);
-      formData.append("serviceDescription", values.serviceDescription);
-      formData.append("categoryId", values.categoryId);
-      formData.append("price", values.price);
-      formData.append("workTime", values.workTime);
-      formData.append("imageId", values.imageId || 0);
-
-      if (isEditing && currentService) {
-        await servicesApi.updateService(currentService.id, {
-          serviceName: values.serviceName,
-          serviceDescription: values.serviceDescription,
-          categoryId: values.categoryId,
-          price: values.price,
-          workTime: values.workTime,
-          imageId: values.imageId || 0,
-        });
-        message.success("Cập nhật dịch vụ thành công!");
-      } else {
-        console.log("FormData keys:", [...formData.keys()]);
-        await servicesApi.createService(formData);
-        message.success("Thêm dịch vụ thành công!");
-      }
-
-      setIsModalVisible(false);
-      fetchServices();
-    } catch (error) {
-      console.error("Lỗi khi lưu dịch vụ:", error);
-      message.error("Lỗi khi lưu dịch vụ!");
-    }
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
-  // Quản lý ServiceDetail
-  const handleManageDetails = (serviceId) => {
-    navigate(`/admin/manage-service-details/${serviceId}`);
-  };
-
-  // ImageManager
-  const handleOpenImageManager = () => {
+  const openImageManager = (target) => {
+    setImageManagerTarget(target);
     setIsImageManagerVisible(true);
   };
 
-  const handleSelectImage = (img) => {
-    setSelectedImage(img);
-    form.setFieldsValue({ imageId: img.id });
+  const handleSelectImage = (image) => {
+    message.success(`Đã chọn ảnh ID: ${image.id}`);
+    if (imageManagerTarget === "create") {
+      createForm.setFieldsValue({ imageId: image.id });
+      setCreatePreview(image);
+    } else if (imageManagerTarget === "edit") {
+      editForm.setFieldsValue({ imageId: image.id });
+      setEditPreview(image);
+    }
+    setIsImageManagerVisible(false);
   };
 
-  const handleCloseImageManager = () => {
-    setIsImageManagerVisible(false);
+  const openDetailModal = (service) => {
+    setDetailService(service);
+    setIsDetailModalVisible(true);
   };
 
   const columns = [
     {
-      title: "Tên Dịch Vụ",
+      title: "Tên dịch vụ",
       dataIndex: "serviceName",
       key: "serviceName",
     },
     {
-      title: "Mô Tả",
+      title: "Mô tả",
       dataIndex: "serviceDescription",
       key: "serviceDescription",
+      render: (text) =>
+        text && text.length > 50 ? text.substring(0, 50) + "..." : text,
+    },
+    {
+      title: "Lợi ích",
+      dataIndex: "benefits",
+      key: "benefits",
+      render: (text) =>
+        text && text.length > 50 ? text.substring(0, 50) + "..." : text,
     },
     {
       title: "Giá",
       dataIndex: "price",
       key: "price",
-      render: (price) => `${price?.toLocaleString()} VND`,
+      render: (price) => `${price.toLocaleString()} VND`,
     },
     {
-      title: "Thời Gian (phút)",
+      title: "Thời gian",
       dataIndex: "workTime",
       key: "workTime",
+      render: (workTime) => `${workTime} phút`,
     },
     {
-      title: "Hình Ảnh",
+      title: "Hình ảnh",
       key: "image",
       render: (_, record) => {
-        if (!record.image) return "No image";
-        const ext = record.image.fileExtension?.replace(".", "") || "jpeg";
-        return (
-          <img
-            src={`data:image/${ext};base64,${record.image.bytes}`}
-            alt="preview"
-            style={{ width: 60, height: 60, objectFit: "cover" }}
-          />
-        );
+        if (record.image) {
+          const ext = record.image.fileExtension.replace(".", "");
+          return (
+            <img
+              src={`data:image/${ext};base64,${record.image.bytes}`}
+              alt="preview"
+              style={{ width: 80, height: 80, objectFit: "cover" }}
+            />
+          );
+        }
+        return record.imageId ? "Đang tải ảnh..." : "No image";
       },
     },
     {
-      title: "Hành Động",
+      title: "Hành động",
       key: "actions",
       render: (_, record) => (
         <>
-          <Button onClick={() => handleEdit(record)} style={{ marginRight: 8 }}>
+          <Popconfirm
+            title="Xóa dịch vụ này?"
+            onConfirm={() => handleDeleteService(record.id)}
+          >
+            <Button danger>Xóa</Button>
+          </Popconfirm>
+          <Button type="link" onClick={() => openEditModal(record)}>
             Sửa
           </Button>
-          <Popconfirm
-            title="Xác nhận xóa dịch vụ?"
-            onConfirm={() => handleDelete(record.id)}
+          <Button
+            type="link"
+            onClick={() => navigate(`/admin/manage-service-details/${record.id}`)}
           >
-            <Button danger style={{ marginRight: 8 }}>
-              Xóa
-            </Button>
-          </Popconfirm>
-          <Button onClick={() => handleManageDetails(record.id)}>
-            Quản lý chi tiết
+            Xem chi tiết
           </Button>
         </>
       ),
@@ -248,109 +216,209 @@ const ManageServicesPage = () => {
 
   return (
     <div className="manage-services-container">
-      <h2 className="manage-services-heading">Quản Lý Dịch Vụ Skincare</h2>
-      <Button
-        type="primary"
-        onClick={handleAdd}
-        className="manage-services-add-button"
-      >
-        Thêm Dịch Vụ
+      <h2 className="manage-services-heading">Quản lý dịch vụ</h2>
+      <Button type="primary" onClick={() => setIsCreateModalVisible(true)}>
+        Thêm dịch vụ
       </Button>
+      <Table dataSource={services} columns={columns} rowKey="id" />
 
-      {/* Bọc bảng trong một div để áp style */}
-      <div className="manage-services-table">
-        <Table dataSource={services} columns={columns} rowKey="id" />
-      </div>
-
-      {/* Modal Thêm/Sửa */}
+      {/* Modal Tạo dịch vụ */}
       <Modal
-        className="manage-services-modal"
-        title={isEditing ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ mới"}
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
+        title="Thêm dịch vụ"
+        visible={isCreateModalVisible}
+        onCancel={() => {
+          setIsCreateModalVisible(false);
+          setCreatePreview(null);
+        }}
+        footer={[
+          <Button
+            key="back"
+            onClick={() => {
+              setIsCreateModalVisible(false);
+              setCreatePreview(null);
+            }}
+          >
+            Hủy
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={() => createForm.submit()}
+          >
+            Tạo dịch vụ
+          </Button>,
+        ]}
+        centered
       >
-        <Form form={form} layout="vertical" className="manage-services-form">
+        <Form layout="vertical" form={createForm} onFinish={handleCreateService}>
           <Form.Item
-            label="Tên Dịch Vụ"
+            label="Tên dịch vụ"
             name="serviceName"
             rules={[{ required: true, message: "Vui lòng nhập tên dịch vụ!" }]}
           >
-            <Input />
+            <Input placeholder="Nhập tên dịch vụ" size="large" />
           </Form.Item>
-
           <Form.Item
-            label="Mô Tả"
+            label="Mô tả dịch vụ"
             name="serviceDescription"
-            rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập mô tả dịch vụ!" }]}
           >
-            <Input.TextArea rows={3} />
+            <Input.TextArea rows={3} placeholder="Nhập mô tả dịch vụ" />
           </Form.Item>
-
           <Form.Item
-            label="Danh mục"
-            name="categoryId"
-            rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
+            label="Lợi ích"
+            name="benefits"
+            rules={[{ required: true, message: "Vui lòng nhập lợi ích của dịch vụ!" }]}
           >
-            <Select placeholder="Chọn danh mục">
-              {categories.map((cat) => (
-                <Option key={cat.id} value={cat.id}>
-                  {cat.categoryName}
-                </Option>
-              ))}
-            </Select>
+            <Input.TextArea rows={3} placeholder="Nhập lợi ích của dịch vụ" />
           </Form.Item>
-
-          {/* Ẩn imageId */}
-          <Form.Item name="imageId" hidden>
-            <InputNumber />
+          <Form.Item
+            label="Giá"
+            name="price"
+            rules={[{ required: true, message: "Vui lòng nhập giá dịch vụ!" }]}
+          >
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Nhập giá dịch vụ"
+              size="large"
+            />
           </Form.Item>
-
-          <div style={{ marginBottom: 16 }}>
-            <Button onClick={handleOpenImageManager}>Chọn Ảnh</Button>
-            {selectedImage && (
-              <div style={{ marginTop: 8 }}>
-                <img
-                  src={`data:image/${selectedImage.fileExtension?.replace(
-                    ".",
-                    ""
-                  )};base64,${selectedImage.bytes}`}
-                  alt="preview"
-                  style={{
-                    width: 80,
-                    height: 80,
-                    objectFit: "cover",
-                    marginRight: 8,
-                  }}
-                />
-                <span>
-                  {selectedImage.description || `Ảnh ID: ${selectedImage.id}`}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <Form.Item label="Giá" name="price" initialValue={0}>
-            <InputNumber min={0} style={{ width: "100%" }} />
-          </Form.Item>
-
           <Form.Item
             label="Thời gian (phút)"
             name="workTime"
-            initialValue={1}
-            rules={[{ required: true, message: "Vui lòng nhập thời gian!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập thời gian làm dịch vụ!" }]}
           >
-            <InputNumber min={1} max={90} style={{ width: "100%" }} />
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Nhập thời gian làm dịch vụ"
+              size="large"
+            />
+          </Form.Item>
+          <Form.Item label="Ảnh dịch vụ" name="imageId">
+            <Button onClick={() => openImageManager("create")} size="large">
+              Chọn ảnh
+            </Button>
+            {createPreview && (
+              <div style={{ marginTop: 16, textAlign: "center" }}>
+                <img
+                  src={`data:image/${createPreview.fileExtension.replace(
+                    ".",
+                    ""
+                  )};base64,${createPreview.bytes}`}
+                  alt="preview"
+                  style={{
+                    width: 150,
+                    height: 150,
+                    objectFit: "cover",
+                    borderRadius: 8,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                  }}
+                />
+              </div>
+            )}
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* Modal ImageManager */}
+      {/* Modal Cập nhật dịch vụ */}
+      <Modal
+        title="Cập nhật dịch vụ"
+        visible={isEditModalVisible}
+        onCancel={() => {
+          setIsEditModalVisible(false);
+          setEditPreview(null);
+        }}
+        footer={[
+          <Button
+            key="back"
+            onClick={() => {
+              setIsEditModalVisible(false);
+              setEditPreview(null);
+            }}
+          >
+            Hủy
+          </Button>,
+          <Button key="submit" type="primary" onClick={() => editForm.submit()}>
+            Cập nhật
+          </Button>,
+        ]}
+        centered
+      >
+        <Form layout="vertical" form={editForm} onFinish={handleUpdateService}>
+          <Form.Item
+            label="Tên dịch vụ"
+            name="serviceName"
+            rules={[{ required: true, message: "Vui lòng nhập tên dịch vụ!" }]}
+          >
+            <Input placeholder="Nhập tên dịch vụ" size="large" />
+          </Form.Item>
+          <Form.Item
+            label="Mô tả dịch vụ"
+            name="serviceDescription"
+            rules={[{ required: true, message: "Vui lòng nhập mô tả dịch vụ!" }]}
+          >
+            <Input.TextArea rows={3} placeholder="Nhập mô tả dịch vụ" />
+          </Form.Item>
+          <Form.Item
+            label="Lợi ích"
+            name="benefits"
+            rules={[{ required: true, message: "Vui lòng nhập lợi ích của dịch vụ!" }]}
+          >
+            <Input.TextArea rows={3} placeholder="Nhập lợi ích của dịch vụ" />
+          </Form.Item>
+          <Form.Item
+            label="Giá"
+            name="price"
+            rules={[{ required: true, message: "Vui lòng nhập giá dịch vụ!" }]}
+          >
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Nhập giá dịch vụ"
+              size="large"
+            />
+          </Form.Item>
+          <Form.Item
+            label="Thời gian (phút)"
+            name="workTime"
+            rules={[{ required: true, message: "Vui lòng nhập thời gian làm dịch vụ!" }]}
+          >
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Nhập thời gian làm dịch vụ"
+              size="large"
+            />
+          </Form.Item>
+          <Form.Item label="Ảnh dịch vụ" name="imageId">
+            <Button onClick={() => openImageManager("edit")} size="large">
+              Chọn ảnh
+            </Button>
+            {editPreview && (
+              <div style={{ marginTop: 16, textAlign: "center" }}>
+                <img
+                  src={`data:image/${editPreview.fileExtension.replace(
+                    ".",
+                    ""
+                  )};base64,${editPreview.bytes}`}
+                  alt="preview"
+                  style={{
+                    width: 150,
+                    height: 150,
+                    objectFit: "cover",
+                    borderRadius: 8,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                  }}
+                />
+              </div>
+            )}
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal quản lý ảnh */}
       <ImageManager
         visible={isImageManagerVisible}
-        onClose={handleCloseImageManager}
+        onClose={() => setIsImageManagerVisible(false)}
         onSelectImage={handleSelectImage}
-        // zIndex={2000}
       />
     </div>
   );
