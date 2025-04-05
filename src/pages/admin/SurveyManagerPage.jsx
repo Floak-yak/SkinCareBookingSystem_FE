@@ -846,7 +846,7 @@ const SurveyManagerPage = () => {
                   icon={<PlusOutlined />} 
                   onClick={handleAddQuestion}
                 >
-                  Add New Question
+                  Thêm Câu Hỏi Mới
                 </Button>
               </div>
               
