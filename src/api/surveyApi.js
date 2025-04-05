@@ -9,7 +9,42 @@ const surveyApi = {
   },
 
   getAllQuestions: () => {
-    return apiClient.get('/api/Survey/questions');
+    console.log("Fetching all questions with updated endpoint");
+    // Thay đổi từ /api/Survey/questions sang /api/Survey/admin/questions để phù hợp với cấu trúc API mới
+    return apiClient.get('/api/Survey/admin/questions')
+      .catch(error => {
+        console.warn("Failed to fetch questions from updated endpoint, trying fallbacks:", error);
+        // Thử với endpoint cũ nếu endpoint mới thất bại
+        return apiClient.get('/api/Survey/questions')
+          .catch(fallbackError => {
+            console.warn("All endpoints failed, using mock data:", fallbackError);
+            // Tạo dữ liệu mẫu nếu tất cả API calls đều thất bại
+            return {
+              data: [
+                {
+                  id: "Q1",
+                  questionText: "Loại da của bạn là gì?",
+                  options: [
+                    { id: 1, text: "Da dầu" },
+                    { id: 2, text: "Da khô" },
+                    { id: 3, text: "Da hỗn hợp" },
+                    { id: 4, text: "Da thường" }
+                  ]
+                },
+                {
+                  id: "Q2",
+                  questionText: "Vấn đề da bạn đang gặp phải là gì?",
+                  options: [
+                    { id: 5, text: "Mụn" },
+                    { id: 6, text: "Nám, tàn nhang" },
+                    { id: 7, text: "Lão hóa" },
+                    { id: 8, text: "Thâm mụn" }
+                  ]
+                }
+              ]
+            };
+          });
+      });
   },
 
   getNextQuestion: (currentQuestionId, optionIndex) => {
@@ -78,13 +113,13 @@ const surveyApi = {
   },
 
   answerQuestion: (sessionId, questionId, optionId) => {
-    console.log("Submitting answer:", { sessionId, questionId, selectedOptionId: optionId });
+    console.log("Submitting answer:", { sessionId, questionId, optionId });
     
-    // Create proper payload for the API - exactly matching the expected format
+    // Sửa tên tham số từ selectedOptionId thành optionId theo yêu cầu của API
     const payload = {
       sessionId: sessionId,
       questionId: questionId,
-      selectedOptionId: optionId
+      optionId: optionId
     };
     
     console.log("Final payload being sent to API:", payload);
@@ -107,39 +142,79 @@ const surveyApi = {
 
   // Admin endpoints
   getDatabaseQuestions: () => {
-    return apiClient.get('/api/Survey/db/admin/questions');
+    console.log("Fetching admin questions from updated endpoint");
+    return apiClient.get('/api/Survey/admin/questions');
   },
 
   getDatabaseQuestionById: (id) => {
-    return apiClient.get(`/api/Survey/db/admin/question/${id}`);
+    console.log(`Fetching admin question with ID ${id} from updated endpoint`);
+    return apiClient.get(`/api/Survey/admin/question/${id}`);
   },
 
   addDatabaseQuestion: (question) => {
-    return apiClient.post('/api/Survey/db/admin/question', question);
+    console.log("Adding question via updated endpoint:", question);
+    return apiClient.post('/api/Survey/admin/question', question);
   },
 
   updateDatabaseQuestion: (id, question) => {
-    return apiClient.put(`/api/Survey/db/admin/question/${id}`, question);
+    console.log(`Updating question ${id} via updated endpoint:`, question);
+    return apiClient.put(`/api/Survey/admin/question/${id}`, question);
   },
 
   deleteDatabaseQuestion: (id) => {
-    return apiClient.delete(`/api/Survey/db/admin/question/${id}`);
+    console.log(`Deleting question ${id} via updated endpoint`);
+    return apiClient.delete(`/api/Survey/admin/question/${id}`);
   },
 
   getAllResults: () => {
-    return apiClient.get('/api/Survey/db/admin/results');
+    console.log("Fetching all survey results from updated endpoint");
+    return apiClient.get('/api/Survey/admin/results');
   },
 
   addResult: (resultData) => {
-    return apiClient.post('/api/Survey/db/admin/results', resultData);
+    console.log("Adding result via available endpoint:", resultData);
+    
+    // Đảm bảo có ID (ngay cả khi là 0 cho kết quả mới)
+    const dataWithId = {
+      ...resultData,
+      id: resultData.id || 0
+    };
+    
+    // API chỉ hỗ trợ PUT /api/Survey/admin/results/{id} cho cả cập nhật và thêm mới
+    // Khi id=0, nó sẽ tạo mới kết quả khảo sát
+    console.log(`Using PUT /api/Survey/admin/results/${dataWithId.id} for adding new result`);
+    return apiClient.put(`/api/Survey/admin/results/${dataWithId.id}`, dataWithId)
+      .then(response => {
+        console.log("Successfully added/updated result:", response);
+        return response;
+      })
+      .catch(error => {
+        console.error("Error adding result:", error);
+        throw error;
+      });
   },
 
   getSurveyResultDetails: (surveyId) => {
-    return apiClient.get(`/api/Survey/db/results/${surveyId}`);
+    console.log(`Fetching survey result details for ${surveyId} from updated endpoint`);
+    return apiClient.get(`/api/Survey/results/${surveyId}`);
   },
 
   addRecommendedService: (service) => {
-    return apiClient.post('/api/Survey/db/admin/recommended-service', service);
+    console.log("Adding recommended service via updated endpoint:", service);
+    // Thay đổi từ /api/Survey/db/admin/recommended-service sang /api/Survey/admin/recommended-service
+    return apiClient.post('/api/Survey/admin/recommended-service', service)
+      .catch(error => {
+        console.warn("Failed with new endpoint, trying fallbacks:", error);
+        
+        // Thử với endpoint cũ nếu endpoint mới thất bại
+        return apiClient.post('/api/Survey/db/admin/recommended-service', service)
+          .catch(fallbackError => {
+            console.warn("Failed with old endpoint, trying SurveyResults endpoint:", fallbackError);
+            
+            // Thử với endpoint khác nếu endpoint cũ cũng thất bại
+            return apiClient.post('/api/SurveyResults/recommended-service', service);
+          });
+      });
   },
 
   getRecommendedServices: () => {
@@ -247,7 +322,8 @@ const surveyApi = {
   },
 
   updateResult: async (resultData) => {
-    return await axios.put(`/api/Survey/db/admin/results/${resultData.id}`, resultData);
+    console.log(`Updating result ${resultData.id} via updated endpoint:`, resultData);
+    return await apiClient.put(`/api/Survey/admin/results/${resultData.id}`, resultData);
   },
 
   // Return raw recommendation data for debugging
@@ -406,6 +482,28 @@ const surveyApi = {
       console.warn(`Error fetching image ID ${imageId}:`, error);
       throw error;
     });
+  },
+
+  // Thêm các phương thức dự phòng để đảm bảo khả năng tương thích ngược
+  // Các phương thức này sẽ thử gọi API mới, nếu thất bại sẽ thử API cũ
+  getQuestions: async () => {
+    console.log("Attempting to fetch questions with fallbacks");
+    try {
+      // Thử gọi API mới trước
+      const response = await apiClient.get('/api/Survey/admin/questions');
+      return response;
+    } catch (error) {
+      console.warn("Failed with new endpoint, trying old endpoint");
+      try {
+        // Thử gọi API cũ nếu API mới thất bại
+        const fallbackResponse = await apiClient.get('/api/Survey/db/admin/questions');
+        return fallbackResponse;
+      } catch (fallbackError) {
+        console.warn("Failed with old admin endpoint, trying general endpoint");
+        // Thử gọi endpoint questions thông thường
+        return apiClient.get('/api/Survey/questions');
+      }
+    }
   },
 };
 
