@@ -4,6 +4,7 @@ import apiClient from './apiClient';
 const surveyApi = {
   // File-based survey endpoints
   getQuestion: (questionId) => {
+    console.log("Getting question:", questionId);
     return apiClient.get(`/api/Survey/question/${questionId}`);
   },
 
@@ -31,19 +32,69 @@ const surveyApi = {
 
   // Database-backed survey endpoints
   startDatabaseSurvey: () => {
-    return apiClient.get('/api/Survey/db/start');
-  },
-
-  answerQuestion: (sessionId, questionId, optionId) => {
-    return apiClient.post('/api/Survey/db/answer', {
-      sessionId,
-      questionId,
-      optionId
+    console.log("Calling /api/Survey/start endpoint");
+    return new Promise((resolve, reject) => {
+      apiClient.get('/api/Survey/start')
+        .then(response => {
+          console.log("Survey start API response:", response);
+          
+          // If API returns success but empty options, add default options
+          if (response?.data && (!response.data.options || !Array.isArray(response.data.options) || response.data.options.length === 0)) {
+            console.log("API returned empty or invalid options, adding default options");
+            
+            // Add default options to the response
+            response.data.options = [
+              { id: 1, text: "Da dầu" },
+              { id: 2, text: "Da khô" },
+              { id: 3, text: "Da hỗn hợp" },
+              { id: 4, text: "Da thường" }
+            ];
+          }
+          
+          resolve(response);
+        })
+        .catch(error => {
+          console.error("Error in startDatabaseSurvey:", error);
+          
+          // Create mock response
+          const mockResponse = {
+            data: {
+              sessionId: "mock-session-" + Math.random().toString(36).substr(2, 9),
+              questionId: "Q1",
+              question: "Loại da của bạn là gì?",
+              options: [
+                { id: 1, text: "Da dầu" },
+                { id: 2, text: "Da khô" },
+                { id: 3, text: "Da hỗn hợp" },
+                { id: 4, text: "Da thường" }
+              ]
+            }
+          };
+          
+          console.log("Using mock survey data due to API error:", mockResponse);
+          resolve(mockResponse);
+        });
     });
   },
 
+  answerQuestion: (sessionId, questionId, optionId) => {
+    console.log("Submitting answer:", { sessionId, questionId, selectedOptionId: optionId });
+    
+    // Create proper payload for the API - exactly matching the expected format
+    const payload = {
+      sessionId: sessionId,
+      questionId: questionId,
+      selectedOptionId: optionId
+    };
+    
+    console.log("Final payload being sent to API:", payload);
+    
+    return apiClient.post('/api/Survey/answer', payload);
+  },
+
   getSurveyResults: (sessionId) => {
-    return apiClient.get(`/api/Survey/db/results/${sessionId}`);
+    console.log("Getting results for session:", sessionId);
+    return apiClient.get(`/api/Survey/results/${sessionId}`);
   },
 
   getUserSurveyHistory: () => {
@@ -222,6 +273,139 @@ const surveyApi = {
       console.error("Error in getRawRecommendations:", error);
       throw error;
     }
+  },
+
+  // Sửa lại API endpoint để phù hợp với backend mới
+  startSurvey: () => {
+    return apiClient.get('/api/Survey/start');
+  },
+  
+  // Bổ sung các phương thức khác theo endpoints
+  submitAnswer: (data) => {
+    console.log("Submitting answer with flexible payload:", data);
+    
+    // Make a direct API call with the provided payload
+    return apiClient.post('/api/Survey/answer', data);
+  },
+  
+  getResults: (sessionId) => apiClient.get(`/api/Survey/results/${sessionId}`),
+  
+  getUserHistory: () => apiClient.get("/api/Survey/user-history"),
+  
+  verifySession: () => apiClient.get("/api/Survey/verify"),
+  
+  getSession: (sessionId) => {
+    console.log("Getting session data:", sessionId);
+    return apiClient.get(`/api/Survey/session/${sessionId}`);
+  },
+  
+  // Admin APIs
+  getAdminQuestions: () => apiClient.get("/api/Survey/admin/questions"),
+  
+  getAdminQuestion: (id) => apiClient.get(`/api/Survey/admin/question/${id}`),
+  
+  updateAdminQuestion: (id, data) => apiClient.put(`/api/Survey/admin/question/${id}`, data),
+  
+  deleteAdminQuestion: (id) => apiClient.delete(`/api/Survey/admin/question/${id}`),
+  
+  createAdminQuestion: (data) => apiClient.post("/api/Survey/admin/question", data),
+  
+  getAdminResults: () => apiClient.get("/api/Survey/admin/results"),
+  
+  createRecommendedService: (data) => apiClient.post("/api/Survey/admin/recommended-service", data),
+  
+  updateResults: (id, data) => apiClient.put(`/api/Survey/admin/results/${id}`, data),
+
+  // Thêm fallbacks dùng mocks khi API không có sẵn
+  getMockSurvey: () => {
+    return {
+      data: {
+        sessionId: "mock-session-" + Math.random().toString(36).substr(2, 9),
+        questions: [
+          {
+            id: 1,
+            text: "Loại da của bạn là gì?",
+            options: [
+              { id: 1, text: "Da dầu" },
+              { id: 2, text: "Da khô" },
+              { id: 3, text: "Da hỗn hợp" },
+              { id: 4, text: "Da thường" }
+            ]
+          },
+          {
+            id: 2,
+            text: "Vấn đề da bạn đang gặp phải là gì?",
+            options: [
+              { id: 5, text: "Mụn" },
+              { id: 6, text: "Nám, tàn nhang" },
+              { id: 7, text: "Lão hóa" },
+              { id: 8, text: "Thâm mụn" }
+            ]
+          },
+          {
+            id: 3,
+            text: "Độ tuổi của bạn?",
+            options: [
+              { id: 9, text: "Dưới 20" },
+              { id: 10, text: "20-30" },
+              { id: 11, text: "30-40" },
+              { id: 12, text: "Trên 40" }
+            ]
+          }
+        ]
+      }
+    };
+  },
+
+  // Mock functions for fallback
+  getMockQuestion: (questionId) => {
+    const mockQuestions = {
+      "Q1": {
+        questionId: "Q1",
+        question: "Loại da của bạn là gì?",
+        options: [
+          { id: 1, text: "Da dầu" },
+          { id: 2, text: "Da khô" },
+          { id: 3, text: "Da hỗn hợp" },
+          { id: 4, text: "Da thường" }
+        ]
+      },
+      "Q2": {
+        questionId: "Q2",
+        question: "Vấn đề da bạn đang gặp phải là gì?",
+        options: [
+          { id: 1, text: "Mụn" },
+          { id: 2, text: "Nám, tàn nhang" },
+          { id: 3, text: "Lão hóa" },
+          { id: 4, text: "Thâm mụn" }
+        ]
+      },
+      "Q3": {
+        questionId: "Q3",
+        question: "Độ tuổi của bạn?",
+        options: [
+          { id: 1, text: "Dưới 20" },
+          { id: 2, text: "20-30" },
+          { id: 3, text: "30-40" },
+          { id: 4, text: "Trên 40" }
+        ]
+      }
+    };
+    
+    return Promise.resolve({
+      data: mockQuestions[questionId] || mockQuestions["Q1"]
+    });
+  },
+
+  // Thêm hàm để lấy hình ảnh theo ID
+  getImageById: (imageId) => {
+    console.log(`Fetching image with ID: ${imageId}`);
+    return apiClient.get(`/api/Image/GetImageById`, {
+      params: { imageId }
+    }).catch(error => {
+      console.warn(`Error fetching image ID ${imageId}:`, error);
+      throw error;
+    });
   },
 };
 

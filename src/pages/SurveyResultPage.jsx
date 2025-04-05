@@ -27,66 +27,198 @@ const SurveyResultPage = () => {
           return;
         }
 
-        const response = await surveyApi.getSurveyResultDetails(surveyId);
-
-        // Ensure recommended services are fully populated
-        const enrichedData = {
-          ...response.data,
-          recommendedServices: response.data.recommendedServices.map(service => ({
-            id: service.id,
-            name: service.name || 'Unknown Service',
-            description: service.description || 'No description available',
-            price: service.price || 0,
-            imageId: service.imageId || service.id // Use imageId if available, fallback to id
-          }))
-        };
-
-        setSurveyData(enrichedData);
+        // Sử dụng getResults thay vì getSurveyResultDetails để phù hợp với API endpoint
+        // getResults sử dụng /api/Survey/results/${sessionId}
+        // còn getSurveyResultDetails sử dụng /api/Survey/db/results/${surveyId} (gây lỗi 404)
+        console.log("Fetching survey results with ID:", surveyId);
         
-        // Save the fact that the user has completed a survey
-        localStorage.setItem("hasCompletedSurvey", "true");
-        console.log("Survey completion status saved to localStorage");
-        
-        // Fetch images for each recommended service
-        fetchServiceImages(enrichedData.recommendedServices);
+        try {
+          // Thử endpoint chính
+          const response = await surveyApi.getResults(surveyId);
+          console.log("Survey results successfully retrieved:", response.data);
+          
+          // Ensure recommended services are fully populated
+          const enrichedData = {
+            ...response.data,
+            recommendedServices: response.data.recommendedServices?.map(service => ({
+              id: service.id,
+              name: service.name || 'Unknown Service',
+              description: service.description || 'No description available',
+              price: service.price || 0,
+              imageId: service.imageId || service.id // Use imageId if available, fallback to id
+            })) || []
+          };
+
+          setSurveyData(enrichedData);
+          
+          // Save the fact that the user has completed a survey
+          localStorage.setItem("hasCompletedSurvey", "true");
+          console.log("Survey completion status saved to localStorage");
+          
+          // Fetch images for each recommended service
+          if (enrichedData.recommendedServices && enrichedData.recommendedServices.length > 0) {
+            fetchServiceImages(enrichedData.recommendedServices);
+          }
+        } catch (mainError) {
+          console.error("Error with main endpoint:", mainError);
+          
+          // Thử endpoint thay thế
+          try {
+            console.log("Trying alternative endpoint with getSurveyResultDetails");
+            const fallbackResponse = await surveyApi.getSurveyResultDetails(surveyId);
+            console.log("Fallback survey results retrieved:", fallbackResponse.data);
+            
+            // Xử lý dữ liệu từ endpoint dự phòng nếu thành công
+            const enrichedData = {
+              ...fallbackResponse.data,
+              recommendedServices: fallbackResponse.data.recommendedServices?.map(service => ({
+                id: service.id,
+                name: service.name || 'Unknown Service',
+                description: service.description || 'No description available',
+                price: service.price || 0,
+                imageId: service.imageId || service.id
+              })) || []
+            };
+
+            setSurveyData(enrichedData);
+            localStorage.setItem("hasCompletedSurvey", "true");
+            
+            if (enrichedData.recommendedServices && enrichedData.recommendedServices.length > 0) {
+              fetchServiceImages(enrichedData.recommendedServices);
+            }
+          } catch (fallbackError) {
+            console.error("Both endpoints failed:", fallbackError);
+            throw new Error("Could not retrieve survey results from any endpoint");
+          }
+        }
         
         setLoading(false);
       } catch (err) {
         console.error("Error fetching survey results:", err);
         setError("Failed to load survey results. Please try again later.");
         setLoading(false);
+        
+        // Hiển thị kết quả mặc định nếu không thể lấy được kết quả từ API
+        showDefaultResults();
       }
     };
     
     const fetchServiceImages = async (services) => {
       const imageDataMap = {};
-      await Promise.all(
-        services.map(async (service) => {
-          if (service.imageId) {
-            try {
-              const response = await fetch(
-                `https://localhost:7101/api/Image/GetImageById?imageId=${service.imageId}`
-              );
-              // Only try to parse JSON if response is ok
-              if (response.ok) {
+      
+      try {
+        await Promise.all(
+          services.map(async (service) => {
+            if (service.imageId) {
+              try {
+                console.log(`Fetching image for service ${service.id} with imageId ${service.imageId}`);
+                
+                // Sử dụng apiClient thay vì fetch API trực tiếp
                 try {
-                  const imageData = await response.json();
-                  if (imageData?.bytes) {
-                    imageDataMap[service.id] = `data:image/png;base64,${imageData.bytes}`;
+                  const response = await surveyApi.getImageById(service.imageId);
+                  
+                  // Kiểm tra nếu response có định dạng đúng
+                  if (response?.data?.bytes) {
+                    imageDataMap[service.id] = `data:image/png;base64,${response.data.bytes}`;
+                    console.log(`Successfully loaded image for service ${service.id}`);
+                  } else {
+                    console.warn(`Image data missing for service ${service.id}:`, response?.data);
+                    // Sử dụng hình ảnh mặc định khi không có dữ liệu hình ảnh
+                    imageDataMap[service.id] = '/assets/default-placeholder.png';
                   }
-                } catch (jsonError) {
-                  console.error(`Invalid JSON for service ${service.id}:`, jsonError);
+                } catch (apiError) {
+                  console.warn(`Error using apiClient for service ${service.id}, trying direct fetch:`, apiError);
+                  
+                  // Dự phòng sử dụng fetch API
+                  const fetchResponse = await fetch(
+                    `https://localhost:7101/api/Image/GetImageById?imageId=${service.imageId}`,
+                    {
+                      method: 'GET',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                      },
+                      // Thêm thời gian chờ tối đa để tránh request treo
+                      signal: AbortSignal.timeout(5000)
+                    }
+                  );
+                  
+                  if (fetchResponse.ok) {
+                    try {
+                      // Đọc response text trước khi parse JSON để kiểm tra xem có dữ liệu không
+                      const text = await fetchResponse.text();
+                      
+                      // Chỉ parse JSON nếu có dữ liệu
+                      if (text && text.trim().length > 0) {
+                        try {
+                          const imageData = JSON.parse(text);
+                          if (imageData?.bytes) {
+                            imageDataMap[service.id] = `data:image/png;base64,${imageData.bytes}`;
+                            console.log(`Successfully loaded image for service ${service.id} via fetch`);
+                          } else {
+                            console.warn(`Image bytes missing for service ${service.id}`);
+                            imageDataMap[service.id] = '/assets/default-placeholder.png';
+                          }
+                        } catch (jsonError) {
+                          console.error(`Invalid JSON for service ${service.id}:`, jsonError);
+                          imageDataMap[service.id] = '/assets/default-placeholder.png';
+                        }
+                      } else {
+                        console.warn(`Empty response for service ${service.id}`);
+                        imageDataMap[service.id] = '/assets/default-placeholder.png';
+                      }
+                    } catch (textError) {
+                      console.error(`Error reading response text for service ${service.id}:`, textError);
+                      imageDataMap[service.id] = '/assets/default-placeholder.png';
+                    }
+                  } else {
+                    console.warn(`Error fetching image for service ${service.id}: Status ${fetchResponse.status}`);
+                    imageDataMap[service.id] = '/assets/default-placeholder.png';
+                  }
                 }
-              } else {
-                console.warn(`Error fetching image for service ${service.id}: Status ${response.status}`);
+              } catch (error) {
+                console.error(`Error loading image for service ${service.id}:`, error);
+                imageDataMap[service.id] = '/assets/default-placeholder.png';
               }
-            } catch (error) {
-              console.error(`Error loading image for service ${service.id}:`, error);
+            } else {
+              console.warn(`No imageId provided for service ${service.id}`);
+              imageDataMap[service.id] = '/assets/default-placeholder.png';
             }
-          }
-        })
-      );
+          })
+        );
+      } catch (overallError) {
+        console.error('Error in overall fetchServiceImages process:', overallError);
+      }
+      
       setImageMap((prev) => ({ ...prev, ...imageDataMap }));
+    };
+
+    // Hàm hiển thị kết quả mặc định khi không lấy được kết quả từ API
+    const showDefaultResults = () => {
+      const defaultData = {
+        result: {
+          skinType: "Da hỗn hợp",
+          resultText: "Không thể tải kết quả từ server. Đây là kết quả mặc định, có thể không chính xác. Làn da của bạn có vẻ thuộc loại da hỗn hợp.",
+          recommendationText: "Bạn nên sử dụng các sản phẩm dành cho da hỗn hợp và chăm sóc đặc biệt cho vùng chữ T."
+        },
+        recommendedServices: [
+          {
+            id: 1,
+            name: "Điều trị da hỗn hợp",
+            description: "Liệu pháp đặc biệt dành cho da hỗn hợp",
+            price: 750000
+          },
+          {
+            id: 2,
+            name: "Chăm sóc da cơ bản",
+            description: "Quy trình làm sạch và dưỡng ẩm cho mọi loại da",
+            price: 500000
+          }
+        ]
+      };
+      
+      setSurveyData(defaultData);
+      console.log("Showing default survey results due to API error");
     };
 
     fetchResults();

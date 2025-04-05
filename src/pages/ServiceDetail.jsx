@@ -20,8 +20,31 @@ const ServiceDetail = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [imageMap, setImageMap] = useState({});
   const [mainServiceImage, setMainServiceImage] = useState(null);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   useEffect(() => {
+    const checkServerConnection = async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        await fetch('/api/health', {
+          method: 'HEAD',
+          signal: controller.signal,
+          cache: 'no-cache'
+        });
+        
+        clearTimeout(timeoutId);
+        setIsOfflineMode(false);
+      } catch (error) {
+        console.log('Server connection check failed:', error);
+        setIsOfflineMode(true);
+        message.warning('Đang hiển thị ở chế độ ngoại tuyến', 3);
+      }
+    };
+    
+    checkServerConnection();
+    
     const fetchServiceDetails = async () => {
       if (!id) return;
 
@@ -176,12 +199,13 @@ const ServiceDetail = () => {
         steps.map(async (step) => {
           if (step.imageId) {
             try {
-              const response = await fetch(`https://localhost:7101/api/Image/GetImageById?imageId=${step.imageId}`);
-              const imageData = await response.json();
-              console.log(`Ảnh bước ${step.id}:`, imageData);
-
-              if (imageData?.bytes) {
-                imageDataMap[step.id] = `data:image/png;base64,${imageData.bytes}`;
+              // Sử dụng apiClient thay vì hard-coded URL
+              const response = await servicesApi.getImageById(step.imageId);
+              
+              console.log(`Ảnh bước ${step.id}:`, response?.data);
+              
+              if (response?.data?.bytes) {
+                imageDataMap[step.id] = `data:image/png;base64,${response.data.bytes}`;
               }
             } catch (error) {
               console.error(`Lỗi khi tải ảnh cho bước ${step.id}:`, error);
@@ -210,7 +234,16 @@ const ServiceDetail = () => {
   }, [id, steps.length]);
 
   if (loading) {
-    return <Spin size="large" className="service-loading" />;
+    return (
+      <div className="service-loading-container" style={{ 
+        display: 'flex', 
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '300px' 
+      }}>
+        <Spin size="large" /> {/* Bỏ tip để tránh warning */}
+      </div>
+    );
   }
 
   if (!serviceData) {
@@ -300,8 +333,60 @@ const ServiceDetail = () => {
     return `0 VNĐ`;
   };
 
+  // Helper function to get service benefits as an array
+  const getServiceBenefits = () => {
+    if (!serviceData) return [];
+    
+    // Check if benefits exists and is an array
+    if (serviceData.benefits && Array.isArray(serviceData.benefits)) {
+      return serviceData.benefits;
+    } 
+    
+    // Check if benefits exists as a string (could be a JSON string)
+    if (serviceData.benefits && typeof serviceData.benefits === 'string') {
+      try {
+        const parsedBenefits = JSON.parse(serviceData.benefits);
+        if (Array.isArray(parsedBenefits)) {
+          return parsedBenefits;
+        }
+      } catch (e) {
+        // If it's not valid JSON, split by commas or new lines
+        if (serviceData.benefits.includes(',')) {
+          return serviceData.benefits.split(',').map(item => item.trim());
+        } else if (serviceData.benefits.includes('\n')) {
+          return serviceData.benefits.split('\n').map(item => item.trim());
+        }
+        // If it's just a single string, return it as a single-item array
+        return [serviceData.benefits];
+      }
+    }
+    
+    // Default benefits
+    return [
+      "Giúp làn da được chăm sóc toàn diện và chuyên nghiệp",
+      "Loại bỏ bụi bẩn và tế bào chết trên da",
+      "Cung cấp dưỡng chất thiết yếu cho da",
+      "Cải thiện kết cấu và độ đàn hồi của da"
+    ];
+  };
+
   return (
     <div className="service-detail">
+      {isOfflineMode && (
+        <div className="offline-notice" style={{
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+          padding: '10px',
+          margin: '10px 0',
+          borderRadius: '5px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <span style={{ marginRight: '10px' }}>⚠️</span>
+          Đang hiển thị ở chế độ ngoại tuyến. Một số thông tin có thể không đầy đủ.
+        </div>
+      )}
       {steps.length > 0 ? (
         <>
           <div className="steps-section">
@@ -361,13 +446,9 @@ const ServiceDetail = () => {
           <div className="service-benefits">
             <h2 className="section-title">Lợi Ích Của Liệu Trình</h2>
             <ul className="benefits-list">
-              {serviceData.benefits?.length > 0 ? (
-                serviceData.benefits.map((benefit, index) => (
-                  <li key={index} className="benefit-item">{benefit}</li>
-                ))
-              ) : (
-                <li className="benefit-item">Giúp làn da được chăm sóc toàn diện và chuyên nghiệp.</li>
-              )}
+              {getServiceBenefits().map((benefit, index) => (
+                <li key={index} className="benefit-item">{benefit}</li>
+              ))}
             </ul>
           </div>
 
