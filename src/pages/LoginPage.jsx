@@ -27,6 +27,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
       const response = await userApi.login(formData.email, formData.password);
 
@@ -44,15 +45,23 @@ const LoginPage = () => {
 
       login(userData);
 
+      // Kiểm tra redirectUrl từ state hoặc localStorage
+      const finalRedirectPath = location.state?.from || 
+                               localStorage.getItem('authRedirectUrl') || 
+                               redirectPath;
+      
+      // Xóa redirectUrl từ localStorage sau khi đã sử dụng
+      localStorage.removeItem('authRedirectUrl');
+
       // Thông báo cho người dùng biết sắp được chuyển hướng
-      if (redirectPath !== "/") {
-        console.log(`Đăng nhập thành công! Đang chuyển đến: ${redirectPath}`);
+      if (finalRedirectPath !== "/") {
+        console.log(`Đăng nhập thành công! Đang chuyển đến: ${finalRedirectPath}`);
       }
 
       setTimeout(() => {
         // Nếu là quản trị viên, luôn chuyển đến trang admin
         // Nếu không, sử dụng đường dẫn chuyển hướng đã xác định
-        navigate(userData.role === "Manager" ? "/admin/user" : redirectPath);
+        navigate(userData.role === "Manager" ? "/admin/user" : finalRedirectPath);
       }, 500);
     } catch (error) {
       alert("Sai email hoặc mật khẩu!");

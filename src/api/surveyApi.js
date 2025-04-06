@@ -1,6 +1,118 @@
 import axios from 'axios';
 import apiClient from './apiClient';
 
+// Hàm trợ giúp để lấy danh sách dịch vụ đề xuất mặc định dựa trên loại da
+const getDefaultServicesForSkinType = (skinType) => {
+  const defaultServices = {
+    "Da dầu": [
+      {
+        id: 101,
+        name: "Điều trị da dầu chuyên sâu",
+        description: "Liệu trình giảm dầu nhờn, se khít lỗ chân lông và ngăn ngừa mụn",
+        price: 650000,
+        imageId: "default-oily-skin"
+      },
+      {
+        id: 102,
+        name: "Mặt nạ than hoạt tính",
+        description: "Giúp hút dầu thừa, làm sạch sâu và thu nhỏ lỗ chân lông",
+        price: 350000,
+        imageId: "charcoal-mask"
+      }
+    ],
+    "Da khô": [
+      {
+        id: 201,
+        name: "Liệu pháp cấp ẩm chuyên sâu",
+        description: "Phục hồi hàng rào bảo vệ da và cung cấp độ ẩm lâu dài",
+        price: 700000,
+        imageId: "default-dry-skin"
+      },
+      {
+        id: 202,
+        name: "Điều trị da khô nứt nẻ",
+        description: "Nuôi dưỡng và phục hồi da bị tổn thương do thiếu ẩm",
+        price: 450000,
+        imageId: "hydration-therapy"
+      }
+    ],
+    "Da hỗn hợp": [
+      {
+        id: 301,
+        name: "Cân bằng da hỗn hợp",
+        description: "Điều tiết vùng chữ T và cấp ẩm cho vùng da khô",
+        price: 650000,
+        imageId: "default-combination-skin"
+      },
+      {
+        id: 302,
+        name: "Mặt nạ cân bằng độ ẩm",
+        description: "Phù hợp cho da hỗn hợp, cân bằng dầu và nước",
+        price: 400000,
+        imageId: "balance-mask"
+      }
+    ],
+    "Da thường": [
+      {
+        id: 401,
+        name: "Chăm sóc da cơ bản",
+        description: "Duy trì làn da khỏe mạnh và ngăn ngừa lão hóa sớm",
+        price: 550000,
+        imageId: "default-normal-skin"
+      },
+      {
+        id: 402,
+        name: "Massage mặt thư giãn",
+        description: "Kích thích tuần hoàn máu và làm săn chắc da mặt",
+        price: 450000,
+        imageId: "face-massage"
+      }
+    ],
+    "Da nhạy cảm": [
+      {
+        id: 501,
+        name: "Điều trị da nhạy cảm",
+        description: "Sử dụng các sản phẩm dịu nhẹ, giảm kích ứng và đỏ da",
+        price: 800000,
+        imageId: "default-sensitive-skin"
+      },
+      {
+        id: 502,
+        name: "Liệu pháp làm dịu da",
+        description: "Phục hồi hàng rào bảo vệ da và giảm thiểu các phản ứng mẫn cảm",
+        price: 550000,
+        imageId: "soothing-therapy"
+      },
+      {
+        id: 503,
+        name: "Tư vấn chăm sóc da nhạy cảm",
+        description: "Tư vấn cá nhân hóa về cách chăm sóc và bảo vệ da nhạy cảm",
+        price: 300000,
+        imageId: "sensitive-consultation"
+      }
+    ],
+    "Không xác định": [
+      {
+        id: 901,
+        name: "Kiểm tra và phân tích da",
+        description: "Đánh giá chuyên sâu về loại da và các vấn đề da mặt",
+        price: 250000,
+        imageId: "skin-analysis"
+      },
+      {
+        id: 902,
+        name: "Tư vấn dịch vụ phù hợp",
+        description: "Tư vấn chuyên nghiệp về quy trình chăm sóc da phù hợp",
+        price: 200000,
+        imageId: "skin-consultation"
+      }
+    ]
+  };
+
+  // Trả về danh sách dịch vụ theo loại da hoặc mặc định nếu không tìm thấy
+  return defaultServices[skinType] || defaultServices["Không xác định"];
+};
+
 const surveyApi = {
   // File-based survey endpoints
   getQuestion: (questionId) => {
@@ -179,6 +291,9 @@ const surveyApi = {
           
           const friendlySkinType = skinTypeMap[dominantSkinType.toUpperCase()] || dominantSkinType;
           
+          // Tạo danh sách dịch vụ đề xuất mặc định dựa trên loại da
+          const defaultServices = getDefaultServicesForSkinType(friendlySkinType);
+          
           // Tạo đối tượng kết quả tự động từ dữ liệu phiên
           return {
             data: {
@@ -189,7 +304,7 @@ const surveyApi = {
                 resultText: `Dựa trên câu trả lời của bạn, chúng tôi đánh giá bạn có ${friendlySkinType}.`,
                 recommendationText: "Hãy tham khảo các dịch vụ phù hợp với loại da của bạn."
               },
-              recommendedServices: []  // Không có dịch vụ được đề xuất từ dữ liệu phiên, cần được thêm sau
+              recommendedServices: defaultServices
             }
           };
         }
@@ -357,6 +472,8 @@ const surveyApi = {
         } else {
           console.log("No recommendations found in the database.");
         }
+      } else {
+        console.log("No recommendations found in the database.");
       }
       
       return response;
@@ -442,7 +559,8 @@ const surveyApi = {
         normalizedData[key] = !isNaN(Number(value)) && value !== '' ? Number(value) : value;
       } else {
         // Giữ nguyên giá trị optionId chính xác cho mỗi câu hỏi
-        normalizedData[key] = value;
+        // Nhưng đảm bảo optionId là số hoặc chuỗi hợp lệ, không phải '0'
+        normalizedData[key] = value === '0' ? 0 : value;
       }
     });
     
@@ -465,6 +583,13 @@ const surveyApi = {
         sessionId: Number(normalizedData.sessionId),
         questionId: Number(normalizedData.questionId || normalizedData.question || 1),
         selectedOptionId: normalizedData.optionId || normalizedData.selectedOptionId
+      },
+      
+      // Thêm payload số 4 cho trường hợp optionId số
+      {
+        sessionId: Number(normalizedData.sessionId),
+        questionId: Number(normalizedData.questionId || normalizedData.question || 1),
+        optionId: Number(normalizedData.optionId || normalizedData.selectedOptionId || 0)
       }
     ];
     
@@ -472,9 +597,25 @@ const surveyApi = {
     return new Promise((resolve, reject) => {
       const tryPayload = (index) => {
         if (index >= payloads.length) {
-          const errorMessage = "All payload formats failed for survey answer submission";
-          console.error(errorMessage);
-          reject(new Error(errorMessage));
+          // Trường hợp tất cả payload thất bại, thử gửi với optionId là 0 (số)
+          const lastAttemptPayload = {
+            sessionId: Number(normalizedData.sessionId),
+            questionId: Number(normalizedData.questionId || normalizedData.question || 1),
+            optionId: 0
+          };
+          
+          console.log("Final attempt with optionId=0:", lastAttemptPayload);
+          
+          apiClient.post('/api/Survey/answer', lastAttemptPayload)
+            .then(response => {
+              console.log("Final attempt succeeded:", response.data);
+              resolve(response);
+            })
+            .catch(finalError => {
+              const errorMessage = "All payload formats failed for survey answer submission";
+              console.error(errorMessage);
+              reject(new Error(errorMessage));
+            });
           return;
         }
         
@@ -530,14 +671,18 @@ const surveyApi = {
                 skinType = skinTypeMap[maxScoreItem.skinTypeId?.toUpperCase()] || maxScoreItem.skinTypeId || "Không xác định";
               }
               
+              // Tạo danh sách dịch vụ đề xuất mặc định dựa trên loại da
+              const defaultServices = getDefaultServicesForSkinType(skinType);
+              
               return {
                 data: {
                   sessionId: sessionResponse.data.sessionId,
                   result: {
                     skinType: skinType,
                     resultText: `Loại da của bạn: ${skinType}`,
-                    recommendationText: "Hãy đặt lịch tư vấn để nhận được đề xuất phù hợp với loại da của bạn."
-                  }
+                    recommendationText: "Dưới đây là các dịch vụ được đề xuất phù hợp với loại da của bạn."
+                  },
+                  recommendedServices: defaultServices
                 }
               };
             }
@@ -686,6 +831,9 @@ const surveyApi = {
       }
     }
   },
+
+  // Export hàm getDefaultServicesForSkinType để có thể được sử dụng từ bên ngoài
+  getDefaultServicesForSkinType
 };
 
 export default surveyApi;

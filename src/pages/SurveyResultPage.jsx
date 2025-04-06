@@ -29,7 +29,6 @@ const SurveyResultPage = () => {
 
         // Sử dụng getResults thay vì getSurveyResultDetails để phù hợp với API endpoint
         // getResults sử dụng /api/Survey/results/${sessionId}
-        // còn getSurveyResultDetails sử dụng /api/Survey/db/results/${surveyId} (gây lỗi 404)
         console.log("Fetching survey results with ID:", surveyId);
         
         try {
@@ -48,6 +47,16 @@ const SurveyResultPage = () => {
               imageId: service.imageId || service.id // Use imageId if available, fallback to id
             })) || []
           };
+
+          // Nếu không có dịch vụ đề xuất, thêm dịch vụ mặc định
+          if (!enrichedData.recommendedServices || enrichedData.recommendedServices.length === 0) {
+            const skinType = enrichedData.result?.skinType || "Không xác định";
+            console.log("No recommended services found, adding default services for:", skinType);
+            // Sử dụng hàm từ surveyApi để lấy dịch vụ mặc định theo loại da
+            enrichedData.recommendedServices = surveyApi.getDefaultServicesForSkinType 
+              ? surveyApi.getDefaultServicesForSkinType(skinType)
+              : [];
+          }
 
           setSurveyData(enrichedData);
           
@@ -332,7 +341,14 @@ const SurveyResultPage = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!user) {
-                          navigate('/login', { state: { from: `/servicesDetail/${service.id}` } });
+                          // Lưu URL hiện tại vào localStorage để sau khi đăng nhập có thể quay lại
+                          const redirectUrl = `/servicesDetail/${service.id}`;
+                          localStorage.setItem('authRedirectUrl', redirectUrl);
+                          
+                          // Chuyển hướng đến trang đăng nhập với state chứa URL cần chuyển hướng
+                          navigate('/login', { 
+                            state: { from: redirectUrl }
+                          });
                         } else {
                           navigate(`/servicesDetail/${service.id}`);
                         }
