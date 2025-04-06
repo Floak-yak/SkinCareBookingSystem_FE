@@ -39,9 +39,8 @@ const startSurvey = async (retryCount = 0) => {
     setLoading(true);
     setError(null);
     
-    // Gọi API để bắt đầu khảo sát - giữ nguyên cấu trúc này
+    // Gọi API để bắt đầu khảo sát
     try {
-      // Có thể sẽ nhận được dữ liệu mock luôn từ hàm startDatabaseSurvey
       const response = await surveyApi.startDatabaseSurvey();
       console.log("Survey API response:", response);
       console.log("Full API response data:", JSON.stringify(response.data));
@@ -53,27 +52,24 @@ const startSurvey = async (retryCount = 0) => {
       // Cập nhật state với dữ liệu nhận được
       setSessionId(response.data.sessionId);
       
-      // Extract the question ID from the proper location in the response
-      // It seems the API is returning nextQuestionData structure
+      // Xử lý cấu trúc nextQuestionData từ API version mới
       if (response.data.nextQuestionData) {
-        // Get question ID from nextQuestionData
         setCurrentQuestionId(response.data.nextQuestionData.questionId);
         
-        // Get question text from nextQuestionData
         const questionTextValue = response.data.nextQuestionData.questionText || 
                                "Loại da của bạn là gì?";
         setQuestionText(questionTextValue);
         
-        // Get options from nextQuestionData
         if (response.data.nextQuestionData.options && 
             Array.isArray(response.data.nextQuestionData.options) && 
             response.data.nextQuestionData.options.length > 0) {
+          // Đảm bảo giữ nguyên ID option chính xác từ API
           const formattedOptions = response.data.nextQuestionData.options.map(o => ({
-            id: o.id || o.optionId || 0,
-            text: o.text || o.optionText || o.label || "Option"
+            id: o.id, // Giữ nguyên ID option từ API
+            text: o.text
           }));
           
-          console.log("Formatted options from nextQuestionData:", formattedOptions);
+          console.log("Using exact option IDs from API:", formattedOptions);
           setOptions(formattedOptions);
         } else {
           console.warn("nextQuestionData contains no options, using defaults");
@@ -87,23 +83,21 @@ const startSurvey = async (retryCount = 0) => {
       }
       // Fallback to direct options in the response
       else if (response.data.options && Array.isArray(response.data.options) && response.data.options.length > 0) {
-        // Đảm bảo options luôn có cấu trúc đúng
         const formattedOptions = response.data.options.map(o => ({
-          id: o.id || o.optionId || 0,
+          id: o.id, // Giữ nguyên ID option từ API
           text: o.text || o.optionText || o.label || "Option"
         }));
         
-        console.log("Formatted options from API:", formattedOptions);
+        console.log("Formatted options with exact IDs from API:", formattedOptions);
         setOptions(formattedOptions);
         
-        // Try to get questionId from other possible fields
+        // Cập nhật ID câu hỏi và nội dung
         setCurrentQuestionId(response.data.questionId || 1);
         
-        // Try to get questionText from other possible fields
         const questionTextValue = response.data.question || 
-                               response.data.questionText || 
-                               response.data.text || 
-                               "Loại da của bạn là gì?";
+                              response.data.questionText || 
+                              response.data.text || 
+                              "Loại da của bạn là gì?";
         setQuestionText(questionTextValue);
       } else {
         console.warn("API returned empty options or options in unexpected format");
@@ -157,186 +151,172 @@ const handleOptionClick = async (optionId, optionIndex) => {
   try {
     setLoading(true);
     
+    // Khai báo biến response ở đây - đây là phần quan trọng để sửa lỗi
+    let response = null;
+    
     if (sessionId) {
       // Ghi log dữ liệu đang gửi đi để debug
       console.log('Sending answer to API:', {
         sessionId,
         questionId: currentQuestionId,
-        selectedOptionId: optionId
+        optionId: optionId // Sử dụng đúng ID option từ API
       });
       
       try {
-        // Try với payload đúng format (với selectedOptionId)
-        const payload = {
-          sessionId: sessionId,
-          questionId: currentQuestionId,
-          selectedOptionId: optionId
-        };
+        // Gọi API answer với optionId chính xác từ API
+        response = await surveyApi.answerQuestion(sessionId, currentQuestionId, optionId);
+        console.log('API answer response:', response.data);
+      } catch (firstAttemptError) {
+        console.error('Lỗi khi gửi payload đầu tiên:', firstAttemptError);
         
-        console.log('Gửi payload:', payload);
-        let response = null;
-        
+        // Thử với định dạng payload thay thế
         try {
-          // Gọi API answer để gửi câu trả lời
-          response = await surveyApi.answerQuestion(sessionId, currentQuestionId, optionId);
-          console.log('API answer response:', response.data);
-        } catch (firstAttemptError) {
-          console.error('Lỗi khi gửi payload đầu tiên:', firstAttemptError);
+          console.log('Thử với format payload thứ hai (optionId)...');
+          response = await surveyApi.submitAnswer({
+            sessionId: sessionId,
+            questionId: currentQuestionId,
+            optionId: optionId // Giữ nguyên ID chính xác
+          });
+          console.log('API answer response (lần thử 2):', response.data);
+        } catch (secondAttemptError) {
+          console.error('Lỗi khi gửi payload thứ hai:', secondAttemptError);
           
-          // Thử với định dạng payload thay thế
+          // Thử với định dạng string IDs
           try {
-            console.log('Thử với format payload thứ hai (optionId)...');
+            console.log('Thử với IDs dạng string...');
             response = await surveyApi.submitAnswer({
-              sessionId: sessionId,
-              questionId: currentQuestionId,
-              optionId: optionId
+              sessionId: sessionId.toString(),
+              questionId: currentQuestionId.toString(),
+              selectedOptionId: optionId.toString()
             });
-            console.log('API answer response (lần thử 2):', response.data);
-          } catch (secondAttemptError) {
-            console.error('Lỗi khi gửi payload thứ hai:', secondAttemptError);
-            
-            // Thử với định dạng string IDs
-            try {
-              console.log('Thử với IDs dạng string...');
-              response = await surveyApi.submitAnswer({
-                sessionId: sessionId.toString(),
-                questionId: currentQuestionId.toString(),
-                selectedOptionId: optionId.toString()
-              });
-              console.log('API answer response (lần thử 3):', response.data);
-            } catch (thirdAttemptError) {
-              console.error('Tất cả các lần thử đều thất bại:', thirdAttemptError);
-              throw thirdAttemptError;
-            }
+            console.log('API answer response (lần thử 3):', response.data);
+          } catch (thirdAttemptError) {
+            console.error('Tất cả các lần thử đều thất bại:', thirdAttemptError);
+            throw thirdAttemptError;
           }
         }
-        
-        // Nếu đến đây thì API đã trả về response thành công
-        if (response && response.data) {
-          // Kiểm tra nếu khảo sát đã hoàn thành (isCompleted hoặc isResult = true)
-          if (response.data.isCompleted || response.data.isResult) {
-            console.log('Khảo sát đã hoàn thành, đang lấy kết quả...');
+      }
+      
+      // Nếu đến đây thì API đã trả về response thành công
+      if (response && response.data) {
+        // Kiểm tra nếu khảo sát đã hoàn thành (isCompleted hoặc isResult = true)
+        if (response.data.isCompleted || response.data.isResult) {
+          console.log('Khảo sát đã hoàn thành, đang lấy kết quả...');
+          
+          try {
+            // Lấy kết quả khảo sát từ API results
+            const resultsResponse = await surveyApi.getSurveyResults(sessionId);
+            console.log('Kết quả khảo sát:', resultsResponse.data);
             
-            try {
-              // Lấy kết quả khảo sát từ API results
-              const resultsResponse = await surveyApi.getSurveyResults(sessionId);
-              console.log('Kết quả khảo sát:', resultsResponse.data);
-              
-              // Cập nhật state với kết quả
-              if (resultsResponse.data.result) {
-                setResultData({
-                  skinType: resultsResponse.data.result.skinType || "Không xác định",
-                  resultText: resultsResponse.data.result.resultText || "Không đủ dữ liệu để phân tích loại da.",
-                  recommendationText: resultsResponse.data.result.recommendationText || "Vui lòng liên hệ với chúng tôi để được tư vấn cụ thể hơn."
-                });
-                
-                // Lấy thông tin về các dịch vụ đề xuất (nếu có)
-                if (resultsResponse.data.recommendedServices) {
-                  setRecommendedServices(resultsResponse.data.recommendedServices);
-                }
-              } else {
-                console.warn('Không tìm thấy kết quả trong response');
-                throw new Error('Không có kết quả khảo sát');
-              }
-              
-              setFinished(true);
-              
-              // Thông báo cho người dùng trước khi chuyển trang
-              message.success('Khảo sát đã hoàn thành. Đang chuyển đến trang kết quả...', 2, () => {
-                // Chuyển trang sau khi hiện thông báo
-                navigate(`/survey-results?id=${sessionId}`);
+            // Cập nhật state với kết quả
+            if (resultsResponse.data.result) {
+              setResultData({
+                skinType: resultsResponse.data.result.skinType || "Không xác định",
+                resultText: resultsResponse.data.result.resultText || "Không đủ dữ liệu để phân tích loại da.",
+                recommendationText: resultsResponse.data.result.recommendationText || "Vui lòng liên hệ với chúng tôi để được tư vấn cụ thể hơn."
               });
-            } catch (resultsError) {
-              console.error('Lỗi khi lấy kết quả khảo sát:', resultsError);
               
-              // Hiện cảnh báo và không chuyển trang ngay
-              message.warning('Không thể tải kết quả khảo sát. Đang thử phương pháp khác...', 2);
-              
-              // Thử với session API
-              setTimeout(async () => {
-                try {
-                  const sessionResponse = await surveyApi.getSession(sessionId);
-                  console.log('Session data:', sessionResponse.data);
-                  
-                  // Tìm loại da có điểm cao nhất
-                  if (sessionResponse.data.skinTypeScores && 
-                      Array.isArray(sessionResponse.data.skinTypeScores) && 
-                      sessionResponse.data.skinTypeScores.length > 0) {
-                    
-                    let maxScore = -1;
-                    let dominantSkinType = "normal";
-                    
-                    sessionResponse.data.skinTypeScores.forEach(item => {
-                      if (item.score > maxScore) {
-                        maxScore = item.score;
-                        dominantSkinType = item.skinTypeId;
-                      }
-                    });
-                    
-                    // Chuyển skinTypeId sang tên thân thiện hơn
-                    const skinTypeMap = {
-                      oily: "Da dầu",
-                      dry: "Da khô",
-                      normal: "Da thường",
-                      combination: "Da hỗn hợp", 
-                      sensitive: "Da nhạy cảm"
-                    };
-                    
-                    setResultData({
-                      skinType: skinTypeMap[dominantSkinType] || dominantSkinType,
-                      resultText: `Dựa trên câu trả lời của bạn, chúng tôi đánh giá bạn có ${skinTypeMap[dominantSkinType] || dominantSkinType}.`,
-                      recommendationText: "Hãy tham khảo các dịch vụ phù hợp với loại da của bạn."
-                    });
-                    
-                    setFinished(true);
-                    navigate(`/survey-results?id=${sessionId}`);
-                  } else {
-                    throw new Error('Không có dữ liệu điểm số trong session');
-                  }
-                } catch (sessionError) {
-                  console.error('Lỗi khi lấy dữ liệu session:', sessionError);
-                  showMockResults();
-                }
-              }, 1000);
-            }
-          } else {
-            // Đây không phải là câu hỏi cuối, hiển thị câu hỏi tiếp theo
-            // LƯU Ý: Không cần gọi API question vì thông tin câu hỏi tiếp theo
-            // đã có sẵn trong response của API answer
-            
-            console.log('Hiển thị câu hỏi tiếp theo từ response:', response.data);
-            
-            // Cập nhật ID câu hỏi hiện tại (nếu có)
-            if (response.data.questionId) {
-              setCurrentQuestionId(response.data.questionId);
-            } 
-            
-            // Cập nhật nội dung câu hỏi (nếu có)
-            if (response.data.questionText) {
-              setQuestionText(response.data.questionText);
-            }
-            
-            // Cập nhật các lựa chọn (nếu có)
-            if (response.data.options && Array.isArray(response.data.options)) {
-              const formattedOptions = response.data.options.map(o => ({
-                id: o.id || o.optionId || 0,
-                text: o.text || o.optionText || o.label || "Option"
-              }));
-              
-              console.log('Các lựa chọn cho câu hỏi tiếp theo:', formattedOptions);
-              setOptions(formattedOptions);
+              // Lấy thông tin về các dịch vụ đề xuất (nếu có)
+              if (resultsResponse.data.recommendedServices) {
+                setRecommendedServices(resultsResponse.data.recommendedServices);
+              }
             } else {
-              console.warn('Không tìm thấy options trong response:', response.data);
-              message.warning('Không tìm thấy các lựa chọn cho câu hỏi tiếp theo');
+              console.warn('Không tìm thấy kết quả trong response');
+              throw new Error('Không có kết quả khảo sát');
             }
+            
+            setFinished(true);
+            
+            // Thông báo cho người dùng trước khi chuyển trang
+            message.success('Khảo sát đã hoàn thành. Đang chuyển đến trang kết quả...', 2, () => {
+              // Chuyển trang sau khi hiện thông báo
+              navigate(`/survey-results?id=${sessionId}`);
+            });
+          } catch (resultsError) {
+            console.error('Lỗi khi lấy kết quả khảo sát:', resultsError);
+            
+            // Hiện cảnh báo và không chuyển trang ngay
+            message.warning('Không thể tải kết quả khảo sát. Đang thử phương pháp khác...', 2);
+            
+            // Thử với session API
+            setTimeout(async () => {
+              try {
+                const sessionResponse = await surveyApi.getSession(sessionId);
+                console.log('Session data:', sessionResponse.data);
+                
+                // Tìm loại da có điểm cao nhất
+                if (sessionResponse.data.skinTypeScores && 
+                    Array.isArray(sessionResponse.data.skinTypeScores) && 
+                    sessionResponse.data.skinTypeScores.length > 0) {
+                  
+                  let maxScore = -1;
+                  let dominantSkinType = "normal";
+                  
+                  sessionResponse.data.skinTypeScores.forEach(item => {
+                    if (item.score > maxScore) {
+                      maxScore = item.score;
+                      dominantSkinType = item.skinTypeId;
+                    }
+                  });
+                  
+                  // Chuyển skinTypeId sang tên thân thiện hơn
+                  const skinTypeMap = {
+                    oily: "Da dầu",
+                    dry: "Da khô",
+                    normal: "Da thường",
+                    combination: "Da hỗn hợp", 
+                    sensitive: "Da nhạy cảm"
+                  };
+                  
+                  setResultData({
+                    skinType: skinTypeMap[dominantSkinType] || dominantSkinType,
+                    resultText: `Dựa trên câu trả lời của bạn, chúng tôi đánh giá bạn có ${skinTypeMap[dominantSkinType] || dominantSkinType}.`,
+                    recommendationText: "Hãy tham khảo các dịch vụ phù hợp với loại da của bạn."
+                  });
+                  
+                  setFinished(true);
+                  navigate(`/survey-results?id=${sessionId}`);
+                } else {
+                  throw new Error('Không có dữ liệu điểm số trong session');
+                }
+              } catch (sessionError) {
+                console.error('Lỗi khi lấy dữ liệu session:', sessionError);
+                showMockResults();
+              }
+            }, 1000);
           }
         } else {
-          console.warn('Response không hợp lệ hoặc không có dữ liệu:', response);
-          message.warning('Phản hồi không hợp lệ từ máy chủ. Vui lòng thử lại.');
+          // Đây không phải là câu hỏi cuối, hiển thị câu hỏi tiếp theo
+          console.log('Hiển thị câu hỏi tiếp theo từ response:', response.data);
+          
+          // Cập nhật ID câu hỏi hiện tại (nếu có)
+          if (response.data.questionId) {
+            setCurrentQuestionId(response.data.questionId);
+          } 
+          
+          // Cập nhật nội dung câu hỏi (nếu có)
+          if (response.data.questionText) {
+            setQuestionText(response.data.questionText);
+          }
+          
+          // Cập nhật các lựa chọn (nếu có)
+          if (response.data.options && Array.isArray(response.data.options)) {
+            // Đảm bảo giữ nguyên ID option chính xác từ API
+            const formattedOptions = response.data.options.map(o => ({
+              id: o.id, // Giữ nguyên ID chính xác
+              text: o.text || o.optionText || o.label || "Option"
+            }));
+            
+            console.log('Các lựa chọn cho câu hỏi tiếp theo với ID chính xác:', formattedOptions);
+            setOptions(formattedOptions);
+          } else {
+            console.warn('Không tìm thấy options trong response:', response.data);
+            message.warning('Không tìm thấy các lựa chọn cho câu hỏi tiếp theo');
+          }
         }
-      } catch (answerError) {
-        console.error('Lỗi khi gửi câu trả lời:', answerError);
-        message.error('Không thể gửi câu trả lời. Vui lòng thử lại sau.', 3);
+      } else {
+        console.warn('Response không hợp lệ hoặc không có dữ liệu:', response);
+        message.warning('Phản hồi không hợp lệ từ máy chủ. Vui lòng thử lại.');
       }
     } else {
       // Không có sessionId, sử dụng dữ liệu mock

@@ -115,21 +115,93 @@ const surveyApi = {
   answerQuestion: (sessionId, questionId, optionId) => {
     console.log("Submitting answer:", { sessionId, questionId, optionId });
     
-    // Sửa tên tham số từ selectedOptionId thành optionId theo yêu cầu của API
+    // Kiểm tra các tham số đầu vào và đảm bảo giá trị hợp lệ
+    if (!sessionId) {
+      console.error("Missing sessionId");
+      return Promise.reject(new Error("Missing sessionId"));
+    }
+    
+    if (questionId === undefined || questionId === null) {
+      console.error("Missing questionId");
+      return Promise.reject(new Error("Missing questionId"));
+    }
+    
+    // Đảm bảo optionId không phải là undefined hoặc null
+    if (optionId === undefined || optionId === null) {
+      console.error("Missing optionId");
+      return Promise.reject(new Error("Missing optionId"));
+    }
+    
+    // Giữ nguyên giá trị optionId chính xác cho mỗi câu hỏi
     const payload = {
-      sessionId: sessionId,
-      questionId: questionId,
-      optionId: optionId
+      sessionId: Number(sessionId),
+      questionId: Number(questionId),
+      optionId: optionId  // Giữ nguyên giá trị optionId
     };
     
-    console.log("Final payload being sent to API:", payload);
-    
-    return apiClient.post('/api/Survey/answer', payload);
+    console.log("Sending answer with payload:", payload);
+    return apiClient.post('/api/Survey/answer', payload)
+      .catch(error => {
+        console.error("Error submitting answer:", error);
+        throw error;
+      });
   },
 
   getSurveyResults: (sessionId) => {
     console.log("Getting results for session:", sessionId);
-    return apiClient.get(`/api/Survey/results/${sessionId}`);
+    return apiClient.get(`/api/Survey/session/${sessionId}`)
+      .then(response => {
+        console.log("Session data received:", response.data);
+        
+        // Nếu session chưa hoàn thành nhưng có dữ liệu skinTypeScores, chuyển đổi thành định dạng kết quả
+        if (response.data && response.data.skinTypeScores && Array.isArray(response.data.skinTypeScores) && response.data.skinTypeScores.length > 0) {
+          console.log("Converting session data to results format");
+          
+          // Tìm loại da có điểm cao nhất
+          let maxScore = -1;
+          let dominantSkinType = "normal";
+          
+          response.data.skinTypeScores.forEach(item => {
+            if (item.score > maxScore) {
+              maxScore = item.score;
+              dominantSkinType = item.skinTypeId;
+            }
+          });
+          
+          // Chuyển đổi skinTypeId thành tên người dùng thân thiện
+          const skinTypeMap = {
+            "OILY": "Da dầu",
+            "DRY": "Da khô",
+            "NORMAL": "Da thường",
+            "COMBINATION": "Da hỗn hợp",
+            "SENSITIVE": "Da nhạy cảm"
+          };
+          
+          const friendlySkinType = skinTypeMap[dominantSkinType.toUpperCase()] || dominantSkinType;
+          
+          // Tạo đối tượng kết quả tự động từ dữ liệu phiên
+          return {
+            data: {
+              sessionId: response.data.sessionId,
+              completedDate: response.data.completedDate || new Date().toISOString(),
+              result: {
+                skinType: friendlySkinType,
+                resultText: `Dựa trên câu trả lời của bạn, chúng tôi đánh giá bạn có ${friendlySkinType}.`,
+                recommendationText: "Hãy tham khảo các dịch vụ phù hợp với loại da của bạn."
+              },
+              recommendedServices: []  // Không có dịch vụ được đề xuất từ dữ liệu phiên, cần được thêm sau
+            }
+          };
+        }
+        
+        // Trả về dữ liệu phiên nguyên bản nếu không thể chuyển đổi
+        return response;
+      })
+      .catch(error => {
+        console.error("Error fetching session data:", error);
+        // Thử lại với endpoint results nếu endpoint session không thành công
+        return apiClient.get(`/api/Survey/results/${sessionId}`);
+      });
   },
 
   getUserSurveyHistory: () => {
@@ -360,12 +432,121 @@ const surveyApi = {
   submitAnswer: (data) => {
     console.log("Submitting answer with flexible payload:", data);
     
-    // Make a direct API call with the provided payload
-    return apiClient.post('/api/Survey/answer', data);
+    // Chuẩn hóa dữ liệu để đảm bảo định dạng đúng
+    const normalizedData = {};
+    
+    // Copy dữ liệu ban đầu
+    Object.entries(data).forEach(([key, value]) => {
+      if (key !== 'optionId' && key !== 'selectedOptionId') {
+        // Chuyển đổi sessionId và questionId sang số nếu có thể
+        normalizedData[key] = !isNaN(Number(value)) && value !== '' ? Number(value) : value;
+      } else {
+        // Giữ nguyên giá trị optionId chính xác cho mỗi câu hỏi
+        normalizedData[key] = value;
+      }
+    });
+    
+    console.log("Normalized payload for API:", normalizedData);
+    
+    // Tạo các phiên bản khác nhau của payload để thử
+    const payloads = [
+      // Payload chính với optionId nguyên gốc
+      normalizedData,
+      
+      // Payload với sessionId và questionId là số, giữ nguyên optionId
+      {
+        sessionId: Number(normalizedData.sessionId),
+        questionId: Number(normalizedData.questionId || normalizedData.question || 1),
+        optionId: normalizedData.optionId || normalizedData.selectedOptionId
+      },
+      
+      // Payload với trường selectedOptionId thay vì optionId
+      {
+        sessionId: Number(normalizedData.sessionId),
+        questionId: Number(normalizedData.questionId || normalizedData.question || 1),
+        selectedOptionId: normalizedData.optionId || normalizedData.selectedOptionId
+      }
+    ];
+    
+    // Thử từng phiên bản payload một
+    return new Promise((resolve, reject) => {
+      const tryPayload = (index) => {
+        if (index >= payloads.length) {
+          const errorMessage = "All payload formats failed for survey answer submission";
+          console.error(errorMessage);
+          reject(new Error(errorMessage));
+          return;
+        }
+        
+        console.log(`Trying submitAnswer payload version ${index + 1}:`, payloads[index]);
+        apiClient.post('/api/Survey/answer', payloads[index])
+          .then(response => {
+            console.log(`Payload version ${index + 1} succeeded:`, response.data);
+            resolve(response);
+          })
+          .catch(error => {
+            console.warn(`Payload version ${index + 1} failed:`, 
+              error.response?.status, error.response?.data || error.message);
+            tryPayload(index + 1);
+          });
+      };
+      
+      // Start trying payloads
+      tryPayload(0);
+    });
   },
-  
-  getResults: (sessionId) => apiClient.get(`/api/Survey/results/${sessionId}`),
-  
+
+  getResults: (sessionId) => {
+    console.log("Fetching results with advanced error handling for session:", sessionId);
+    
+    // Thử phương thức đã được cải tiến
+    return surveyApi.getSurveyResults(sessionId)
+      .catch(error => {
+        console.error("Both endpoints failed for session results, using fallback:", error);
+        
+        // Nếu cả hai phương thức đều thất bại, cố gắng lấy dữ liệu session trực tiếp
+        return apiClient.get(`/api/Survey/session/${sessionId}`)
+          .then(sessionResponse => {
+            console.log("Retrieved raw session data:", sessionResponse.data);
+            
+            // Tạo đối tượng kết quả tối thiểu
+            if (sessionResponse.data) {
+              const skinTypeScores = sessionResponse.data.skinTypeScores || [];
+              let skinType = "Không xác định";
+              
+              // Tìm loại da nếu có điểm số
+              if (skinTypeScores.length > 0) {
+                const maxScoreItem = skinTypeScores.reduce((max, item) => 
+                  (item.score > max.score) ? item : max, { score: -1 });
+                  
+                const skinTypeMap = {
+                  "OILY": "Da dầu",
+                  "DRY": "Da khô", 
+                  "NORMAL": "Da thường",
+                  "COMBINATION": "Da hỗn hợp",
+                  "SENSITIVE": "Da nhạy cảm"
+                };
+                
+                skinType = skinTypeMap[maxScoreItem.skinTypeId?.toUpperCase()] || maxScoreItem.skinTypeId || "Không xác định";
+              }
+              
+              return {
+                data: {
+                  sessionId: sessionResponse.data.sessionId,
+                  result: {
+                    skinType: skinType,
+                    resultText: `Loại da của bạn: ${skinType}`,
+                    recommendationText: "Hãy đặt lịch tư vấn để nhận được đề xuất phù hợp với loại da của bạn."
+                  }
+                }
+              };
+            }
+            
+            throw new Error("Could not process session data");
+          });
+      });
+  },
+
   getUserHistory: () => apiClient.get("/api/Survey/user-history"),
   
   verifySession: () => apiClient.get("/api/Survey/verify"),
