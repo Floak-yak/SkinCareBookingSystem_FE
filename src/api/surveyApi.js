@@ -1,116 +1,113 @@
 import axios from 'axios';
 import apiClient from './apiClient';
 
-// Hàm trợ giúp để lấy danh sách dịch vụ đề xuất mặc định dựa trên loại da
-const getDefaultServicesForSkinType = (skinType) => {
-  const defaultServices = {
-    "Da dầu": [
-      {
-        id: 101,
-        name: "Điều trị da dầu chuyên sâu",
-        description: "Liệu trình giảm dầu nhờn, se khít lỗ chân lông và ngăn ngừa mụn",
-        price: 650000,
-        imageId: "default-oily-skin"
-      },
-      {
-        id: 102,
-        name: "Mặt nạ than hoạt tính",
-        description: "Giúp hút dầu thừa, làm sạch sâu và thu nhỏ lỗ chân lông",
-        price: 350000,
-        imageId: "charcoal-mask"
+// Hàm trợ giúp để lấy danh sách dịch vụ đề xuất dựa trên loại da từ API
+const getDefaultServicesForSkinType = async (skinType) => {
+  console.log(`Fetching recommended services for skin type: ${skinType}`);
+  try {
+    // Chuyển đổi tên loại da sang định dạng API có thể hiểu
+    const skinTypeMap = {
+      "Da dầu": "OILY",
+      "Da khô": "DRY", 
+      "Da thường": "NORMAL",
+      "Da hỗn hợp": "COMBINATION",
+      "Da nhạy cảm": "SENSITIVE"
+    };
+    
+    // Lấy mã loại da hoặc sử dụng tên tiếng Việt nếu không có trong map
+    const skinTypeCode = skinTypeMap[skinType] || skinType;
+    
+    try {
+      // Gọi API để lấy dịch vụ đề xuất theo loại da
+      const response = await apiClient.get('/api/SkincareServices/GetByType', {
+        params: { skinType: skinTypeCode }
+      });
+      
+      console.log(`API returned ${response.data?.length || 0} services for skin type ${skinType}`);
+      
+      // Trả về dữ liệu từ API nếu có
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        return response.data;
       }
-    ],
-    "Da khô": [
-      {
-        id: 201,
-        name: "Liệu pháp cấp ẩm chuyên sâu",
-        description: "Phục hồi hàng rào bảo vệ da và cung cấp độ ẩm lâu dài",
-        price: 700000,
-        imageId: "default-dry-skin"
-      },
-      {
-        id: 202,
-        name: "Điều trị da khô nứt nẻ",
-        description: "Nuôi dưỡng và phục hồi da bị tổn thương do thiếu ẩm",
-        price: 450000,
-        imageId: "hydration-therapy"
+    } catch (typeError) {
+      console.warn(`Error fetching services by skin type: ${typeError.message}`);
+      // Continue to fallbacks if this endpoint fails
+    }
+    
+    // Thử endpoint khác nếu không thành công
+    try {
+      const fallbackResponse = await apiClient.get('/api/SurveyResults/recommended-services', {
+        params: { skinType: skinTypeCode }
+      });
+      
+      if (fallbackResponse.data && Array.isArray(fallbackResponse.data) && fallbackResponse.data.length > 0) {
+        return fallbackResponse.data;
       }
-    ],
-    "Da hỗn hợp": [
-      {
-        id: 301,
-        name: "Cân bằng da hỗn hợp",
-        description: "Điều tiết vùng chữ T và cấp ẩm cho vùng da khô",
-        price: 650000,
-        imageId: "default-combination-skin"
-      },
-      {
-        id: 302,
-        name: "Mặt nạ cân bằng độ ẩm",
-        description: "Phù hợp cho da hỗn hợp, cân bằng dầu và nước",
-        price: 400000,
-        imageId: "balance-mask"
+    } catch (fallbackError) {
+      console.warn(`Fallback endpoint failed: ${fallbackError.message}`);
+    }
+    
+    // Nếu cả hai endpoint trên đều thất bại, thử lấy tất cả dịch vụ
+    try {
+      console.log("Fetching all services as a fallback");
+      const allServicesResponse = await apiClient.get('/api/SkincareServices/GetServices');
+      
+      if (allServicesResponse.data && Array.isArray(allServicesResponse.data)) {
+        console.log(`Found ${allServicesResponse.data.length} services, filtering for ${skinType}`);
+        
+        // Filter services if possible, otherwise return up to 3 services as recommendations
+        const services = allServicesResponse.data;
+        const recommendedServices = services.slice(0, Math.min(3, services.length));
+        
+        console.log(`Returning ${recommendedServices.length} general services as fallback recommendations`);
+        return recommendedServices;
       }
-    ],
-    "Da thường": [
+    } catch (allServicesError) {
+      console.warn(`All services endpoint failed: ${allServicesError.message}`);
+    }
+    
+    // Cuối cùng, nếu không có API nào thành công, trả về dịch vụ mẫu
+    console.log("Using hardcoded sample services as a last resort");
+    return [
       {
-        id: 401,
+        id: 1,
         name: "Chăm sóc da cơ bản",
-        description: "Duy trì làn da khỏe mạnh và ngăn ngừa lão hóa sớm",
-        price: 550000,
-        imageId: "default-normal-skin"
-      },
-      {
-        id: 402,
-        name: "Massage mặt thư giãn",
-        description: "Kích thích tuần hoàn máu và làm săn chắc da mặt",
+        serviceName: "Chăm sóc da cơ bản",
+        description: "Liệu trình làm sạch và dưỡng ẩm cho mọi loại da",
+        serviceDescription: "Liệu trình làm sạch và dưỡng ẩm cho mọi loại da",
         price: 450000,
-        imageId: "face-massage"
-      }
-    ],
-    "Da nhạy cảm": [
-      {
-        id: 501,
-        name: "Điều trị da nhạy cảm",
-        description: "Sử dụng các sản phẩm dịu nhẹ, giảm kích ứng và đỏ da",
-        price: 800000,
-        imageId: "default-sensitive-skin"
+        imageId: 1
       },
       {
-        id: 502,
-        name: "Liệu pháp làm dịu da",
-        description: "Phục hồi hàng rào bảo vệ da và giảm thiểu các phản ứng mẫn cảm",
-        price: 550000,
-        imageId: "soothing-therapy"
+        id: 2,
+        name: `Điều trị đặc biệt cho ${skinType}`,
+        serviceName: `Điều trị đặc biệt cho ${skinType}`,
+        description: `Liệu trình chuyên sâu cho ${skinType}`,
+        serviceDescription: `Liệu trình chuyên sâu cho ${skinType}`,
+        price: 750000,
+        imageId: 2
+      }
+    ];
+  } catch (error) {
+    console.error(`Error fetching services for skin type ${skinType}:`, error);
+    // Trả về mảng mẫu nếu có lỗi
+    return [
+      {
+        id: 1,
+        name: "Chăm sóc da cơ bản",
+        serviceName: "Chăm sóc da cơ bản",
+        description: "Liệu trình làm sạch và dưỡng ẩm cho mọi loại da",
+        price: 450000
       },
       {
-        id: 503,
-        name: "Tư vấn chăm sóc da nhạy cảm",
-        description: "Tư vấn cá nhân hóa về cách chăm sóc và bảo vệ da nhạy cảm",
-        price: 300000,
-        imageId: "sensitive-consultation"
+        id: 2,
+        name: `Liệu trình dành cho ${skinType}`,
+        serviceName: `Liệu trình dành cho ${skinType}`,
+        description: `Phương pháp điều trị phù hợp với ${skinType}`,
+        price: 650000
       }
-    ],
-    "Không xác định": [
-      {
-        id: 901,
-        name: "Kiểm tra và phân tích da",
-        description: "Đánh giá chuyên sâu về loại da và các vấn đề da mặt",
-        price: 250000,
-        imageId: "skin-analysis"
-      },
-      {
-        id: 902,
-        name: "Tư vấn dịch vụ phù hợp",
-        description: "Tư vấn chuyên nghiệp về quy trình chăm sóc da phù hợp",
-        price: 200000,
-        imageId: "skin-consultation"
-      }
-    ]
-  };
-
-  // Trả về danh sách dịch vụ theo loại da hoặc mặc định nếu không tìm thấy
-  return defaultServices[skinType] || defaultServices["Không xác định"];
+    ];
+  }
 };
 
 const surveyApi = {
@@ -262,7 +259,7 @@ const surveyApi = {
   getSurveyResults: (sessionId) => {
     console.log("Getting results for session:", sessionId);
     return apiClient.get(`/api/Survey/session/${sessionId}`)
-      .then(response => {
+      .then(async response => {
         console.log("Session data received:", response.data);
         
         // Nếu session chưa hoàn thành nhưng có dữ liệu skinTypeScores, chuyển đổi thành định dạng kết quả
@@ -291,8 +288,8 @@ const surveyApi = {
           
           const friendlySkinType = skinTypeMap[dominantSkinType.toUpperCase()] || dominantSkinType;
           
-          // Tạo danh sách dịch vụ đề xuất mặc định dựa trên loại da
-          const defaultServices = getDefaultServicesForSkinType(friendlySkinType);
+          // Tạo danh sách dịch vụ đề xuất từ API dựa trên loại da
+          const recommendedServices = await getDefaultServicesForSkinType(friendlySkinType);
           
           // Tạo đối tượng kết quả tự động từ dữ liệu phiên
           return {
@@ -304,7 +301,7 @@ const surveyApi = {
                 resultText: `Dựa trên câu trả lời của bạn, chúng tôi đánh giá bạn có ${friendlySkinType}.`,
                 recommendationText: "Hãy tham khảo các dịch vụ phù hợp với loại da của bạn."
               },
-              recommendedServices: defaultServices
+              recommendedServices: recommendedServices
             }
           };
         }
@@ -515,24 +512,11 @@ const surveyApi = {
     return await apiClient.put(`/api/Survey/admin/results/${resultData.id}`, resultData);
   },
 
-  // Return raw recommendation data for debugging
+  // Return raw recommendation data directly from API without manipulation
   getRawRecommendations: async () => {
     try {
-      console.log("Getting raw recommendation data directly from API");
+      console.log("Getting raw recommendation data from API");
       const response = await apiClient.get('/api/SurveyResults/recommended-service');
-      console.log("FULL RAW RESPONSE:", response);
-      
-      // Show the exact data structure we're working with
-      if (response.data && response.data.data && response.data.data.length > 0) {
-        const firstItem = response.data.data[0];
-        console.log("RAW DATA STRUCTURE OF FIRST ITEM:");
-        console.log(JSON.stringify(firstItem, null, 2));
-        console.log("EXAMPLE VALUES:");
-        Object.keys(firstItem).forEach(key => {
-          console.log(`${key}: ${JSON.stringify(firstItem[key])}`);
-        });
-      }
-      
       return response;
     } catch (error) {
       console.error("Error in getRawRecommendations:", error);
@@ -642,12 +626,12 @@ const surveyApi = {
     
     // Thử phương thức đã được cải tiến
     return surveyApi.getSurveyResults(sessionId)
-      .catch(error => {
+      .catch(async error => {
         console.error("Both endpoints failed for session results, using fallback:", error);
         
         // Nếu cả hai phương thức đều thất bại, cố gắng lấy dữ liệu session trực tiếp
         return apiClient.get(`/api/Survey/session/${sessionId}`)
-          .then(sessionResponse => {
+          .then(async sessionResponse => {
             console.log("Retrieved raw session data:", sessionResponse.data);
             
             // Tạo đối tượng kết quả tối thiểu
@@ -671,8 +655,8 @@ const surveyApi = {
                 skinType = skinTypeMap[maxScoreItem.skinTypeId?.toUpperCase()] || maxScoreItem.skinTypeId || "Không xác định";
               }
               
-              // Tạo danh sách dịch vụ đề xuất mặc định dựa trên loại da
-              const defaultServices = getDefaultServicesForSkinType(skinType);
+              // Tạo danh sách dịch vụ đề xuất từ API dựa trên loại da
+              const recommendedServices = await getDefaultServicesForSkinType(skinType);
               
               return {
                 data: {
@@ -682,7 +666,7 @@ const surveyApi = {
                     resultText: `Loại da của bạn: ${skinType}`,
                     recommendationText: "Dưới đây là các dịch vụ được đề xuất phù hợp với loại da của bạn."
                   },
-                  recommendedServices: defaultServices
+                  recommendedServices: recommendedServices
                 }
               };
             }

@@ -15,6 +15,53 @@ const SurveyResultPage = () => {
   const [imageMap, setImageMap] = useState({});
   const { user } = useAuth(); // Use the authenticated user from context
 
+  // Process service recommendations to handle different data structures
+  const processServiceRecommendations = (recommendations) => {
+    if (!recommendations || !Array.isArray(recommendations)) return [];
+    
+    return recommendations
+      .map(item => {
+        // Check if we have a direct service item (instead of recommendation)
+        const isDirectService = item.serviceName !== undefined && !item.service;
+        
+        if (isDirectService) {
+          // This is a direct service object, not a recommendation
+          return {
+            id: item.id || 0,
+            name: item.serviceName || item.name || `Service ${item.id}`,
+            description: item.serviceDescription || item.description || "",
+            price: typeof item.price === 'number' ? item.price : 0,
+            imageId: item.imageId || item.id // Use imageId if available, fallback to id
+          };
+        } else {
+          // Regular recommendation object with service property
+          const serviceId = item.serviceId || item.id;
+          
+          // Process service object to ensure valid data
+          if (item.service) {
+            // Extract service data from recommendation
+            return {
+              id: serviceId || 0,
+              name: item.service.name || item.service.serviceName || `Service ${serviceId}`,
+              description: item.service.description || item.service.serviceDescription || "",
+              price: typeof item.service.price === 'number' ? item.service.price : 0,
+              imageId: item.service.imageId || serviceId
+            };
+          } else {
+            // If no service object, use the item itself as service
+            return {
+              id: serviceId || 0,
+              name: item.name || `Service ${serviceId}`,
+              description: item.description || "",
+              price: typeof item.price === 'number' ? item.price : 0,
+              imageId: item.imageId || serviceId
+            };
+          }
+        }
+      })
+      .filter(item => item && item.id > 0); // Keep only valid items
+  };
+
   useEffect(() => {
     const fetchResults = async () => {
       try {
@@ -27,78 +74,89 @@ const SurveyResultPage = () => {
           return;
         }
 
-        // Sử dụng getResults thay vì getSurveyResultDetails để phù hợp với API endpoint
-        // getResults sử dụng /api/Survey/results/${sessionId}
         console.log("Fetching survey results with ID:", surveyId);
+        let surveyResultData = null;
+        let errorOccurred = false;
         
+        // Try the primary endpoint
         try {
-          // Thử endpoint chính
           const response = await surveyApi.getResults(surveyId);
           console.log("Survey results successfully retrieved:", response.data);
-          
-          // Ensure recommended services are fully populated
-          const enrichedData = {
-            ...response.data,
-            recommendedServices: response.data.recommendedServices?.map(service => ({
-              id: service.id,
-              name: service.name || 'Unknown Service',
-              description: service.description || 'No description available',
-              price: service.price || 0,
-              imageId: service.imageId || service.id // Use imageId if available, fallback to id
-            })) || []
-          };
-
-          // Nếu không có dịch vụ đề xuất, thêm dịch vụ mặc định
-          if (!enrichedData.recommendedServices || enrichedData.recommendedServices.length === 0) {
-            const skinType = enrichedData.result?.skinType || "Không xác định";
-            console.log("No recommended services found, adding default services for:", skinType);
-            // Sử dụng hàm từ surveyApi để lấy dịch vụ mặc định theo loại da
-            enrichedData.recommendedServices = surveyApi.getDefaultServicesForSkinType 
-              ? surveyApi.getDefaultServicesForSkinType(skinType)
-              : [];
-          }
-
-          setSurveyData(enrichedData);
-          
-          // Save the fact that the user has completed a survey
-          localStorage.setItem("hasCompletedSurvey", "true");
-          console.log("Survey completion status saved to localStorage");
-          
-          // Fetch images for each recommended service
-          if (enrichedData.recommendedServices && enrichedData.recommendedServices.length > 0) {
-            fetchServiceImages(enrichedData.recommendedServices);
-          }
+          surveyResultData = response.data;
         } catch (mainError) {
           console.error("Error with main endpoint:", mainError);
+          errorOccurred = true;
           
-          // Thử endpoint thay thế
+          // Try the fallback endpoint
           try {
             console.log("Trying alternative endpoint with getSurveyResultDetails");
             const fallbackResponse = await surveyApi.getSurveyResultDetails(surveyId);
             console.log("Fallback survey results retrieved:", fallbackResponse.data);
-            
-            // Xử lý dữ liệu từ endpoint dự phòng nếu thành công
-            const enrichedData = {
-              ...fallbackResponse.data,
-              recommendedServices: fallbackResponse.data.recommendedServices?.map(service => ({
-                id: service.id,
-                name: service.name || 'Unknown Service',
-                description: service.description || 'No description available',
-                price: service.price || 0,
-                imageId: service.imageId || service.id
-              })) || []
-            };
-
-            setSurveyData(enrichedData);
-            localStorage.setItem("hasCompletedSurvey", "true");
-            
-            if (enrichedData.recommendedServices && enrichedData.recommendedServices.length > 0) {
-              fetchServiceImages(enrichedData.recommendedServices);
-            }
+            surveyResultData = fallbackResponse.data;
+            errorOccurred = false;
           } catch (fallbackError) {
             console.error("Both endpoints failed:", fallbackError);
             throw new Error("Could not retrieve survey results from any endpoint");
           }
+        }
+        
+        // Process the recommended services using our helper function
+        const processedServices = processServiceRecommendations(
+          surveyResultData?.recommendedServices || []
+        );
+        console.log("Processed recommended services:", processedServices);
+        
+        // Ensure recommended services are fully populated
+        const enrichedData = {
+          ...surveyResultData,
+          recommendedServices: processedServices
+        };
+
+        // If there are no recommended services yet, add default ones based on skin type
+        if (!enrichedData.recommendedServices || enrichedData.recommendedServices.length === 0) {
+          const skinType = enrichedData.result?.skinType || "Không xác định";
+          console.log("No recommended services found, adding default services for:", skinType);
+          
+          try {
+            // Get default services using the enhanced function that will try multiple endpoints
+            const defaultServices = await surveyApi.getDefaultServicesForSkinType(skinType);
+            
+            // Process these services through the same function to ensure consistent format
+            enrichedData.recommendedServices = processServiceRecommendations(defaultServices);
+            console.log("Added fallback services:", enrichedData.recommendedServices);
+          } catch (servicesError) {
+            console.error("Failed to get default services:", servicesError);
+            
+            // As a last resort, add some hardcoded services
+            enrichedData.recommendedServices = [
+              {
+                id: 1,
+                name: "Chăm sóc da cơ bản",
+                description: "Liệu trình làm sạch và dưỡng ẩm cho mọi loại da",
+                price: 450000,
+                imageId: 1
+              },
+              {
+                id: 2,
+                name: `Liệu trình dành cho ${skinType}`,
+                description: `Phương pháp điều trị phù hợp với ${skinType}`,
+                price: 650000,
+                imageId: 2
+              }
+            ];
+            console.log("Added hardcoded services as last resort");
+          }
+        }
+
+        setSurveyData(enrichedData);
+        
+        // Save the fact that the user has completed a survey
+        localStorage.setItem("hasCompletedSurvey", "true");
+        console.log("Survey completion status saved to localStorage");
+        
+        // Fetch images for each recommended service
+        if (enrichedData.recommendedServices && enrichedData.recommendedServices.length > 0) {
+          fetchServiceImages(enrichedData.recommendedServices);
         }
         
         setLoading(false);
