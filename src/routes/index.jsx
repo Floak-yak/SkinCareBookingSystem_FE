@@ -30,6 +30,7 @@ import BookingHistory from "../pages/BookingHistory";
 import StaffCalendar from "../pages/StaffCalendar";
 import VerifySuccess from "../components/VerifySuccess";
 import VerifyFail from "../components/VerifyFail";
+import SpecialistList from "../pages/Specialist/SpecialistList";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
