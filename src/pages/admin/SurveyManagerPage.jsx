@@ -163,7 +163,7 @@ const SurveyManagerPage = () => {
         questionText: question.question,
         options: question.options.map(opt => ({
           optionText: opt.label,
-          nextQuestionId: opt.nextId
+          nextQuestionId: opt.nextQuestionId
         }))
       });
     }
@@ -613,7 +613,7 @@ const SurveyManagerPage = () => {
         <ul className="options-list">
           {options && options.map((opt, idx) => (
             <li key={idx}>
-              {opt.label || opt.optionText} → {opt.nextId || opt.nextQuestionId}
+              {opt.label || opt.optionText}
             </li>
           ))}
         </ul>
@@ -896,19 +896,10 @@ const SurveyManagerPage = () => {
                             <Form.Item
                               {...restField}
                               name={[name, 'optionText']}
-                              style={{ marginRight: 8, width: '60%' }}
+                              style={{ marginRight: 8, width: '90%' }}
                               rules={[{ required: true, message: 'Option text required' }]}
                             >
                               <Input placeholder="Option text" />
-                            </Form.Item>
-                            
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'nextQuestionId']}
-                              style={{ width: '30%' }}
-                              rules={[{ required: true, message: 'Next step required' }]}
-                            >
-                              <Input placeholder="Next question ID" />
                             </Form.Item>
                             
                             {fields.length > 1 && (

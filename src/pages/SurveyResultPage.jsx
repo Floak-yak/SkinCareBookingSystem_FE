@@ -80,7 +80,7 @@ const SurveyResultPage = () => {
         
         // Try the primary endpoint
         try {
-          const response = await surveyApi.getResults(surveyId);
+          const response = await surveyApi.getSurveyResults(surveyId); // Updated to use the new logic
           console.log("Survey results successfully retrieved:", response.data);
           surveyResultData = response.data;
         } catch (mainError) {
