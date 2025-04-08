@@ -87,6 +87,14 @@ const Header = () => {
       ),
     },
     role === "Customer" && {
+      key: "refundHistory",
+      label: (
+        <Link to="/refund-history" className="booking-history-btn">
+          <CheckCircleOutlined /> Trạng thái hoàn tiền
+        </Link>
+      ),
+    },
+    role === "Customer" && {
       key: "skinSurvey",
       label: (
         <Link to="/survey" className="skin-survey-btn">
@@ -117,6 +125,7 @@ const Header = () => {
           <Link to="/admin/categories">Quản lý danh mục</Link>
           <Link to="/admin/manager-orders">Quản lý đơn hàng</Link>
           <Link to="/admin/survey-manager">Quản lý câu hỏi</Link>
+          <Link to="/admin/cancel-booking">Quản lí lịch hủy</Link>
         </>
       );
     } else if (role === "Staff") {
