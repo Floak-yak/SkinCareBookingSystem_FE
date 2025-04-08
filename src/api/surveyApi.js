@@ -300,6 +300,7 @@ const surveyApi = {
   getSurveyResultDetails: (surveyId) => {
     console.log(`Fetching survey result details for ${surveyId} from updated endpoint`);
     return apiClient.get(`/api/Survey/results/${surveyId}`);
+    //return apiClient.get(`/api/SurveyResults/recommended-services/${skinType}`);
   },
 
   addRecommendedService: (service) => {
@@ -736,7 +737,12 @@ const surveyApi = {
   },
 
   // Export hàm getDefaultServicesForSkinType để có thể được sử dụng từ bên ngoài
-  getDefaultServicesForSkinType
+  getDefaultServicesForSkinType,
+
+  deleteOption: (questionId, optionId) => {
+    console.log(`Deleting option with questionId: ${questionId}, optionId: ${optionId}`);
+    return apiClient.delete(`/api/Survey/admin/question/${questionId}/option/${optionId}`);
+  },
 };
 
 export default surveyApi;

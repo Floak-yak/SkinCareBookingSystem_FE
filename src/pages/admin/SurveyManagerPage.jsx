@@ -57,7 +57,7 @@ const SurveyManagerPage = () => {
           questionList = dbResponse.data.map(q => ({
             id: q.id,
             questionId: q.questionId,
-            question: q.questionText,
+            questionText: q.questionText,
             options: q.options || [],
             isDatabase: true
           }));
@@ -141,33 +141,25 @@ const SurveyManagerPage = () => {
     }
   };
 
-  // Handle editing a question
+  // Ensure the form is pre-filled with the correct data when editing a question
   const handleEditQuestion = (question) => {
     setSelectedQuestion(question);
-    
-    if (question.isDatabase) {
-      // Format for database question
-      questionForm.setFieldsValue({
-        id: question.id,
-        questionId: question.questionId,
-        questionText: question.question,
-        options: question.options.map(opt => ({
+
+    questionForm.setFieldsValue({
+      id: question.id,
+      questionId: question.questionId,
+      //here
+      questionText: question.questionText,
+      options: question.options.map(opt => {
+        const skinTypePoint = opt.skinTypePoints?.[0] || {}; // Get the first skinTypePoint or an empty object
+        return {
           optionText: opt.optionText,
-          nextQuestionId: opt.nextQuestionId
-        }))
-      });
-    } else {
-      // Format for file-based question
-      questionForm.setFieldsValue({
-        id: question.id,
-        questionText: question.question,
-        options: question.options.map(opt => ({
-          optionText: opt.label,
-          nextQuestionId: opt.nextQuestionId
-        }))
-      });
-    }
-    
+          points: skinTypePoint.points || '', // Pre-fill points if available
+          skinTypeId: skinTypePoint.skinTypeId || '' // Pre-fill skinTypeId if available
+        };
+      })
+    });
+
     setShowQuestionModal(true);
   };
 
@@ -181,7 +173,7 @@ const SurveyManagerPage = () => {
     setShowQuestionModal(true);
   };
 
-  // Save a question (create or update)
+  // Ensure points and skinTypeId are included when saving options
   const handleSaveQuestion = async (values) => {
     try {
       // Determine if it's a database or file-based question
@@ -194,13 +186,20 @@ const SurveyManagerPage = () => {
           questionId: values.questionId,
           questionText: values.questionText,
           options: values.options.map(opt => ({
+            id: opt.id || null,
             optionText: opt.optionText,
-            nextQuestionId: opt.nextQuestionId
+            isDeleted: opt.isDeleted ?? false,
+            skinTypePoints: [
+              {
+                skinTypeId: opt.skinTypeId,
+                points: opt.points
+              }
+            ]
           }))
         };
         console.log('Request body for updateDatabaseQuestion:', questionData);
         if (selectedQuestion) {
-          await surveyApi.updateDatabaseQuestion(selectedQuestion.id, questionData);
+         await surveyApi.updateDatabaseQuestion(selectedQuestion.id, questionData);
           message.success('Question updated successfully');
         } else {
           await surveyApi.addDatabaseQuestion(questionData);
@@ -215,7 +214,11 @@ const SurveyManagerPage = () => {
         };
         
         values.options.forEach(opt => {
-          fileQuestion.choices[opt.optionText] = opt.nextQuestionId;
+          fileQuestion.choices[opt.optionText] = {
+            nextQuestionId: opt.nextQuestionId,
+            points: opt.points, // Include points
+            skinTypeId: opt.skinTypeId // Include skinTypeId
+          };
         });
         
         if (selectedQuestion) {
@@ -238,18 +241,26 @@ const SurveyManagerPage = () => {
   // Delete a question
   const handleDeleteQuestion = async (question) => {
     try {
+      if (!question || !question.id) {
+        console.error('Invalid question data:', question);
+        message.error('Invalid question. Please try again.');
+        return;
+      }
+
       if (window.confirm('Are you sure you want to delete this question?')) {
-        if (question.isDatabase) {
-          await surveyApi.deleteDatabaseQuestion(question.id);
+        console.log('Deleting question with ID:', question.id);
+        const response = await surveyApi.deleteAdminQuestion(question.id);
+
+        if (response.status === 200) {
+          message.success('Question deleted successfully');
+          fetchQuestions(); // Refresh the question list
         } else {
-          await surveyApi.deleteQuestion(question.id);
+          throw new Error('Failed to delete question on the server');
         }
-        message.success('Question deleted successfully');
-        fetchQuestions();
       }
     } catch (err) {
       console.error('Error deleting question:', err);
-      message.error('Failed to delete question');
+      message.error('Failed to delete question. Please try again.');
     }
   };
 
@@ -602,7 +613,7 @@ const SurveyManagerPage = () => {
     },
     {
       title: 'Question',
-      dataIndex: 'question',
+      dataIndex: 'questionText',
       key: 'question',
     },
     {
@@ -613,7 +624,7 @@ const SurveyManagerPage = () => {
         <ul className="options-list">
           {options && options.map((opt, idx) => (
             <li key={idx}>
-              {opt.label || opt.optionText}
+              <strong>{opt.optionText}</strong>
             </li>
           ))}
         </ul>
@@ -830,6 +841,28 @@ const SurveyManagerPage = () => {
     }
   };
 
+  const handleDeleteOption = async (questionId, optionId, remove) => {
+    try {
+      console.log(`Attempting to delete option with questionId: ${questionId}, optionId: ${optionId}`);
+      const response = await surveyApi.deleteOption(questionId, optionId);
+      console.log('Delete API response:', response);
+
+      if (response.status === 200) {
+        message.success('Option deleted successfully');
+        remove(); // Remove the option from the UI
+
+        // Refresh the options list to ensure data consistency
+        const updatedQuestions = await surveyApi.getAllQuestions();
+        console.log('Updated questions after deletion:', updatedQuestions);
+      } else {
+        throw new Error('API did not return success status');
+      }
+    } catch (error) {
+      console.error('Error deleting option:', error);
+      message.error('Failed to delete option. Please try again.');
+    }
+  };
+
   return (
     <div className="survey-manager-page">
       <h1>Hệ Thống Quản Lý Khảo Sát</h1>
@@ -877,7 +910,7 @@ const SurveyManagerPage = () => {
                   >
                     <Input placeholder="e.g., Q1, Q2, RESULT_1, etc." />
                   </Form.Item>
-                  
+                  //Fix here
                   <Form.Item
                     name="questionText"
                     label="Question Text"
@@ -896,24 +929,74 @@ const SurveyManagerPage = () => {
                             <Form.Item
                               {...restField}
                               name={[name, 'optionText']}
-                              style={{ marginRight: 8, width: '90%' }}
+                              style={{ marginRight: 8, width: '40%' }}
                               rules={[{ required: true, message: 'Option text required' }]}
                             >
                               <Input placeholder="Option text" />
                             </Form.Item>
-                            
+
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'points']}
+                              style={{ marginRight: 8, width: '20%' }}
+                              rules={[{ required: true, message: 'Points required' }]}
+                            >
+                              <Input
+                                type="number"
+                                placeholder="Points"
+                                id={`options_${name}_points`}
+                                aria-required="true"
+                              />
+                            </Form.Item>
+
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'skinTypeId']}
+                              style={{ marginRight: 8, width: '30%' }}
+                              rules={[{ required: true, message: 'Skin type ID required' }]}
+                            >
+                              <Select placeholder="Select skin type">
+                                <Option value="DRY">Dry</Option>
+                                <Option value="OILY">Oily</Option>
+                                <Option value="COMBINATION">Combination</Option>
+                                <Option value="NORMAL">Normal</Option>
+                                <Option value="SENSITIVE">Sensitive</Option>
+                                <Option value="ACNE_PRONE">Acne-Prone</Option>
+                                <Option value="AGING">Aging</Option>
+                              </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'skinTypePoints']}
+                              style={{ marginRight: 8, width: '30%' }}
+                            >
+                              <ul>
+                                {restField.value?.map((point, idx) => (
+                                  <li key={idx}>
+                                    Skin Type: {point.skinTypeId}, Points: {point.points}
+                                  </li>
+                                ))}
+                              </ul>
+                            </Form.Item>
+
                             {fields.length > 1 && (
                               <Button 
                                 type="text" 
                                 danger 
                                 icon={<DeleteOutlined />} 
-                                onClick={() => remove(name)} 
+                                //delete here
+                                onClick={
+                                  
+                                  () => remove(name)
+
+                                } 
                                 style={{ marginLeft: 8 }}
                               />
                             )}
                           </div>
                         ))}
-                        
+
                         <Form.Item>
                           <Button 
                             type="dashed" 
