@@ -122,8 +122,8 @@ const Header = () => {
     } else if (role === "Staff") {
       return (
         <>
-          {/* Approve Blogs */}
           <Link to="/staff/approve-blogs">Duyệt bài</Link>
+          <Link to="/staff/checkin">CheckIn</Link>
         </>
       );
     } else if (role === "SkinTherapist") {

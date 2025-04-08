@@ -30,6 +30,7 @@ import BookingHistory from "../pages/BookingHistory";
 import StaffCalendar from "../pages/StaffCalendar";
 import VerifySuccess from "../components/VerifySuccess";
 import VerifyFail from "../components/VerifyFail";
+import CheckInStaffPage from "../pages/CheckInStaffPage";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -54,6 +55,7 @@ const AppRoutes = () => {
       <Route path="/blogs/:id" element={<BlogDetail />} />
       <Route path="/blogs/create" element={<CreateBlog />} />
       <Route path="/staff/approve-blogs" element={<ApproveBlog />} />
+      <Route path="/staff/checkin" element={<CheckInStaffPage />} />
       <Route path="/services" element={<Services />} />
       <Route path="/booking" element={<Booking />} />
       <Route path="/booking-history" element={<BookingHistory />} />

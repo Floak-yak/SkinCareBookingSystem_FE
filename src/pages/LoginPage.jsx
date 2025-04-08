@@ -49,6 +49,8 @@ const LoginPage = () => {
             ? "/admin/user"
             : userData.role === "SkinTherapist"
             ? "/staff-calendar"
+            : userData.role === "Staff"
+            ? "/staff/approve-blogs"
             : redirectPath
         );
       }, 500);
