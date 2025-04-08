@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/SurveyResultPage.css';
 import { FaCheck, FaExclamationTriangle, FaArrowLeft } from 'react-icons/fa';
@@ -12,12 +12,18 @@ const SurveyResultPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [surveyData, setSurveyData] = useState(null);
-  const [imageMap, setImageMap] = useState({});
-  const { user } = useAuth(); // Use the authenticated user from context
+  const { user } = useAuth();
+  const fetchingRef = useRef(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 2;
 
   useEffect(() => {
+    if (fetchingRef.current) return;
+
     const fetchResults = async () => {
       try {
+        fetchingRef.current = true;
+        
         const params = new URLSearchParams(location.search);
         const surveyId = params.get('id');
 
@@ -27,17 +33,38 @@ const SurveyResultPage = () => {
           return;
         }
 
+        console.log(`Attempting to fetch survey results (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`);
+        
+        // First explicitly ensure the survey is completed
+        try {
+          console.log('Making sure the survey is properly completed...');
+          await surveyApi.completeSurvey(surveyId);
+          console.log('Survey completion status updated successfully');
+        } catch (completeError) {
+          console.warn('Error completing survey:', completeError.message);
+          // Continue anyway - it might already be completed
+        }
+        
+        // Now fetch the results
         const response = await surveyApi.getSurveyResultDetails(surveyId);
 
-        // Ensure recommended services are fully populated
+        if (!response || !response.data) {
+          throw new Error("Invalid response from server");
+        }
+
+        // Check if using default data (fallback case)
+        if (response.statusText === 'OK (Generated)') {
+          console.log('Warning: Using default survey data. This is fallback data, not real API results.');
+        }
+
+        // Process recommended services data
         const enrichedData = {
           ...response.data,
           recommendedServices: response.data.recommendedServices.map(service => ({
             id: service.id,
             name: service.name || 'Unknown Service',
             description: service.description || 'No description available',
-            price: service.price || 0,
-            imageId: service.imageId || service.id // Use imageId if available, fallback to id
+            price: service.price || 0
           }))
         };
 
@@ -45,52 +72,35 @@ const SurveyResultPage = () => {
         
         // Save the fact that the user has completed a survey
         localStorage.setItem("hasCompletedSurvey", "true");
-        console.log("Survey completion status saved to localStorage");
-        
-        // Fetch images for each recommended service
-        fetchServiceImages(enrichedData.recommendedServices);
         
         setLoading(false);
       } catch (err) {
         console.error("Error fetching survey results:", err);
+        
+        // If we haven't hit max retries yet, try again 
+        if (retryCount < MAX_RETRIES) {
+          console.log(`Retrying in 2 seconds... (${retryCount + 1}/${MAX_RETRIES})`);
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+            fetchingRef.current = false;
+          }, 2000);
+          return;
+        }
+        
         setError("Failed to load survey results. Please try again later.");
         setLoading(false);
+      } finally {
+        fetchingRef.current = false;
       }
-    };
-    
-    const fetchServiceImages = async (services) => {
-      const imageDataMap = {};
-      await Promise.all(
-        services.map(async (service) => {
-          if (service.imageId) {
-            try {
-              const response = await fetch(
-                `https://localhost:7101/api/Image/GetImageById?imageId=${service.imageId}`
-              );
-              // Only try to parse JSON if response is ok
-              if (response.ok) {
-                try {
-                  const imageData = await response.json();
-                  if (imageData?.bytes) {
-                    imageDataMap[service.id] = `data:image/png;base64,${imageData.bytes}`;
-                  }
-                } catch (jsonError) {
-                  console.error(`Invalid JSON for service ${service.id}:`, jsonError);
-                }
-              } else {
-                console.warn(`Error fetching image for service ${service.id}: Status ${response.status}`);
-              }
-            } catch (error) {
-              console.error(`Error loading image for service ${service.id}:`, error);
-            }
-          }
-        })
-      );
-      setImageMap((prev) => ({ ...prev, ...imageDataMap }));
     };
 
     fetchResults();
-  }, [location.search]);
+
+    // Cleanup function
+    return () => {
+      fetchingRef.current = false;
+    };
+  }, [location.search, retryCount]);
 
   const handleBackToSurvey = () => {
     navigate('/survey');
@@ -98,12 +108,70 @@ const SurveyResultPage = () => {
 
   const handleBookConsultation = () => {
     if (!user) {
-      // If user is not logged in, redirect to login page with return URL
       navigate('/login', { state: { from: '/services' } });
     } else {
-      // If user is logged in, proceed to services page
       navigate('/services');
     }
+  };
+
+  const handleRetry = () => {
+    setLoading(true);
+    setError(null);
+    setRetryCount(0);
+    fetchingRef.current = false;
+  };
+
+  // Render the service card 
+  const renderServiceCard = (service, index) => {
+    return (
+      <div 
+        key={index} 
+        className="service-item"
+        onClick={() => {
+          if (!user) {
+            navigate('/login', { state: { from: `/servicesDetail/${service.id}` } });
+          } else {
+            navigate(`/servicesDetail/${service.id}`);
+          }
+        }}
+      >
+        <div className="service-info">
+          <h3 className="service-title">{service.name}</h3>
+          <p className="service-description">{service.description}</p>
+          <p className="service-price">
+            Giá: {service.price?.toLocaleString('vi-VN')} VNĐ
+          </p>
+        </div>
+        <div className="service-actions">
+          <button 
+            className="book-service-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!user) {
+                navigate('/login', { state: { from: '/booking' } });
+              } else {
+                navigate('/booking');
+              }
+            }}
+          >
+            Đặt lịch
+          </button>
+          <button 
+            className="view-details-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!user) {
+                navigate('/login', { state: { from: `/servicesDetail/${service.id}` } });
+              } else {
+                navigate(`/servicesDetail/${service.id}`);
+              }
+            }}
+          >
+            Xem chi tiết
+          </button>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -113,6 +181,7 @@ const SurveyResultPage = () => {
           <span className="visually-hidden">Loading...</span>
         </Spinner>
         <p>Đang phân tích kết quả...</p>
+        {retryCount > 0 && <p>Đang thử lại lần {retryCount}/{MAX_RETRIES}...</p>}
       </div>
     );
   }
@@ -123,9 +192,14 @@ const SurveyResultPage = () => {
         <FaExclamationTriangle size={50} />
         <h3>Có lỗi xảy ra</h3>
         <p>{error}</p>
-        <button className="primary-button" onClick={handleBackToSurvey}>
-          Quay lại khảo sát
-        </button>
+        <div className="error-actions">
+          <button className="primary-button" onClick={handleRetry}>
+            Thử lại
+          </button>
+          <button className="secondary-button" onClick={handleBackToSurvey}>
+            Quay lại khảo sát
+          </button>
+        </div>
       </div>
     );
   }
@@ -162,55 +236,7 @@ const SurveyResultPage = () => {
           <h3>Dịch Vụ Được Đề Xuất</h3>
           <div className="services-container">
             {surveyData?.recommendedServices && surveyData.recommendedServices.length > 0 ? (
-              surveyData.recommendedServices.map((service, index) => (
-                <div 
-                  key={index} 
-                  className="service-item"
-                  onClick={() => {
-                    if (!user) {
-                      navigate('/login', { state: { from: `/servicesDetail/${service.id}` } });
-                    } else {
-                      navigate(`/servicesDetail/${service.id}`);
-                    }
-                  }}
-                >
-                  <div className="service-info">
-                    <h3 className="service-title">{service.name}</h3>
-                    <p className="service-description">{service.description}</p>
-                    <p className="service-price">
-                      Giá: {service.price?.toLocaleString('vi-VN')} VNĐ
-                    </p>
-                  </div>
-                  <div className="service-actions">
-                    <button 
-                      className="book-service-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!user) {
-                          navigate('/login', { state: { from: '/booking' } });
-                        } else {
-                          navigate('/booking');
-                        }
-                      }}
-                    >
-                      Đặt lịch
-                    </button>
-                    <button 
-                      className="view-details-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!user) {
-                          navigate('/login', { state: { from: `/servicesDetail/${service.id}` } });
-                        } else {
-                          navigate(`/servicesDetail/${service.id}`);
-                        }
-                      }}
-                    >
-                      Xem chi tiết
-                    </button>
-                  </div>
-                </div>
-              ))
+              surveyData.recommendedServices.map((service, index) => renderServiceCard(service, index))
             ) : (
               <div className="empty-services">
                 <p>Hiện tại chưa có dịch vụ được đề xuất cho loại da của bạn.</p>

@@ -38,33 +38,48 @@ const SurveyQuestionPage = () => {
       setLoading(true);
       setError(null);
       
-      // Try to use the new database-backed API
-      try {
-        const response = await surveyApi.startDatabaseSurvey();
-        if (!response || !response.data) {
-          throw new Error('Invalid response from server');
-        }
+      const response = await surveyApi.startSurvey();
+      console.log('Survey API response:', response.data);
+      
+      if (!response || !response.data) {
+        throw new Error('Invalid response from server');
+      }
+      
+      // Handle the API response based on actual API structure
+      if (response.data.sessionId && response.data.nextQuestionData) {
+        // API format with nextQuestionData structure
         setSessionId(response.data.sessionId);
-        setCurrentQuestionId(response.data.questionId);
-        setQuestionText(response.data.question);
-        setOptions(response.data.options?.map(o => ({
+        const questionData = response.data.nextQuestionData;
+        
+        setCurrentQuestionId(questionData.questionId);
+        setQuestionText(questionData.questionText);
+        setOptions(questionData.options?.map(o => ({
           id: o.id,
           text: o.text
         })) || []);
-      } catch (dbError) {
-        console.warn('Database survey not available, falling back to file-based survey', dbError);
         
-        // Fall back to file-based API
-        const response = await surveyApi.startSurvey();
-        if (!response || !response.data) {
-          throw new Error('Invalid response from file-based survey');
-        }
+        console.log('Using API format with sessionId and nextQuestionData');
+      } else if (response.data.sessionId) {
+        // Alternative database format
+        setSessionId(response.data.sessionId);
+        setCurrentQuestionId(response.data.questionId || response.data.id);
+        setQuestionText(response.data.question || response.data.questionText);
+        setOptions(response.data.options?.map(o => ({
+          id: o.id,
+          text: o.text || o.optionText
+        })) || []);
+        
+        console.log('Using alternative database format');
+      } else {
+        // File-based survey (legacy format)
         setQuestionText(response.data.question);
         setOptions(response.data.options?.map((option, index) => ({
           id: index,
           text: option.label
         })) || []);
         setCurrentQuestionId('Q1');
+        
+        console.log('Using legacy file-based format');
       }
     } catch (err) {
       console.error('Error starting survey:', err);
@@ -87,24 +102,113 @@ const SurveyQuestionPage = () => {
       
       if (sessionId) {
         // Use database-backed API
-        const response = await surveyApi.answerQuestion(sessionId, currentQuestionId, optionId);
+        // Determine if this might be the last question by checking response structure
+        const isLastQuestionPayload = response => {
+          return (response.data.nextQuestionData && response.data.nextQuestionData.isResult) || 
+                 (response.data.isResult === true);
+        };
         
-        if (response.data.isResult) {
-          // We have a result
-          setResultData(response.data.result);
-          setRecommendedServices(response.data.recommendedServices || []);
-          setFinished(true);
+        // First make a GET request to check if this would be the last question
+        let isLast = false;
+        try {
+          // We can use the session endpoint to check the next question without answering
+          const checkResponse = await surveyApi.getSession(sessionId);
+          isLast = checkResponse.data.isLastQuestion || 
+                   checkResponse.data.nextIsResult || 
+                   (checkResponse.data.currentQuestionIndex >= checkResponse.data.totalQuestions - 1);
+        } catch (checkError) {
+          console.log('Could not determine if this is the last question:', checkError);
+          // Continue anyway, assume it might be the last one
+        }
+        
+        console.log('Is this potentially the last question?', isLast);
+        
+        // Submit the answer, indicating if it might be the last one
+        const response = await surveyApi.answerQuestion(sessionId, currentQuestionId, optionId, isLast);
+        console.log('Answer API response:', response.data);
+        
+        // If the response indicates this is the last question/survey is complete
+        const isComplete = (response.data.isResult === true) || 
+                          (response.data.nextQuestionData && response.data.nextQuestionData.isResult) ||
+                          (response.data.isEnd === true) ||
+                          (response.data.message?.includes('completed'));
+        
+        if (isComplete) {
+          // Explicitly complete the survey to ensure proper database updating
+          try {
+            console.log('Explicitly completing the survey...');
+            await surveyApi.completeSurvey(sessionId);
+          } catch (completeError) {
+            console.warn('Error explicitly completing survey:', completeError);
+            // Continue even if this fails - the backend might have already completed it
+          }
+        }
+        
+        // Now check the response to determine what to do next
+        if (response.data.nextQuestionData) {
+          // Format with nextQuestionData
+          const questionData = response.data.nextQuestionData;
           
-          // Navigate to the results page with the session ID
-          navigate(`/survey-results?id=${sessionId}`);
+          if (questionData.isResult) {
+            // Survey complete - get the results
+            const resultsResponse = await surveyApi.getSurveyResults(sessionId);
+            console.log('Results API response:', resultsResponse.data);
+            
+            if (resultsResponse.data && resultsResponse.data.result) {
+              setResultData(resultsResponse.data.result);
+              setRecommendedServices(resultsResponse.data.recommendedServices || []);
+              setFinished(true);
+              navigate(`/survey-results?id=${sessionId}`);
+            } else {
+              throw new Error('Invalid results data structure');
+            }
+          } else {
+            // Next question
+            setCurrentQuestionId(questionData.questionId);
+            setQuestionText(questionData.questionText);
+            setOptions(questionData.options.map(o => ({
+              id: o.id,
+              text: o.text
+            })));
+          }
+        } else if (response.data.isResult !== undefined) {
+          // Alternative format with direct isResult flag
+          if (response.data.isResult) {
+            // Survey is finished - get results
+            const resultsResponse = await surveyApi.getSurveyResults(sessionId);
+            
+            if (resultsResponse.data && resultsResponse.data.result) {
+              setResultData(resultsResponse.data.result);
+              setRecommendedServices(resultsResponse.data.recommendedServices || []);
+              setFinished(true);
+              navigate(`/survey-results?id=${sessionId}`);
+            } else {
+              throw new Error('Invalid results data');
+            }
+          } else {
+            // We have another question from the new format
+            setCurrentQuestionId(response.data.questionId);
+            setQuestionText(response.data.questionText);
+            setOptions(response.data.options.map(o => ({
+              id: o.id,
+              text: o.text
+            })));
+          }
         } else {
-          // We have another question
-          setCurrentQuestionId(response.data.questionId);
-          setQuestionText(response.data.question);
-          setOptions(response.data.options.map(o => ({
-            id: o.id,
-            text: o.optionText || o.text // Add fallback to o.text
-          })));
+          // Legacy format
+          if (response.data.isResult) {
+            setResultData(response.data.result);
+            setRecommendedServices(response.data.recommendedServices || []);
+            setFinished(true);
+            navigate(`/survey-results?id=${sessionId}`);
+          } else {
+            setCurrentQuestionId(response.data.questionId);
+            setQuestionText(response.data.question);
+            setOptions(response.data.options.map(o => ({
+              id: o.id,
+              text: o.optionText || o.text
+            })));
+          }
         }
       } else {
         // Use file-based API
@@ -116,17 +220,7 @@ const SurveyQuestionPage = () => {
           const conclusionResponse = await surveyApi.getQuestion(nextQuestionId);
           setResultData(conclusionResponse.data);
           setFinished(true);
-          
-          // For file-based surveys without sessions, still show the result page
-          // but we'll need to temporarily store results in local storage
-          try {
-            localStorage.setItem('surveyResults', JSON.stringify(conclusionResponse.data));
-            navigate('/survey-results');
-          } catch (error) {
-            console.warn('Error saving survey results to localStorage:', error);
-            // Still navigate but we might not have results
-            navigate('/survey-results');
-          }
+          navigate('/survey-results');
         } else {
           // This is another question
           const questionResponse = await surveyApi.getQuestion(nextQuestionId);
