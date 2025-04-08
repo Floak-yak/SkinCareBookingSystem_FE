@@ -24,7 +24,9 @@ const bookingApi = {
     }),
 
     CheckOut: (skinTherapistId, scheduleLogId) =>
-        apiClient.get(`/Booking/SkinTherapistCheckout?skinTherapistId=${skinTherapistId}&scheduleLogId=${scheduleLogId}`),
+        apiClient.get(`/api/Booking/SkinTherapistCheckout?skinTherapistId=${skinTherapistId}&scheduleLogId=${scheduleLogId}`),
+    checkIn: (customerId) =>
+      apiClient.put(`/api/Booking/SkinTherapistCheckin?userId=${customerId}`),
 };
 
 export default bookingApi;

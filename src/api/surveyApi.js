@@ -35,6 +35,10 @@ const surveyApi = {
     console.log("Getting question:", questionId);
     return apiClient.get(`/api/Survey/question/${questionId}`);
   },
+  SURVEY_RESULTS: {
+    RECOMMENDED_SERVICE: '/api/SurveyResults/recommended-service'
+  }
+};
 
   getAllQuestions: () => {
     console.log("Fetching all questions with updated endpoint");
@@ -74,23 +78,101 @@ const surveyApi = {
           });
       });
   },
+  status: 200,
+  statusText: 'OK (Generated)'
+};
 
-  getNextQuestion: (currentQuestionId, optionIndex) => {
-    return apiClient.get(`/api/Survey/next`, {
-      params: { currentQuestionId, optionIndex },
-    });
+const surveyApi = {
+  // Start a new survey session - matches /api/Survey/start
+  startSurvey: async () => {
+    return apiClient.get(SURVEY_API.START);
   },
-
-  addQuestion: (newQuestion) => {
-    return apiClient.post('/api/Survey/question', newQuestion);
+  
+  // Answer a survey question - matches /api/Survey/answer
+  answerQuestion: async (sessionId, questionId, optionId, isLastQuestion = false) => {
+    console.log('Sending survey answer:', { sessionId, questionId, optionId, isLastQuestion });
+    
+    // Convert IDs to numbers if they're strings
+    const payload = {
+      sessionId: typeof sessionId === 'string' ? parseInt(sessionId, 10) : sessionId,
+      questionId: typeof questionId === 'string' ? parseInt(questionId, 10) : questionId,
+      optionId: typeof optionId === 'string' ? parseInt(optionId, 10) : optionId,
+      isCompleted: isLastQuestion // Add completion flag for the last question
+    };
+    
+    try {
+      // Try with the converted numbers first
+      return await apiClient.post(SURVEY_API.ANSWER, payload);
+    } catch (error) {
+      // If that fails, try with the original values
+      if (error.response && error.response.status === 400) {
+        console.log('First attempt failed, trying with original values');
+        return apiClient.post(SURVEY_API.ANSWER, {
+          sessionId,
+          questionId,
+          optionId,
+          isCompleted: isLastQuestion // Include completion flag here too
+        });
+      }
+      throw error;
+    }
   },
-
-  updateQuestion: (updatedQuestion) => {
-    return apiClient.post(`/api/Survey/update`, updatedQuestion);
+  
+  // Get survey results by session ID
+  getSurveyResults: async (sessionId) => {
+    console.log('Fetching survey results for session:', sessionId);
+    
+    try {
+      // Try direct path with session ID first (most common API pattern)
+      return await apiClient.get(`${SURVEY_API.RESULTS}/${sessionId}`);
+    } catch (error) {
+      console.log(`Error trying ${SURVEY_API.RESULTS}/${sessionId}:`, error.message);
+      
+      // If 404, endpoints don't exist - use default results
+      if (error.response && (error.response.status === 404 || error.response.status === 400)) {
+        console.log('Results endpoint not available, using default results');
+        return DEFAULT_SURVEY_RESULT;
+      }
+      
+      throw error;
+    }
   },
-
-  deleteQuestion: (questionId) => {
-    return apiClient.delete(`/api/Survey/question/${questionId}`);
+  
+  // Get detailed survey results for the results page
+  getSurveyResultDetails: async (sessionId) => {
+    console.log('Fetching detailed survey results for session:', sessionId);
+    
+    try {
+      // First try to complete the survey if it's not already completed
+      try {
+        console.log('Attempting to mark survey as completed...');
+        // Use the explicit completeSurvey function with proper headers
+        await surveyApi.completeSurvey(sessionId);
+        console.log('Survey marked as completed successfully');
+      } catch (completeError) {
+        // Log but continue - the survey might already be completed
+        console.log('Note: Could not mark survey as completed:', completeError.message);
+      }
+      
+      // Now try to get the results
+      return await apiClient.get(`${SURVEY_API.RESULTS}/${sessionId}`);
+    } catch (error) {
+      console.log(`Error trying ${SURVEY_API.RESULTS}/${sessionId}:`, error.message);
+      
+      // Log more details about the error for debugging
+      if (error.response) {
+        console.log('Error response data:', error.response.data);
+        console.log('Error response status:', error.response.status);
+      }
+      
+      // If 404 or 400, endpoints don't exist or there's an issue - use default results
+      if (error.response && (error.response.status === 404 || error.response.status === 400)) {
+        console.log('Results endpoint not available, using default results');
+        return DEFAULT_SURVEY_RESULT;
+      }
+      
+      throw error;
+    }
   },
 
   // Database-backed survey endpoints
@@ -235,12 +317,12 @@ const surveyApi = {
       });
   },
 
-  getUserSurveyHistory: () => {
-    return apiClient.get('/api/Survey/db/user-history');
+  getDatabaseQuestions: () => {
+    return apiClient.get(SURVEY_API.ADMIN.QUESTIONS);
   },
 
-  verifySurveyEligibility: () => {
-    return apiClient.get('/api/Survey/db/verify');
+  getQuestionById: (id) => {
+    return apiClient.get(`${SURVEY_API.ADMIN.QUESTION}/${id}`);
   },
 
   // Admin endpoints
@@ -321,24 +403,11 @@ const surveyApi = {
       });
   },
 
-  getRecommendedServices: () => {
-    console.log("Fetching recommended services from API");
-    return apiClient.get('/api/SurveyResults/recommended-service')
-      .then(response => {
-        console.log("Raw API response:", response.data);
-        if (response.data && response.data.data) {
-          // Log the structure of the first item for debugging
-          if (response.data.data.length > 0) {
-            console.log("First recommendation structure:", JSON.stringify(response.data.data[0], null, 2));
-            console.log("Service structure inside first item:", 
-              response.data.data[0].service ? JSON.stringify(response.data.data[0].service, null, 2) : "No service data");
-          }
-        }
-        return response;
-      });
+  addRecommendedService: (service) => {
+    return apiClient.post(SURVEY_API.ADMIN.RECOMMENDED_SERVICE, service);
   },
 
-  // Debug function to log existing recommendation data
+  // Check recommendations - ensure the endpoint exists or handle gracefully
   checkRecommendations: async () => {
     try {
       console.log("Fetching all recommended services...");
@@ -395,17 +464,22 @@ const surveyApi = {
       
       return response;
     } catch (error) {
-      console.error("Error fetching recommendations:", error);
+      if (error.response && error.response.status === 404) {
+        console.log('Endpoint /api/Survey/admin/recommended-service/check not found. Skipping check.');
+        return { message: 'Endpoint not found', status: 404 };
+      }
       throw error;
     }
   },
 
+  // Survey Results endpoints
+  getRecommendedServices: () => {
+    return apiClient.get(SURVEY_API.SURVEY_RESULTS.RECOMMENDED_SERVICE);
+  },
+
   deleteRecommendedService: (serviceId) => {
-    // IMPORTANT: This function now uses serviceId for deletion, NOT recommendationId
-    // Ensure serviceId is a valid number
     const id = Number(serviceId);
     if (isNaN(id)) {
-      console.error(`Invalid service ID: ${serviceId}`);
       return Promise.reject(new Error(`Invalid service ID: ${serviceId}`));
     }
     

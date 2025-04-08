@@ -38,9 +38,15 @@ const LoginPage = () => {
       const userData = {
         token,
         userId,
-        fullName: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
-        email: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
-        role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+        fullName:
+          decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+        email:
+          decoded[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ],
+        role: decoded[
+          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ],
       };
 
       login(userData);
@@ -59,9 +65,15 @@ const LoginPage = () => {
       }
 
       setTimeout(() => {
-        // Nếu là quản trị viên, luôn chuyển đến trang admin
-        // Nếu không, sử dụng đường dẫn chuyển hướng đã xác định
-        navigate(userData.role === "Manager" ? "/admin/user" : finalRedirectPath);
+        navigate(
+          userData.role === "Manager"
+            ? "/admin/user"
+            : userData.role === "SkinTherapist"
+            ? "/staff-calendar"
+            : userData.role === "Staff"
+            ? "/staff/approve-blogs"
+            : redirectPath
+        );
       }, 500);
     } catch (error) {
       alert("Sai email hoặc mật khẩu!");

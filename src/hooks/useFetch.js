@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const useFetch = (url, localStorageKey = null) => {
+const useFetch = (url) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,22 +11,7 @@ const useFetch = (url, localStorageKey = null) => {
       try {
         const response = await fetch(url);
         const jsonData = await response.json();
-
-        // Lấy dữ liệu từ localStorage nếu có
-        const storedData = localStorageKey
-          ? JSON.parse(localStorage.getItem(localStorageKey)) || []
-          : [];
-
-        // Hợp nhất dữ liệu mà không bị trùng lặp
-        const mergedData = [...jsonData];
-
-        storedData.forEach((item) => {
-          if (!mergedData.some((existing) => existing.id === item.id)) {
-            mergedData.push(item);
-          }
-        });
-
-        setData(mergedData);
+        setData(jsonData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -35,23 +20,20 @@ const useFetch = (url, localStorageKey = null) => {
     };
 
     fetchData();
-  }, [url, localStorageKey]);
+  }, [url]);
 
-  // Cập nhật dữ liệu mà không làm mất dữ liệu mock
+  // Update data function - now only works with direct API data
   const updateData = (newItem) => {
     const updatedData = [...data];
 
     const existingIndex = updatedData.findIndex((item) => item.id === newItem.id);
     if (existingIndex !== -1) {
-      updatedData[existingIndex] = newItem; // Cập nhật bài viết nếu đã tồn tại
+      updatedData[existingIndex] = newItem; // Update item if it exists
     } else {
-      updatedData.push(newItem); // Thêm mới nếu chưa có
+      updatedData.push(newItem); // Add new item
     }
 
     setData(updatedData);
-    if (localStorageKey) {
-      localStorage.setItem(localStorageKey, JSON.stringify(updatedData));
-    }
   };
 
   return { data, loading, error, setData, updateData };

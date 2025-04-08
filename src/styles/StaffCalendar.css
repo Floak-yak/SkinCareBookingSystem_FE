@@ -1,322 +1,323 @@
 /* Container chính */
 .spa-calendar {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    font-family: Arial, sans-serif;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
 }
 
 /* Header của lịch */
 .calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .user-greeting h1 {
-    font-size: 24px;
-    color: #333;
-    margin: 0;
+  font-size: 24px;
+  color: #333;
+  margin: 0;
 }
 
 .user-info {
-    margin-top: 5px;
+  margin-top: 5px;
 }
 
 .welcome {
-    font-size: 16px;
-    color: #666;
+  font-size: 16px;
+  color: #666;
 }
 
 .user-name {
-    font-size: 18px;
-    font-weight: bold;
-    color: #2d3748;
-    margin-left: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #2d3748;
+  margin-left: 5px;
 }
 
 .work-hours {
-    font-size: 14px;
-    color: #555;
+  font-size: 14px;
+  color: #555;
 }
 
 /* Wrapper của FullCalendar */
 .calendar-wrapper {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Tùy chỉnh FullCalendar */
 .fc {
-    font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 /* Thanh công cụ */
 .fc .fc-toolbar {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .fc .fc-toolbar-title {
-    font-size: 20px;
-    font-weight: bold;
-    color: #2d3748;
+  font-size: 20px;
+  font-weight: bold;
+  color: #2d3748;
 }
 
 .fc .fc-button {
-    background-color: #38a169;
-    border: none;
-    color: white;
-    padding: 8px 12px;
-    text-transform: capitalize;
-    border-radius: 4px;
-    transition: background-color 0.3s;
+  background-color: #38a169;
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  text-transform: capitalize;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
 .fc .fc-button:hover {
-    background-color: #2f855a;
+  background-color: #2f855a;
 }
 
 .fc .fc-button.fc-button-active {
-    background-color: #dd6b20;
+  background-color: #dd6b20;
 }
 
 /* Tiêu đề ngày trong tuần/tháng */
 .fc .fc-col-header-cell {
-    background-color: #edf2f7;
-    color: #2d3748;
-    font-weight: bold;
-    padding: 10px;
+  background-color: #edf2f7;
+  color: #2d3748;
+  font-weight: bold;
+  padding: 10px;
 }
 
 /* Ô thời gian */
 .fc .fc-timegrid-slot {
-    height: 50px;
+  height: 50px;
 }
 
 .fc .fc-timegrid-slot-label {
-    font-size: 12px;
-    color: #666;
+  font-size: 12px;
+  color: #666;
 }
 
 /* Sự kiện */
 .booking-event {
-    padding: 5px;
-    font-size: 12px;
-    color: white;
-    border-radius: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  padding: 5px;
+  font-size: 12px;
+  color: white;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .event-month {
-    font-size: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .event-service {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .event-customer {
-    font-style: italic;
+  font-style: italic;
 }
 
 .event-time {
-    font-size: 10px;
+  font-size: 10px;
 }
 
 /* Chế độ tháng */
 .fc-daygrid-day {
-    background-color: #fff;
-    border: 1px solid #e2e8f0;
-    height: 100px;
-    /* Cố định chiều cao ô ngày */
-    overflow-y: auto;
-    /* Cho phép cuộn nếu có nhiều sự kiện */
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  height: 100px;
+  /* Cố định chiều cao ô ngày */
+  overflow-y: auto;
+  /* Cho phép cuộn nếu có nhiều sự kiện */
 }
 
 /* Bỏ hiệu ứng mờ cho các ngày không thuộc tháng hiện tại */
 .fc .fc-daygrid-day.fc-day-other {
-    opacity: 1 !important;
-    /* Bỏ mờ */
-    background-color: #f7fafc;
-    /* Nền nhạt để phân biệt */
+  opacity: 1 !important;
+  /* Bỏ mờ */
+  background-color: #f7fafc;
+  /* Nền nhạt để phân biệt */
 }
 
 .fc-daygrid-day.fc-day-today {
-    background-color: #fefcbf;
+  background-color: #fefcbf;
 }
 
 .fc-daygrid-day-number {
-    font-size: 14px;
-    color: #2d3748;
+  font-size: 14px;
+  color: #2d3748;
 }
 
 /* Cố định kích thước ô ngày */
 .fc .fixed-day-cell {
-    height: 100px !important;
-    /* Cố định chiều cao */
-    max-height: 100px !important;
+  height: 100px !important;
+  /* Cố định chiều cao */
+  max-height: 100px !important;
 }
 
 /* Popover khi có nhiều sự kiện */
 .fc .fc-more-popover {
-    z-index: 1000;
-    background-color: #fff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Thông báo đăng nhập */
 .login-message {
-    text-align: center;
-    font-size: 18px;
-    color: #e53e3e;
-    margin-top: 50px;
+  text-align: center;
+  font-size: 18px;
+  color: #e53e3e;
+  margin-top: 50px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .calendar-header {
-        flex-direction: column;
-        text-align: center;
-    }
+  .calendar-header {
+    flex-direction: column;
+    text-align: center;
+  }
 
-    .work-hours {
-        margin-top: 10px;
-    }
+  .work-hours {
+    margin-top: 10px;
+  }
 
-    .fc .fc-toolbar {
-        flex-direction: column;
-        gap: 10px;
-    }
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
 
-    .fc .fc-toolbar-title {
-        margin-bottom: 10px;
-    }
+  .fc .fc-toolbar-title {
+    margin-bottom: 10px;
+  }
 
-    .fc-daygrid-day {
-        height: 80px;
-        /* Giảm chiều cao trên mobile */
-    }
+  .fc-daygrid-day {
+    height: 80px;
+    /* Giảm chiều cao trên mobile */
+  }
 
-    .fc .fixed-day-cell {
-        height: 80px !important;
-        max-height: 80px !important;
-    }
+  .fc .fixed-day-cell {
+    height: 80px !important;
+    max-height: 80px !important;
+  }
 }
 
 /* Modal styles */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
-.modal {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    width: 400px;
-    max-width: 90%;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    outline: none;
+.modal-container {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  outline: none;
+  z-index: 1001 !important;
 }
 
 .modal-content h2 {
-    font-size: 20px;
-    margin-bottom: 15px;
-    color: #2d3748;
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #2d3748;
 }
 
 .modal-content p {
-    margin: 10px 0;
-    font-size: 14px;
-    color: #4a5568;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #4a5568;
 }
 
 .modal-content p strong {
-    color: #2d3748;
+  color: #2d3748;
 }
 
 .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .checkout-button {
-    background-color: #38a169;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  background-color: #38a169;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .checkout-button:hover {
-    background-color: #2f855a;
+  background-color: #2f855a;
 }
 
 .close-button {
-    background-color: #e53e3e;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .close-button:hover {
-    background-color: #c53030;
+  background-color: #c53030;
 }
 
 .completed-message {
-    color: #dd6b20;
-    font-weight: bold;
+  color: #dd6b20;
+  font-weight: bold;
 }
 
 .spa-calendar {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .booking-event {
-    background-color: #4299e1;
-    /* Màu xanh mặc định */
+  background-color: #4299e1;
+  /* Màu xanh mặc định */
 }
 
 .modal {
-    min-width: 280px;
-    animation: fadeIn 0.3s ease-out;
+  min-width: 280px;
+  animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
+  from {
+    opacity: 0;
+  }
 
-    to {
-        opacity: 1;
-    }
+  to {
+    opacity: 1;
+  }
 }
