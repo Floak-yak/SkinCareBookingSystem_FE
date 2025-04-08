@@ -81,10 +81,7 @@ const servicesDetailApi = {
       { url: `/api/ServicesDetail/GetDetailByServiceId/${serviceId}`, method: 'get' },
       { url: `/api/ServicesDetail/GetDetailsByServiceId/${serviceId}`, method: 'get' },
       { url: `/api/SkincareServices/GetDetails/${serviceId}`, method: 'get' },
-      { url: `/api/ServicesDetail`, method: 'get', params: { serviceId } },
-      { url: `/api/ServicesDetail/Details`, method: 'get', params: { serviceId } },
-      { url: `/api/Services/GetDetails/${serviceId}`, method: 'get' },
-      { url: `/api/Services/Details/${serviceId}`, method: 'get' }
+      { url: `/api/ServicesDetail`, method: 'get', params: { serviceId } }
     ];
     
     // Hàm thử lần lượt từng endpoint
