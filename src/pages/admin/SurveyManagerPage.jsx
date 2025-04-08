@@ -36,17 +36,12 @@ const SurveyManagerPage = () => {
     data: null,
     error: null
   });
-
-  // State for skin types
-  const [skinTypes, setSkinTypes] = useState([]);
-  const [loadingSkinTypes, setLoadingSkinTypes] = useState(false);
   
   // Load data when component mounts
   useEffect(() => {
     fetchQuestions();
     fetchResults();
     fetchServices();
-    fetchSkinTypes();
   }, []);
 
   // Fetch questions from both file-based and database systems
@@ -62,7 +57,7 @@ const SurveyManagerPage = () => {
           questionList = dbResponse.data.map(q => ({
             id: q.id,
             questionId: q.questionId,
-            question: q.questionText,
+            questionText: q.questionText,
             options: q.options || [],
             isDatabase: true
           }));
@@ -146,54 +141,25 @@ const SurveyManagerPage = () => {
     }
   };
 
-  // Fetch skin types from API
-  const fetchSkinTypes = async () => {
-    try {
-      setLoadingSkinTypes(true);
-      const response = await surveyApi.getAllResults(); // Gọi API
-      if (response.data) {
-        // Lấy danh sách loại da từ response
-        const types = response.data.map((result) => ({
-          value: result.skinType,
-          label: result.skinType,
-        }));
-        setSkinTypes(types);
-      }
-    } catch (error) {
-      console.error('Error fetching skin types:', error);
-      message.error('Failed to load skin types. Please try again.');
-    } finally {
-      setLoadingSkinTypes(false);
-    }
-  };
-
-  // Handle editing a question
+  // Ensure the form is pre-filled with the correct data when editing a question
   const handleEditQuestion = (question) => {
     setSelectedQuestion(question);
-    
-    if (question.isDatabase) {
-      // Format for database question
-      questionForm.setFieldsValue({
-        id: question.id,
-        questionId: question.questionId,
-        questionText: question.question,
-        options: question.options.map(opt => ({
+
+    questionForm.setFieldsValue({
+      id: question.id,
+      questionId: question.questionId,
+      //here
+      questionText: question.questionText,
+      options: question.options.map(opt => {
+        const skinTypePoint = opt.skinTypePoints?.[0] || {}; // Get the first skinTypePoint or an empty object
+        return {
           optionText: opt.optionText,
-          nextQuestionId: opt.nextQuestionId
-        }))
-      });
-    } else {
-      // Format for file-based question
-      questionForm.setFieldsValue({
-        id: question.id,
-        questionText: question.question,
-        options: question.options.map(opt => ({
-          optionText: opt.label,
-          nextQuestionId: opt.nextId
-        }))
-      });
-    }
-    
+          points: skinTypePoint.points || '', // Pre-fill points if available
+          skinTypeId: skinTypePoint.skinTypeId || '' // Pre-fill skinTypeId if available
+        };
+      })
+    });
+
     setShowQuestionModal(true);
   };
 
@@ -207,7 +173,7 @@ const SurveyManagerPage = () => {
     setShowQuestionModal(true);
   };
 
-  // Save a question (create or update)
+  // Ensure points and skinTypeId are included when saving options
   const handleSaveQuestion = async (values) => {
     try {
       // Determine if it's a database or file-based question
@@ -220,13 +186,20 @@ const SurveyManagerPage = () => {
           questionId: values.questionId,
           questionText: values.questionText,
           options: values.options.map(opt => ({
+            id: opt.id || null,
             optionText: opt.optionText,
-            nextQuestionId: opt.nextQuestionId
+            isDeleted: opt.isDeleted ?? false,
+            skinTypePoints: [
+              {
+                skinTypeId: opt.skinTypeId,
+                points: opt.points
+              }
+            ]
           }))
         };
         console.log('Request body for updateDatabaseQuestion:', questionData);
         if (selectedQuestion) {
-          await surveyApi.updateDatabaseQuestion(selectedQuestion.id, questionData);
+         await surveyApi.updateDatabaseQuestion(selectedQuestion.id, questionData);
           message.success('Question updated successfully');
         } else {
           await surveyApi.addDatabaseQuestion(questionData);
@@ -241,7 +214,11 @@ const SurveyManagerPage = () => {
         };
         
         values.options.forEach(opt => {
-          fileQuestion.choices[opt.optionText] = opt.nextQuestionId;
+          fileQuestion.choices[opt.optionText] = {
+            nextQuestionId: opt.nextQuestionId,
+            points: opt.points, // Include points
+            skinTypeId: opt.skinTypeId // Include skinTypeId
+          };
         });
         
         if (selectedQuestion) {
@@ -264,18 +241,26 @@ const SurveyManagerPage = () => {
   // Delete a question
   const handleDeleteQuestion = async (question) => {
     try {
+      if (!question || !question.id) {
+        console.error('Invalid question data:', question);
+        message.error('Invalid question. Please try again.');
+        return;
+      }
+
       if (window.confirm('Are you sure you want to delete this question?')) {
-        if (question.isDatabase) {
-          await surveyApi.deleteDatabaseQuestion(question.id);
+        console.log('Deleting question with ID:', question.id);
+        const response = await surveyApi.deleteAdminQuestion(question.id);
+
+        if (response.status === 200) {
+          message.success('Question deleted successfully');
+          fetchQuestions(); // Refresh the question list
         } else {
-          await surveyApi.deleteQuestion(question.id);
+          throw new Error('Failed to delete question on the server');
         }
-        message.success('Question deleted successfully');
-        fetchQuestions();
       }
     } catch (err) {
       console.error('Error deleting question:', err);
-      message.error('Failed to delete question');
+      message.error('Failed to delete question. Please try again.');
     }
   };
 
@@ -628,7 +613,7 @@ const SurveyManagerPage = () => {
     },
     {
       title: 'Question',
-      dataIndex: 'question',
+      dataIndex: 'questionText',
       key: 'question',
     },
     {
@@ -639,7 +624,7 @@ const SurveyManagerPage = () => {
         <ul className="options-list">
           {options && options.map((opt, idx) => (
             <li key={idx}>
-              {opt.label || opt.optionText} → {opt.nextId || opt.nextQuestionId}
+              <strong>{opt.optionText}</strong>
             </li>
           ))}
         </ul>
@@ -672,23 +657,23 @@ const SurveyManagerPage = () => {
   // Columns for results table
   const resultColumns = [
     {
-      title: 'ID',
+      title: 'Mã kết quả',
       dataIndex: 'resultId',
       key: 'resultId',
     },
     {
-      title: 'Skin Type',
+      title: 'Loại da',
       dataIndex: 'skinType',
       key: 'skinType',
     },
     {
-      title: 'Description',
+      title: 'Mô tả',
       dataIndex: 'resultText',
       key: 'resultText',
       ellipsis: true,
     },
     {
-      title: 'Recommended Services',
+      title: 'Dịch vụ đề xuất',
       dataIndex: 'recommendedServices',
       key: 'recommendedServices',
       render: (_, record) => {
@@ -696,16 +681,16 @@ const SurveyManagerPage = () => {
         return (
           <div>
             {services.length ? (
-              <Tag color="blue">{services.length} services</Tag>
+              <Tag color="blue">{services.length} dịch vụ</Tag>
             ) : (
-              <Tag color="red">No services</Tag>
+              <Tag color="red">Chưa có dịch vụ</Tag>
             )}
           </div>
         );
       },
     },
     {
-      title: 'Actions',
+      title: 'Thao tác',
       key: 'actions',
       render: (_, record) => (
         <Space>
@@ -714,13 +699,13 @@ const SurveyManagerPage = () => {
             icon={<EditOutlined />} 
             onClick={() => handleEditResult(record)}
           >
-            Edit
+            Sửa
           </Button>
           <Button 
             icon={<PlusOutlined />} 
             onClick={() => handleManageResultServices(record)}
           >
-            Manage Services
+            Quản lý dịch vụ
           </Button>
         </Space>
       ),
@@ -856,14 +841,36 @@ const SurveyManagerPage = () => {
     }
   };
 
+  const handleDeleteOption = async (questionId, optionId, remove) => {
+    try {
+      console.log(`Attempting to delete option with questionId: ${questionId}, optionId: ${optionId}`);
+      const response = await surveyApi.deleteOption(questionId, optionId);
+      console.log('Delete API response:', response);
+
+      if (response.status === 200) {
+        message.success('Option deleted successfully');
+        remove(); // Remove the option from the UI
+
+        // Refresh the options list to ensure data consistency
+        const updatedQuestions = await surveyApi.getAllQuestions();
+        console.log('Updated questions after deletion:', updatedQuestions);
+      } else {
+        throw new Error('API did not return success status');
+      }
+    } catch (error) {
+      console.error('Error deleting option:', error);
+      message.error('Failed to delete option. Please try again.');
+    }
+  };
+
   return (
     <div className="survey-manager-page">
-      <h1>Survey Management System</h1>
+      <h1>Hệ Thống Quản Lý Khảo Sát</h1>
       
       <Tabs defaultActiveKey="questions" items={[
         {
           key: "questions",
-          label: "Survey Questions",
+          label: "Câu hỏi khảo sát",
           children: (
             <>
               <div className="tab-header">
@@ -872,7 +879,7 @@ const SurveyManagerPage = () => {
                   icon={<PlusOutlined />} 
                   onClick={handleAddQuestion}
                 >
-                  Add New Question
+                  Thêm Câu Hỏi Mới
                 </Button>
               </div>
               
@@ -903,7 +910,7 @@ const SurveyManagerPage = () => {
                   >
                     <Input placeholder="e.g., Q1, Q2, RESULT_1, etc." />
                   </Form.Item>
-                  
+                  //Fix here
                   <Form.Item
                     name="questionText"
                     label="Question Text"
@@ -922,33 +929,74 @@ const SurveyManagerPage = () => {
                             <Form.Item
                               {...restField}
                               name={[name, 'optionText']}
-                              style={{ marginRight: 8, width: '60%' }}
+                              style={{ marginRight: 8, width: '40%' }}
                               rules={[{ required: true, message: 'Option text required' }]}
                             >
                               <Input placeholder="Option text" />
                             </Form.Item>
-                            
+
                             <Form.Item
                               {...restField}
-                              name={[name, 'nextQuestionId']}
-                              style={{ width: '30%' }}
-                              rules={[{ required: true, message: 'Next step required' }]}
+                              name={[name, 'points']}
+                              style={{ marginRight: 8, width: '20%' }}
+                              rules={[{ required: true, message: 'Points required' }]}
                             >
-                              <Input placeholder="Next question ID" />
+                              <Input
+                                type="number"
+                                placeholder="Points"
+                                id={`options_${name}_points`}
+                                aria-required="true"
+                              />
                             </Form.Item>
-                            
+
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'skinTypeId']}
+                              style={{ marginRight: 8, width: '30%' }}
+                              rules={[{ required: true, message: 'Skin type ID required' }]}
+                            >
+                              <Select placeholder="Select skin type">
+                                <Option value="DRY">Dry</Option>
+                                <Option value="OILY">Oily</Option>
+                                <Option value="COMBINATION">Combination</Option>
+                                <Option value="NORMAL">Normal</Option>
+                                <Option value="SENSITIVE">Sensitive</Option>
+                                <Option value="ACNE_PRONE">Acne-Prone</Option>
+                                <Option value="AGING">Aging</Option>
+                              </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'skinTypePoints']}
+                              style={{ marginRight: 8, width: '30%' }}
+                            >
+                              <ul>
+                                {restField.value?.map((point, idx) => (
+                                  <li key={idx}>
+                                    Skin Type: {point.skinTypeId}, Points: {point.points}
+                                  </li>
+                                ))}
+                              </ul>
+                            </Form.Item>
+
                             {fields.length > 1 && (
                               <Button 
                                 type="text" 
                                 danger 
                                 icon={<DeleteOutlined />} 
-                                onClick={() => remove(name)} 
+                                //delete here
+                                onClick={
+                                  
+                                  () => remove(name)
+
+                                } 
                                 style={{ marginLeft: 8 }}
                               />
                             )}
                           </div>
                         ))}
-                        
+
                         <Form.Item>
                           <Button 
                             type="dashed" 
@@ -985,7 +1033,7 @@ const SurveyManagerPage = () => {
         },
         {
           key: "results",
-          label: "Survey Results",
+          label: "Kết quả khảo sát",
           children: (
             <>
               <div className="tab-header">
@@ -998,7 +1046,7 @@ const SurveyManagerPage = () => {
                     setShowResultModal(true);
                   }}
                 >
-                  Add New Result
+                  Thêm kết quả mới
                 </Button>
               </div>
               
@@ -1010,7 +1058,7 @@ const SurveyManagerPage = () => {
               />
               
               <Modal
-                title={selectedResult ? "Edit Survey Result" : "Add New Survey Result"}
+                title={selectedResult ? "Chỉnh sửa kết quả khảo sát" : "Thêm kết quả khảo sát mới"}
                 open={showResultModal}
                 onCancel={() => setShowResultModal(false)}
                 footer={null}
@@ -1023,40 +1071,42 @@ const SurveyManagerPage = () => {
                 >
                   <Form.Item
                     name="resultId"
-                    label="Result ID"
-                    rules={[{ required: true, message: 'Please enter a result ID' }]}
+                    label="Mã kết quả"
+                    rules={[{ required: true, message: 'Vui lòng nhập mã kết quả' }]}
                   >
-                    <Input placeholder="e.g., RESULT_1, RESULT_DRY_SKIN, etc." />
+                    <Input placeholder="VD: RESULT_1, RESULT_DRY_SKIN, v.v." />
                   </Form.Item>
                   
                   <Form.Item
                     name="skinType"
-                    label="Skin Type"
-                    rules={[{ required: true, message: 'Please select a skin type' }]}
+                    label="Loại da"
+                    rules={[{ required: true, message: 'Vui lòng chọn loại da' }]}
                   >
-                    <Select placeholder="Select skin type" loading={loadingSkinTypes}>
-                      {skinTypes.map((type) => (
-                        <Option key={type.value} value={type.value}>
-                          {type.label}
-                        </Option>
-                      ))}
+                    <Select placeholder="Chọn loại da">
+                      <Option value="Oily">Da dầu</Option>
+                      <Option value="Dry">Da khô</Option>
+                      <Option value="Combination">Da hỗn hợp</Option>
+                      <Option value="Normal">Da thường</Option>
+                      <Option value="Sensitive">Da nhạy cảm</Option>
+                      <Option value="Acne-Prone">Da mụn</Option>
+                      <Option value="Aging">Da lão hóa</Option>
                     </Select>
                   </Form.Item>
                   
                   <Form.Item
                     name="resultText"
-                    label="Result Description"
-                    rules={[{ required: true, message: 'Please enter the result description' }]}
+                    label="Mô tả kết quả"
+                    rules={[{ required: true, message: 'Vui lòng nhập mô tả kết quả' }]}
                   >
-                    <TextArea rows={4} placeholder="Detailed description of the skin analysis result" />
+                    <TextArea rows={4} placeholder="Mô tả chi tiết về kết quả phân tích da" />
                   </Form.Item>
                   
                   <Form.Item
                     name="recommendationText"
-                    label="General Recommendations"
-                    rules={[{ required: true, message: 'Please enter recommendations' }]}
+                    label="Khuyến nghị chung"
+                    rules={[{ required: true, message: 'Vui lòng nhập các khuyến nghị' }]}
                   >
-                    <TextArea rows={4} placeholder="General skin care recommendations" />
+                    <TextArea rows={4} placeholder="Khuyến nghị chăm sóc da chung" />
                   </Form.Item>
                   
                   <Form.Item style={{ textAlign: 'right', marginTop: 20 }}>
@@ -1064,21 +1114,21 @@ const SurveyManagerPage = () => {
                       style={{ marginRight: 8 }} 
                       onClick={() => setShowResultModal(false)}
                     >
-                      Cancel
+                      Hủy
                     </Button>
                     <Button 
                       type="primary" 
                       htmlType="submit" 
                       icon={<SaveOutlined />}
                     >
-                      Save Result
+                      Lưu kết quả
                     </Button>
                   </Form.Item>
                 </Form>
               </Modal>
               
               <Modal
-                title="Manage Recommended Services"
+                title="Quản lý dịch vụ đề xuất"
                 open={resultServicesModalVisible}
                 onCancel={() => setResultServicesModalVisible(false)}
                 footer={null}
@@ -1086,7 +1136,7 @@ const SurveyManagerPage = () => {
               >
                 {selectedResult && (
                   <div>
-                    <Card title="Current Recommendations" style={{ marginBottom: 16 }}>
+                    <Card title="Các dịch vụ đã đề xuất" style={{ marginBottom: 16 }}>
                       <Button 
                         onClick={handleCheckRecommendations}
                         style={{ display: 'none', marginBottom: 16, marginRight: 8 }}
@@ -1094,22 +1144,22 @@ const SurveyManagerPage = () => {
                         ghost
                         icon={<SearchOutlined />}
                       >
-                        View All Recommendations
+                        Xem tất cả đề xuất
                       </Button>
 
                       <Button 
                         onClick={async () => {
                           try {
                             await surveyApi.getRawRecommendations();
-                            message.info('Check console for raw data');
+                            message.info('Xem chi tiết dữ liệu trong console');
                           } catch (err) {
                             console.error('Debug check failed:', err);
-                            message.error('Failed to get raw recommendations');
+                            message.error('Không thể lấy thông tin đề xuất');
                           }
                         }}
                         style={{ display: 'none', marginBottom: 16 }}
                       >
-                        Get Raw
+                        Xem dữ liệu gốc
                       </Button>
 
                       {selectedResult.recommendedServices?.length > 0 ? (
@@ -1132,24 +1182,24 @@ const SurveyManagerPage = () => {
                                     icon={<DeleteOutlined />} 
                                     onClick={() => {
                                       Modal.confirm({
-                                        title: 'Delete Service',
+                                        title: 'Xóa dịch vụ',
                                         content: (
                                           <div>
-                                            <p>Are you sure you want to delete this service recommendation?</p>
-                                            <p>Service: {service.name}</p>
-                                            <p>Service ID: {serviceId}</p>
+                                            <p>Bạn có chắc chắn muốn xóa dịch vụ đề xuất này không?</p>
+                                            <p>Tên dịch vụ: {service.name}</p>
+                                            <p>Mã dịch vụ: {serviceId}</p>
                                           </div>
                                         ),
-                                        okText: 'Delete',
+                                        okText: 'Xóa',
                                         okType: 'danger',
-                                        cancelText: 'Cancel',
+                                        cancelText: 'Hủy',
                                         onOk: () => {
                                           removeServiceRecommendation(serviceId);
                                         }
                                       });
                                     }}
                                   >
-                                    Delete
+                                    Xóa
                                   </Button>
                                 ]}
                               >
@@ -1157,13 +1207,13 @@ const SurveyManagerPage = () => {
                                   title={
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
                                       <span style={{ marginRight: '10px' }}>{service.name}</span>
-                                      <Tag color="blue">ID: {serviceId}</Tag>
+                                      <Tag color="blue">Mã: {serviceId}</Tag>
                                     </div>
                                   }
                                   description={
                                     <>
                                       {service.description && <div>{service.description}</div>}
-                                      {service.price > 0 && <div>Price: {service.price.toLocaleString()} VND</div>}
+                                      {service.price > 0 && <div>Giá: {service.price.toLocaleString()} VNĐ</div>}
                                     </>
                                   }
                                 />
@@ -1172,11 +1222,11 @@ const SurveyManagerPage = () => {
                           }}
                         />
                       ) : (
-                        <div>No services recommended yet</div>
+                        <div>Chưa có dịch vụ nào được đề xuất</div>
                       )}
                     </Card>
                     
-                    <Card title="Available Services">
+                    <Card title="Các dịch vụ có sẵn">
                       <List
                         itemLayout="horizontal"
                         dataSource={(skinCareServices || [])
@@ -1189,7 +1239,7 @@ const SurveyManagerPage = () => {
                                 icon={<PlusOutlined />} 
                                 onClick={() => addServiceRecommendation(service.id)}
                               >
-                                Add
+                                Thêm
                               </Button>
                             ]}
                           >
@@ -1198,7 +1248,7 @@ const SurveyManagerPage = () => {
                               description={
                                 <>
                                   {service.serviceDescription && <div>{service.serviceDescription}</div>}
-                                  {service.price > 0 && <div>Price: {service.price.toLocaleString()} VND</div>}
+                                  {service.price > 0 && <div>Giá: {service.price.toLocaleString()} VNĐ</div>}
                                 </>
                               }
                             />

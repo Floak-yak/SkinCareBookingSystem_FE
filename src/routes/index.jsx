@@ -32,6 +32,9 @@ import VerifySuccess from "../components/VerifySuccess";
 import VerifyFail from "../components/VerifyFail";
 import ManageCancelBookingPage from "../pages/admin/ManageCancelBookingPage";
 import RefundHistory from "../pages/RefundHistory";
+import CheckInStaffPage from "../pages/CheckInStaffPage";
+import SpecialistList from "../pages/Specialist/SpecialistList";
+import Profile from "../pages/Profile";
 
 const AppRoutes = () => {
   const [user, setUser] = useState(null);
@@ -56,6 +59,7 @@ const AppRoutes = () => {
       <Route path="/blogs/:id" element={<BlogDetail />} />
       <Route path="/blogs/create" element={<CreateBlog />} />
       <Route path="/staff/approve-blogs" element={<ApproveBlog />} />
+      <Route path="/staff/checkin" element={<CheckInStaffPage />} />
       <Route path="/services" element={<Services />} />
       <Route path="/booking" element={<Booking />} />
       <Route path="/booking-history" element={<BookingHistory />} />
@@ -70,6 +74,8 @@ const AppRoutes = () => {
       <Route path="/survey-results" element={<SurveyResultPage />} />
       <Route path="/staff-calendar" element={<StaffCalendar />} />
       <Route path="/refund-history" element={<RefundHistory />} />
+      <Route path="/skintherapistList" element={<SpecialistList />} />
+      <Route path="/profile" element={<Profile />} />
 
       {/* admin page */}
       <Route path="/admin/product" element={<ManageProductsPage />} />

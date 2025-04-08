@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useNavigate, Link, useSearchParams, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import userApi from "../api/userApi";
 import { jwtDecode } from "jwt-decode";
@@ -8,8 +8,15 @@ import "../styles/loginPage.css";
 const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
-  const redirectPath = searchParams.get("redirect") || "/";
+  
+  // Ưu tiên lấy tham số chuyển hướng từ location.state.from (khi chuyển từ component khác sang như SurveyResultPage)
+  // Nếu không có, thử lấy từ query parameter "redirect"
+  // Nếu không có cả hai, mặc định là "/"
+  const redirectPath = location.state?.from || searchParams.get("redirect") || "/";
+  console.log("Redirect path after login:", redirectPath);
+  
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
@@ -20,6 +27,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
       const response = await userApi.login(formData.email, formData.password);
 
@@ -43,12 +51,27 @@ const LoginPage = () => {
 
       login(userData);
 
+      // Kiểm tra redirectUrl từ state hoặc localStorage
+      const finalRedirectPath = location.state?.from || 
+                               localStorage.getItem('authRedirectUrl') || 
+                               redirectPath;
+      
+      // Xóa redirectUrl từ localStorage sau khi đã sử dụng
+      localStorage.removeItem('authRedirectUrl');
+
+      // Thông báo cho người dùng biết sắp được chuyển hướng
+      if (finalRedirectPath !== "/") {
+        console.log(`Đăng nhập thành công! Đang chuyển đến: ${finalRedirectPath}`);
+      }
+
       setTimeout(() => {
         navigate(
           userData.role === "Manager"
             ? "/admin/user"
             : userData.role === "SkinTherapist"
             ? "/staff-calendar"
+            : userData.role === "Staff"
+            ? "/staff/approve-blogs"
             : redirectPath
         );
       }, 500);

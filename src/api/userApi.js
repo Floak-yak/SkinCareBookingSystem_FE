@@ -34,6 +34,12 @@ const userApi = {
   updateRole: (userId, role, categoryId = 0) =>
     apiClient.put("/api/User", null, { params: { userId, role, categoryId } }),
   delete: (userId) => apiClient.delete(`/api/User/Remove?userId=${userId}`),
+  updateProfile: (formData) =>
+    apiClient.put("/api/User/UpdateUserProfile", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  getUserById: (userId) =>
+    apiClient.get(`/api/User/GetUserById?userId=${userId}`),
 };
 
 export default userApi;

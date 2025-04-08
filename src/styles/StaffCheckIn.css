@@ -1,0 +1,85 @@
+.staff-checkin-container {
+  padding: 20px;
+  background-color: #f5f5f5;
+  font-family: Arial, sans-serif;
+  min-height: 70vh;
+}
+
+.staff-checkin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.staff-checkin-header h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.staff-checkin-filter,
+.staff-checkin-datepicker {
+  margin-bottom: 1.5rem;
+}
+
+.staff-checkin-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.staff-checkin-card h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.staff-checkin-card p {
+  margin: 0.5rem 0;
+  color: #555;
+}
+
+.staff-checkin-card ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  color: #555;
+}
+
+.staff-checkin-card button {
+  background-color: #1890ff;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 1rem;
+}
+
+.staff-checkin-card button:hover:not(:disabled) {
+  background-color: #40a9ff;
+}
+
+.staff-checkin-card button:disabled {
+  background-color: #ccc !important;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  background-color: #fff;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  margin: 2rem 0;
+}
+
+.empty-state .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: pulse 1.5s infinite;
+}

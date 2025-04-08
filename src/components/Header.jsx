@@ -4,11 +4,9 @@ import { Dropdown, Button, message, Badge, Avatar } from "antd";
 import {
   UserOutlined,
   LogoutOutlined,
-  IdcardOutlined,
-  MailOutlined,
   MenuOutlined,
-  CheckCircleOutlined,
   ShoppingCartOutlined,
+  CheckCircleOutlined,
   ProfileOutlined,
 } from "@ant-design/icons";
 import "../styles/header.css";
@@ -28,30 +26,20 @@ const Header = () => {
     navigate("/");
   };
 
-  // Lấy role
+  // Các link chính dựa theo role (không thay đổi gì nếu bạn cần giữ logic theo role)
   const role = user?.role;
 
-  // =================== MENU USER DROPDOWN ====================
+  // Tạo dropdown menu đơn giản chỉ gồm Profile và Logout
   const userMenuItems = [
     {
       key: "profile",
       label: (
-        <span>
-          <UserOutlined /> {user?.fullName || "Người dùng"}
-        </span>
-      ),
-    },
-    {
-      key: "email",
-      label: (
-        <span>
-          <MailOutlined /> {user?.email || "Chưa có email"}
-        </span>
+        <Link to="/profile">
+          <UserOutlined /> Profile
+        </Link>
       ),
     },
     { type: "divider" },
-
-    // Duyệt bài nếu role = Staff
     role === "Staff" && {
       key: "approve",
       label: (
@@ -107,18 +95,17 @@ const Header = () => {
     {
       key: "logout",
       label: (
-        <Link to="/" onClick={handleLogout}>
-          <LogoutOutlined /> Đăng xuất</Link>
+        <span onClick={handleLogout}>
+          <LogoutOutlined /> Đăng xuất
+        </span>
       ),
     },
-  ].filter(Boolean);
+  ];
 
-  // =================== MENU CHÍNH (TUỲ ROLE) ====================
   const renderNavLinks = () => {
     if (role === "Manager") {
       return (
         <>
-          {/* Quản trị */}
           <Link to="/admin/user">Quản lý tài khoản</Link>
           <Link to="/admin/product">Quản lý sản phẩm</Link>
           <Link to="/admin/manage-services">Quản lý dịch vụ</Link>
@@ -131,8 +118,8 @@ const Header = () => {
     } else if (role === "Staff") {
       return (
         <>
-          {/* Approve Blogs */}
           <Link to="/staff/approve-blogs">Duyệt bài</Link>
+          <Link to="/staff/checkin">CheckIn</Link>
         </>
       );
     } else if (role === "SkinTherapist") {
@@ -142,7 +129,7 @@ const Header = () => {
         </>
       );
     } else {
-      // Role = "Customer" hoặc chưa login
+      // Role = "Customer" hoặc chưa đăng nhập
       return (
         <>
           <Link to="/">Trang chủ</Link>
@@ -163,10 +150,7 @@ const Header = () => {
         SkinCare Booking
       </Link>
 
-      {/* MENU CHÍNH */}
       <nav className={`nav ${menuOpen ? "open" : ""}`}>{renderNavLinks()}</nav>
-
-      {/* CART & USER */}
 
       <div className="cart-auth">
         {(role === "Customer" || !role) && (
@@ -179,15 +163,11 @@ const Header = () => {
           </Link>
         )}
 
-        {/* AVATAR USER */}
         <div className="auth">
           {user ? (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <Button type="text" className="user-info">
                 <Avatar src={user.avatar} icon={<UserOutlined />} />
-                <span className="user-name">
-                  {user?.fullName || "Người dùng"}
-                </span>
               </Button>
             </Dropdown>
           ) : (
@@ -203,7 +183,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* TOGGLE MENU */}
       <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
         <MenuOutlined />
       </button>
