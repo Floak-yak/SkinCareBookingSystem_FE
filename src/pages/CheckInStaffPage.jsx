@@ -1,92 +1,159 @@
-// src/pages/CheckInStaffPage.jsx
-import React, { useEffect, useState } from 'react';
-import bookingApi from '../api/bookingApi';
-import scheduleApi from '../api/scheduleApi';
+import React, { useState, useEffect } from "react";
+import { Card, Button, message, Spin, DatePicker, Radio } from "antd";
+import bookingApi from "../api/bookingApi";
+import useAuth from "../hooks/useAuth";
+import moment from "moment";
+import "../styles/StaffCheckIn.css";
 
-const CheckInStaffPage = () => {
-  const [bookings, setBookings] = useState([]);
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+const StaffCheckIn = () => {
+  const { user: currentUser } = useAuth();
+  const [groupedBookings, setGroupedBookings] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(moment());
+  const [filterType, setFilterType] = useState("day");
 
-  // Fetch danh sách booking cho staff (giả sử chỉ lấy những booking chưa CheckIn - status = 0)
-  const fetchBookings = async () => {
+  const fetchBookingsForCheckIn = async () => {
     try {
       const res = await bookingApi.getAllBookings();
-      const filtered = res.data.filter(booking =>
-        booking.skintherapistName?.toLowerCase() === currentUser.fullName.toLowerCase() &&
-        booking.status === 0
-      );
-      setBookings(filtered);
+      let filtered = res.data.filter((booking) => {
+        const bookingMoment = moment(booking.date);
+        let dateMatches = false;
+        if (filterType === "day") {
+          dateMatches = bookingMoment.isSame(selectedDate, "day");
+        } else if (filterType === "week") {
+          dateMatches = bookingMoment.isSame(selectedDate, "week");
+        } else if (filterType === "month") {
+          dateMatches = bookingMoment.isSame(selectedDate, "month");
+        }
+        return (
+          dateMatches &&
+          (booking.status === 0 || booking.status === 2) &&
+          booking.user 
+        );
+      });
+
+      // Nhóm các booking theo khách hàng
+      const groups = {};
+      filtered.forEach((booking) => {
+        const custId = booking.user.id;
+        if (!custId) return;
+        if (!groups[custId]) {
+          groups[custId] = {
+            customer: booking.user,
+            bookings: [],
+          };
+        }
+        groups[custId].bookings.push(booking);
+      });
+      setGroupedBookings(groups);
     } catch (error) {
-      console.error('Lỗi tải danh sách booking:', error);
+      console.error("Error fetching bookings for checkin:", error);
+      message.error("Lỗi tải lịch checkIn");
     }
+    setLoading(false);
   };
 
   useEffect(() => {
     if (currentUser) {
-      fetchBookings();
+      setLoading(true);
+      fetchBookingsForCheckIn();
     }
-  }, [currentUser]);
+  }, [currentUser, selectedDate, filterType]);
 
-  // Hàm xử lý CheckIn
-  const handleCheckIn = async (booking) => {
+  const handleDateChange = (date, dateString) => {
+    setSelectedDate(date || moment());
+  };
+
+  // Xử lý thay đổi loại lọc
+  const handleFilterTypeChange = (e) => {
+    setFilterType(e.target.value);
+  };
+
+  // check in cho khách 
+  const handleGroupCheckIn = async (customerId) => {
     try {
-      const therapistId = currentUser.userId;
-      // Gọi API lấy schedule của chuyên viên
-      const scheduleResponse = await scheduleApi.getByTherapistId(therapistId);
-
-      const eventStartTime = new Date(booking.date);
-      const eventStartTimeLocal = eventStartTime
-        .toLocaleString('sv', { timeZone: 'Asia/Bangkok' })
-        .replace(' ', 'T');
-
-      let scheduleLogId;
-      // Tìm scheduleLog phù hợp dựa vào thời gian
-      const matchingDay = scheduleResponse.data.find(day => day.dateWork === eventStartTimeLocal);
-      if (matchingDay) {
-        const matchingLog = matchingDay.scheduleLogs.find(log => log.timeStartShift === eventStartTimeLocal);
-        if (matchingLog) {
-          scheduleLogId = matchingLog.id;
-        }
-      }
-      if (!scheduleLogId) {
-        throw new Error('Không tìm thấy scheduleLog phù hợp để CheckIn');
-      }
-
-      // Gọi API CheckIn (giả lập, vì BE chưa có API thực sự)
-      // await bookingApi.CheckIn(therapistId, scheduleLogId);
-      console.log('Gọi API CheckIn với:', therapistId, scheduleLogId);
-      alert('CheckIn thành công (giả lập)!');
-
-      // Refresh danh sách booking
-      fetchBookings();
+      await bookingApi.SkinTherapistCheckin(customerId);
+      message.success("CheckIn thành công cho khách hàng!");
+      fetchBookingsForCheckIn();
     } catch (error) {
-      console.error('Lỗi khi CheckIn:', error);
-      alert('Có lỗi xảy ra khi CheckIn. Vui lòng thử lại.');
+      message.error("Chưa đến ngày thực hiện dịch vụ.");
     }
   };
 
+  if (!currentUser) {
+    return <div>Vui lòng đăng nhập</div>;
+  }
+
+  if (loading) {
+    return <Spin tip="Đang tải lịch" style={{ margin: "2rem" }} />;
+  }
+
+  // Chuyển đối tượng groupedBookings thành mảng để render
+  const groupsArray = Object.values(groupedBookings);
+
   return (
-    <div className="checkin-page">
-      <h1>Trang CheckIn cho Staff</h1>
-      {bookings.length === 0 ? (
-        <p>Không có booking nào cần CheckIn.</p>
-      ) : (
-        <div className="booking-list">
-          {bookings.map(booking => (
-            <div key={booking.id} className="booking-item">
-              <p>
-                <strong>Dịch vụ:</strong> {booking.serviceName}
-              </p>
-              <p>
-                <strong>Thời gian:</strong> {new Date(booking.date).toLocaleString()}
-              </p>
-              <button onClick={() => handleCheckIn(booking)}>CheckIn</button>
-            </div>
-          ))}
+    <div className="staff-checkin-container">
+      <div className="staff-checkin-header">
+        <h1>CheckIn Page</h1>
+      </div>
+  
+      {/* Bộ chọn loại lọc */}
+      <div className="staff-checkin-filter">
+        <span>Loại lọc: </span>
+        <Radio.Group onChange={handleFilterTypeChange} value={filterType}>
+          <Radio.Button value="day">Theo ngày</Radio.Button>
+          <Radio.Button value="week">Theo tuần</Radio.Button>
+          <Radio.Button value="month">Theo tháng</Radio.Button>
+        </Radio.Group>
+      </div>
+  
+      {/* DatePicker để chọn ngày */}
+      <div className="staff-checkin-datepicker">
+        <span>Chọn ngày: </span>
+        <DatePicker
+          value={selectedDate}
+          format="DD/MM/YYYY"
+          onChange={handleDateChange}
+        />
+      </div>
+  
+      {groupsArray.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🌟</div>
+          <h2>Ngày {selectedDate.format("DD/MM/YYYY")} thật yên tĩnh!</h2>
+          <p>Chưa có lịch đặt nào hôm nay. Hãy dành thời gian nghỉ ngơi hoặc lên kế hoạch cho những điều thú vị phía trước!</p>
         </div>
+      ) : (
+        groupsArray.map((group) => (
+          <Card key={group.customer.id} className="staff-checkin-card">
+            <h2>Khách hàng: {group.customer.fullName}</h2>
+            <p>SĐT: {group.customer.phoneNumber || "N/A"}</p>
+            <div>
+              <strong>Danh sách lịch đặt:</strong>
+              <ul>
+                {group.bookings.map((booking) => (
+                  <li key={booking.id}>
+                    {moment(booking.date).format("DD/MM/YYYY HH:mm")} -{" "}
+                    {booking.serviceName} - Trạng thái:{" "}
+                    {(booking.status === 0 || booking.status === 2)
+                      ? "Đang chờ"
+                      : "Đã hoàn thành"}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Button
+              type="primary"
+              onClick={() => handleGroupCheckIn(group.customer.id)}
+              disabled={selectedDate.isAfter(moment(), "day")}
+            >
+              CheckIn cho cả ngày
+            </Button>
+          </Card>
+        ))
       )}
     </div>
   );
 };
 
-export default CheckInStaffPage;
+export default StaffCheckIn;
