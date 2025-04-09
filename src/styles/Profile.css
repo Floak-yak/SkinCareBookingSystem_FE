@@ -1,3 +1,5 @@
+/* src/styles/Profile.css */
+
 .profile-container {
     padding: 2rem;
     background-color: #f0f2f5;
@@ -23,6 +25,7 @@
     border-radius: 8px;
     background-color: #fff;
     padding: 1.5rem;
+    text-align: left;
   }
   
   .profile-card p {
@@ -35,10 +38,35 @@
     color: #333;
   }
   
-  .profile-card .ant-btn {
-    margin-top: 1rem;
+  /* Avatar Section */
+  .profile-avatar {
+    text-align: center;
+    margin-bottom: 1.5rem;
   }
   
+  .profile-avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #1890ff;
+    margin-bottom: 0.5rem;
+  }
+  
+  .profile-avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.2rem;
+    margin: 0 auto 0.5rem;
+  }
+  
+  /* Form styling */
   .profile-form {
     max-width: 600px;
     margin: 0 auto;
