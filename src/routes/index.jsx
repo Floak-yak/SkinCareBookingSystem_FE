@@ -30,6 +30,8 @@ import BookingHistory from "../pages/BookingHistory";
 import StaffCalendar from "../pages/StaffCalendar";
 import VerifySuccess from "../components/VerifySuccess";
 import VerifyFail from "../components/VerifyFail";
+import ManageCancelBookingPage from "../pages/admin/ManageCancelBookingPage";
+import RefundHistory from "../pages/RefundHistory";
 import CheckInStaffPage from "../pages/CheckInStaffPage";
 import SpecialistList from "../pages/Specialist/SpecialistList";
 import Profile from "../pages/Profile";
@@ -71,6 +73,7 @@ const AppRoutes = () => {
       <Route path="/survey" element={<SurveyQuestionPage />} />
       <Route path="/survey-results" element={<SurveyResultPage />} />
       <Route path="/staff-calendar" element={<StaffCalendar />} />
+      <Route path="/refund-history" element={<RefundHistory />} />
       <Route path="/skintherapistList" element={<SpecialistList />} />
       <Route path="/profile" element={<Profile />} />
 
@@ -88,6 +91,7 @@ const AppRoutes = () => {
         element={<ManageServiceDetailsPage />}
       />
       <Route path="/admin/survey-manager" element={<SurveyManagerPage />} />
+      <Route path="/admin/cancel-booking" element={<ManageCancelBookingPage />} />
 
       {/* xác thực tài khoản */}
       <Route path="/verify-success" element={<VerifySuccess />} />
